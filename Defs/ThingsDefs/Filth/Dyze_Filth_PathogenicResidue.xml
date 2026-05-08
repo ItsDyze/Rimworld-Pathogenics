@@ -7,8 +7,7 @@
     <graphicData>
       <graphicClass>Graphic_Cluster</graphicClass>
       <shaderType>Transparent</shaderType>
-      <texPath>Things/Filth/Spatter</texPath>
-      <color>(120, 145, 95, 150)</color>
+      <texPath>Dyze/Things/Filth/PathogenicResidue</texPath>
     </graphicData>
     <statBases>
       <Beauty>-12</Beauty>
