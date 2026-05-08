@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <packageId>dyze.coreexample</packageId>
+  <name>Dyze Core Example</name>
+  <author>Dyze</author>
+  <description>
+    A tutorial mod used to learn RimWorld modding best practices step by step.
+  </description>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+</ModMetaData>
