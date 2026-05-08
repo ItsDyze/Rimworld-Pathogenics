@@ -1,0 +1,17 @@
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+
+# Build outputs
+bin/
+obj/
+
+# RimWorld / Unity noise
+Player.log
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db

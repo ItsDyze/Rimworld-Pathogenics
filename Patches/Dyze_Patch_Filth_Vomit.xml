@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <Operation Class="PatchOperationReplace">
+    <xpath>Defs/ThingDef[defName="Filth_Vomit"]/statBases/Cleanliness</xpath>
+    <value>
+      <Cleanliness>-12</Cleanliness>
+    </value>
+  </Operation>
+
+</Patch>
