@@ -12,6 +12,14 @@ obj/
 Player.log
 *.tmp
 
+# C# build output
+Source/**/bin/
+Source/**/obj/
+
+# Optional: ignore compiled assembly during development
+# Assemblies/*.dll
+# Assemblies/*.pdb
+
 # OS
 .DS_Store
 Thumbs.db

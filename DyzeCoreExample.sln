@@ -1,0 +1,32 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sources", "Sources", "{C16B2082-E6A6-C480-36D0-FC08AA18D453}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DyzeCoreExample", "DyzeCoreExample", "{40F96B93-3484-3768-A079-4F5AE26E8140}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sources", "Sources\DyzeCoreExample\Sources.csproj", "{8C3C924B-C818-00A6-4298-67373512CBAB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C3C924B-C818-00A6-4298-67373512CBAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C3C924B-C818-00A6-4298-67373512CBAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C3C924B-C818-00A6-4298-67373512CBAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C3C924B-C818-00A6-4298-67373512CBAB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{40F96B93-3484-3768-A079-4F5AE26E8140} = {C16B2082-E6A6-C480-36D0-FC08AA18D453}
+		{8C3C924B-C818-00A6-4298-67373512CBAB} = {40F96B93-3484-3768-A079-4F5AE26E8140}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3FC66F28-E81D-4FD1-888B-96A8F067F882}
+	EndGlobalSection
+EndGlobal
