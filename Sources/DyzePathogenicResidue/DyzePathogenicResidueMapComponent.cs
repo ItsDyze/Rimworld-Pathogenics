@@ -4,7 +4,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
     public class PathogenicResidueMapComponent : MapComponent
     {
@@ -84,7 +84,7 @@ namespace Dyze.RimWorld.CoreExample
         {
             base.MapComponentTick();
 
-            DyzePathogenicResidueSettings settings = DyzeCoreExampleMod.Settings;
+            DyzePathogenicResidueSettings settings = DyzePathogenicResidueMod.Settings;
 
             if (settings == null || !settings.Enabled)
             {
@@ -108,7 +108,7 @@ namespace Dyze.RimWorld.CoreExample
 
         public bool TryProcessPawnMovement(Pawn pawn)
         {
-            DyzePathogenicResidueSettings settings = DyzeCoreExampleMod.Settings;
+            DyzePathogenicResidueSettings settings = DyzePathogenicResidueMod.Settings;
 
             if (settings == null || !settings.Enabled)
             {

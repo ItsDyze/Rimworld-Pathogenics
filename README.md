@@ -1,4 +1,4 @@
-# Dyze Core Example
+# Dyze Pathogenic residue
 
 A RimWorld tutorial mod built step by step.
 Is it AI-assisted? Of course.

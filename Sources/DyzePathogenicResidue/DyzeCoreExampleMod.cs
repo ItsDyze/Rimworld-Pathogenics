@@ -4,19 +4,19 @@ using HarmonyLib;
 using UnityEngine;
 using Verse;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
-    public class DyzeCoreExampleMod: Mod
+    public class DyzePathogenicResidueMod: Mod
     {
         public static DyzePathogenicResidueSettings Settings;
 
 
-        public DyzeCoreExampleMod(ModContentPack content) : base(content)
+        public DyzePathogenicResidueMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<DyzePathogenicResidueSettings>();
 
 
-            Harmony harmony = new Harmony("dyze.coreexample");
+            Harmony harmony = new Harmony("dyze.pathogenicresidue");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             DyzeLog.Message("Mod assembly loaded successfully.");

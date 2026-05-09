@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Verse;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
     public class DyzePathogenicResidueSettings : ModSettings
     {

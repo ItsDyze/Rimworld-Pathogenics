@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/HediffDef[defName="Flu"]/modExtensions/li[@Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension"]</xpath>
+    <nomatch Class="PatchOperationAddModExtension">
+      <xpath>Defs/HediffDef[defName="Flu"]</xpath>
+      <value>
+        <li Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension">
+          <spawnChanceFactor>1.0</spawnChanceFactor>
+          <minSeverity>0.10</minSeverity>
+        </li>
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/HediffDef[defName="Plague"]/modExtensions/li[@Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension"]</xpath>
+    <nomatch Class="PatchOperationAddModExtension">
+      <xpath>Defs/HediffDef[defName="Plague"]</xpath>
+      <value>
+        <li Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension">
+          <spawnChanceFactor>1.5</spawnChanceFactor>
+          <minSeverity>0.10</minSeverity>
+        </li>
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/HediffDef[defName="Malaria"]/modExtensions/li[@Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension"]</xpath>
+    <nomatch Class="PatchOperationAddModExtension">
+      <xpath>Defs/HediffDef[defName="Malaria"]</xpath>
+      <value>
+        <li Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension">
+          <spawnChanceFactor>1.2</spawnChanceFactor>
+          <minSeverity>0.10</minSeverity>
+        </li>
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/HediffDef[defName="WoundInfection"]/modExtensions/li[@Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension"]</xpath>
+    <nomatch Class="PatchOperationAddModExtension">
+      <xpath>Defs/HediffDef[defName="WoundInfection"]</xpath>
+      <value>
+        <li Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension">
+          <spawnChanceFactor>0.6</spawnChanceFactor>
+          <minSeverity>0.20</minSeverity>
+        </li>
+      </value>
+    </nomatch>
+  </Operation>
+
+  <Operation Class="PatchOperationConditional">
+    <xpath>Defs/HediffDef[defName="ScariaInfection"]/modExtensions/li[@Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension"]</xpath>
+    <nomatch Class="PatchOperationAddModExtension">
+      <xpath>Defs/HediffDef[defName="ScariaInfection"]</xpath>
+      <value>
+        <li Class="Dyze.RimWorld.PathogenicResidue.DyzePathogenicResidueHediffExtension">
+          <spawnChanceFactor>0.6</spawnChanceFactor>
+          <minSeverity>0.20</minSeverity>
+        </li>
+      </value>
+    </nomatch>
+  </Operation>
+
+</Patch>

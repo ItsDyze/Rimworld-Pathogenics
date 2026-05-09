@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Dyze_PathogenicResidue_SettingsCategory>Dyze Pathogenic residue</Dyze_PathogenicResidue_SettingsCategory>
+
+  <Dyze_PathogenicResidue_Enable_Label>Enable pathogenic residue</Dyze_PathogenicResidue_Enable_Label>
+  <Dyze_PathogenicResidue_Enable_Desc>If enabled, sick pawns may leave pathogenic residue as they move.</Dyze_PathogenicResidue_Enable_Desc>
+
+  <Dyze_PathogenicResidue_AffectColonistsOnly_Label>Affect colonists only</Dyze_PathogenicResidue_AffectColonistsOnly_Label>
+  <Dyze_PathogenicResidue_AffectColonistsOnly_Desc>If enabled, only colonists can leave pathogenic residue.</Dyze_PathogenicResidue_AffectColonistsOnly_Desc>
+
+  <Dyze_PathogenicResidue_CheckInterval_Label>Check interval: {0} ticks</Dyze_PathogenicResidue_CheckInterval_Label>
+
+  <Dyze_PathogenicResidue_SpawnChance_Label>Spawn chance per check: {0}%</Dyze_PathogenicResidue_SpawnChance_Label>
+
+  <Dyze_PathogenicResidue_Reset_Label>Reset to defaults</Dyze_PathogenicResidue_Reset_Label>
+
+  <Dyze_PathogenicResidue_RequireMovement_Label>Require movement</Dyze_PathogenicResidue_RequireMovement_Label>
+  <Dyze_PathogenicResidue_RequireMovement_Desc>If enabled, pawns only leave residue after moving to a different cell.</Dyze_PathogenicResidue_RequireMovement_Desc>
+
+  <Dyze_PathogenicResidue_Cooldown_Label>Per-pawn cooldown: {0} ticks</Dyze_PathogenicResidue_Cooldown_Label>
+  <Dyze_PathogenicResidue_DebugLogging_Label>Enable debug logging</Dyze_PathogenicResidue_DebugLogging_Label>
+  <Dyze_PathogenicResidue_DebugLogging_Desc>If enabled, the mod writes extra diagnostic messages to the RimWorld log.</Dyze_PathogenicResidue_DebugLogging_Desc>
+  <Dyze_PathogenicResidue_UseMovementHook_Label>Use movement hook</Dyze_PathogenicResidue_UseMovementHook_Label>
+  <Dyze_PathogenicResidue_UseMovementHook_Desc>If enabled, residue is checked when pawns move instead of through periodic map scanning. Requires Harmony.</Dyze_PathogenicResidue_UseMovementHook_Desc>
+</LanguageData>

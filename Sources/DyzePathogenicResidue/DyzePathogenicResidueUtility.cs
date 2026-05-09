@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
     public static class DyzePathogenicResidueUtility
     {
@@ -52,7 +52,7 @@ namespace Dyze.RimWorld.CoreExample
                 return false;
             }
 
-            float baseChance = DyzeCoreExampleMod.Settings?.SpawnChancePerCheck ?? 0.08f;
+            float baseChance = DyzePathogenicResidueMod.Settings?.SpawnChancePerCheck ?? 0.08f;
             spawnChance = Mathf.Clamp01(baseChance * highestFactor);
             return spawnChance > 0f;
         }

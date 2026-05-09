@@ -4,9 +4,9 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sources", "Sources", "{C16B2082-E6A6-C480-36D0-FC08AA18D453}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DyzeCoreExample", "DyzeCoreExample", "{40F96B93-3484-3768-A079-4F5AE26E8140}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DyzePathogenicResidue", "DyzePathogenicResidue", "{40F96B93-3484-3768-A079-4F5AE26E8140}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sources", "Sources\DyzeCoreExample\Sources.csproj", "{8C3C924B-C818-00A6-4298-67373512CBAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sources", "Sources\DyzePathogenicResidue\Sources.csproj", "{8C3C924B-C818-00A6-4298-67373512CBAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

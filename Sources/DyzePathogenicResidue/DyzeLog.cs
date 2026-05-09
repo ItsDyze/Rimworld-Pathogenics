@@ -1,14 +1,14 @@
 using Verse;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
     public static class DyzeLog
     {
-        private const string Prefix = "[DyzeCoreExample]";
+        private const string Prefix = "[DyzePathogenicResidue]";
 
         public static void Message(string message)
         {
-            if (DyzeCoreExampleMod.Settings?.EnableDebugLogging == true)
+            if (DyzePathogenicResidueMod.Settings?.EnableDebugLogging == true)
             {
                 Log.Message($"{Prefix} {message}");
             }

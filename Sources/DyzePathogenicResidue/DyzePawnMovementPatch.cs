@@ -2,14 +2,14 @@ using HarmonyLib;
 using Verse;
 using Verse.AI;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
     [HarmonyPatch(typeof(Pawn_PathFollower), "TryEnterNextPathCell")]
     public static class DyzePawnMovementPatch
     {
         public static void Postfix(Pawn ___pawn)
         {
-            DyzePathogenicResidueSettings settings = DyzeCoreExampleMod.Settings;
+            DyzePathogenicResidueSettings settings = DyzePathogenicResidueMod.Settings;
 
             if (settings == null || !settings.Enabled || !settings.UseMovementHook)
             {

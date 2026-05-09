@@ -1,7 +1,7 @@
 using RimWorld;
 using Verse;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
     [DefOf]
     public static class DyzeThingDefOf

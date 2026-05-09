@@ -3,7 +3,7 @@ using LudeonTK;
 using RimWorld;
 using Verse;
 
-namespace Dyze.RimWorld.CoreExample
+namespace Dyze.RimWorld.PathogenicResidue
 {
     public static class DyzeDebugActions
     {
@@ -132,7 +132,7 @@ namespace Dyze.RimWorld.CoreExample
         )]
         public static void LogMovementHookStatus()
         {
-            DyzePathogenicResidueSettings settings = DyzeCoreExampleMod.Settings;
+            DyzePathogenicResidueSettings settings = DyzePathogenicResidueMod.Settings;
 
             string text =
                 $"Movement hook enabled in settings: {settings?.UseMovementHook}\n" +
