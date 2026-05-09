@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done
 
 ## Goal
 
@@ -16,13 +16,13 @@ A new illness can appear in the colony after hidden incubation. It behaves like 
 
 Add a new `HediffDef`.
 
-Suggested def name:
+Implemented def name:
 
 ```text
 PR_PathogenicFlu
 ```
 
-The disease should not replace vanilla Flu at first.
+The disease does not replace vanilla Flu.
 
 ## Scope
 
@@ -48,11 +48,13 @@ A standalone disease avoids conflicts with vanilla disease logic and makes testi
 
 The disease can later become a template for generalized disease profiles.
 
+This implementation intentionally delivers the visible disease layer plus debug tools as a clean vertical slice. Hidden incubation and transmission systems remain for later roadmap items.
+
 ## Acceptance criteria
 
-- [ ] `PR_PathogenicFlu` exists as a custom `HediffDef`
-- [ ] disease appears correctly in the pawn health tab
-- [ ] disease has English localization
-- [ ] disease has French localization
-- [ ] debug action can apply it to a selected pawn
-- [ ] debug action can remove it from a selected pawn
+- [x] `PR_PathogenicFlu` exists as a custom `HediffDef`
+- [x] disease appears correctly in the pawn health tab when applied
+- [x] disease has English localization
+- [x] disease has French localization
+- [x] debug action can apply it to a selected pawn
+- [x] debug action can remove it from a selected pawn

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <HediffDef>
+    <defName>PR_PathogenicFlu</defName>
+    <hediffClass>HediffWithComps</hediffClass>
+    <label>pathogenic flu</label>
+    <description>A standalone respiratory illness used to prototype the Pathogenics v0.2 disease simulation. It appears as a visible disease after incubation and can be applied manually for testing.</description>
+    <isBad>true</isBad>
+    <scenarioCanAdd>true</scenarioCanAdd>
+    <stages>
+      <li>
+        <minSeverity>0.01</minSeverity>
+      </li>
+    </stages>
+  </HediffDef>
+</Defs>
