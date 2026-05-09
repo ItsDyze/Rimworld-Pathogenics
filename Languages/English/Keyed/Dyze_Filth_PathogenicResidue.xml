@@ -23,4 +23,14 @@
   <Dyze_PathogenicResidue_DebugLogging_Desc>If enabled, the mod writes extra diagnostic messages to the RimWorld log.</Dyze_PathogenicResidue_DebugLogging_Desc>
   <Dyze_PathogenicResidue_UseMovementHook_Label>Use movement hook</Dyze_PathogenicResidue_UseMovementHook_Label>
   <Dyze_PathogenicResidue_UseMovementHook_Desc>If enabled, residue is checked when pawns move instead of through periodic map scanning. Requires Harmony.</Dyze_PathogenicResidue_UseMovementHook_Desc>
+  <Dyze_PathogenicResidue_ClearAll_Label>Clear all pathogenic residue</Dyze_PathogenicResidue_ClearAll_Label>
+  <Dyze_PathogenicResidue_ClearAll_Confirm>
+  This will remove all currently spawned pathogenic residue from loaded maps.
+
+  Use this before saving and removing the mod.
+
+  Continue?
+  </Dyze_PathogenicResidue_ClearAll_Confirm>
+
+  <Dyze_PathogenicResidue_ClearAll_Done>Removed {0} pathogenic residue.</Dyze_PathogenicResidue_ClearAll_Done>
 </LanguageData>

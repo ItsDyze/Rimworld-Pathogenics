@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -145,6 +146,47 @@ namespace Dyze.RimWorld.PathogenicResidue
             );
 
             return true;
+        }
+
+        public static int ClearAllResidueFromLoadedMaps()
+        {
+            int totalRemoved = 0;
+
+            if (Current.Game == null)
+            {
+                return totalRemoved;
+            }
+
+            for (int i = 0; i < Find.Maps.Count; i++)
+            {
+                totalRemoved += ClearAllResidueFromMap(Find.Maps[i]);
+            }
+
+            return totalRemoved;
+        }
+
+        public static int ClearAllResidueFromMap(Map map)
+        {
+            if (map == null || DyzeThingDefOf.Dyze_Filth_PathogenicResidue == null)
+            {
+                return 0;
+            }
+
+            List<Thing> residueThings = map.listerThings
+                .ThingsOfDef(DyzeThingDefOf.Dyze_Filth_PathogenicResidue)
+                .ToList();
+
+            for (int i = 0; i < residueThings.Count; i++)
+            {
+                Thing thing = residueThings[i];
+
+                if (thing != null && !thing.Destroyed)
+                {
+                    thing.Destroy(DestroyMode.Vanish);
+                }
+            }
+
+            return residueThings.Count;
         }
     }
 }

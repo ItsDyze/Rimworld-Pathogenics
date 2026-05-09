@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using HarmonyLib;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -111,6 +112,30 @@ namespace Dyze.RimWorld.PathogenicResidue
                 Settings.EnableDebugLogging = false;
                 Settings.UseMovementHook = true;
             }
+
+            listing.GapLine();
+
+            if (listing.ButtonText("Dyze_PathogenicResidue_ClearAll_Label".Translate()))
+            {
+                Find.WindowStack.Add(new Dialog_MessageBox(
+                    "Dyze_PathogenicResidue_ClearAll_Confirm".Translate(),
+                    "Confirm".Translate(),
+                    delegate
+                    {
+                        int removed = DyzePathogenicResidueUtility.ClearAllResidueFromLoadedMaps();
+
+                        Messages.Message(
+                            "Dyze_PathogenicResidue_ClearAll_Done".Translate(removed),
+                            MessageTypeDefOf.PositiveEvent,
+                            false
+                        );
+                    },
+                    "Cancel".Translate(),
+                    null
+                ));
+            }
+
+            listing.GapLine();
 
             listing.End();
 

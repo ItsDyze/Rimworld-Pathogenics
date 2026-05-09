@@ -22,4 +22,13 @@
   <Dyze_PathogenicResidue_DebugLogging_Desc>Si activé, le mod écrit des messages de diagnostic supplémentaires dans le journal de RimWorld.</Dyze_PathogenicResidue_DebugLogging_Desc>
   <Dyze_PathogenicResidue_UseMovementHook_Label>Utiliser le hook de déplacement</Dyze_PathogenicResidue_UseMovementHook_Label>
   <Dyze_PathogenicResidue_UseMovementHook_Desc>Si activé, les résidus sont vérifiés quand les pions se déplacent au lieu d’un scan périodique de la carte. Nécessite Harmony.</Dyze_PathogenicResidue_UseMovementHook_Desc>
+  <Dyze_PathogenicResidue_ClearAll_Label>Supprimer tous les résidus pathogènes</Dyze_PathogenicResidue_ClearAll_Label>
+  <Dyze_PathogenicResidue_ClearAll_Confirm>
+  Cela supprimera tous les résidus pathogènes actuellement présents sur les cartes chargées.
+
+  À utiliser avant de sauvegarder puis retirer le mod.
+
+  Continuer ?
+  </Dyze_PathogenicResidue_ClearAll_Confirm>
+  <Dyze_PathogenicResidue_ClearAll_Done>{0} résidu(s) pathogène(s) supprimé(s).</Dyze_PathogenicResidue_ClearAll_Done>
 </LanguageData>
