@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace Dyze.RimWorld.CoreExample
@@ -43,12 +44,12 @@ namespace Dyze.RimWorld.CoreExample
             {
                 Pawn pawn = allPawns[i];
                 
-                if(!ShouldPawnLeaveResidue(pawn, settings))
+                if(!TryGetResidueSpawnChance(pawn, settings, out float spawnChance))
                 {
                     continue;
                 }
 
-                if(!Rand.Chance(settings.SpawnChancePerCheck))
+                if(!Rand.Chance(spawnChance))
                 {
                     continue;
                 }
@@ -57,7 +58,47 @@ namespace Dyze.RimWorld.CoreExample
             }
         }
 
-        private bool ShouldPawnLeaveResidue(Pawn pawn, DyzePathogenicResidueSettings settings)
+        private bool TryGetResidueSpawnChance(Pawn pawn, DyzePathogenicResidueSettings settings, out float spawnChance)
+        {
+            spawnChance = 0f;
+
+            if(!IsValidPawn(pawn, settings))
+            {
+                return false;
+            }
+
+            List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+            float highestFactor = 0f;
+
+            for(int i = 0; i < hediffs.Count; i++)
+            {
+                Hediff hediff = hediffs[i];
+                if(!TryGetResidueExtension(hediff, out DyzePathogenicResidueHediffExtension extension))
+                {
+                    continue;
+                }
+
+                if(hediff.Severity < extension.minSeverity)
+                {
+                    continue;
+                }
+
+                if(extension.spawnChanceFactor > highestFactor)
+                {
+                    highestFactor = extension.spawnChanceFactor;
+                }
+            }
+
+            if(highestFactor <= 0f)
+            {
+                return false;
+            }
+
+            spawnChance = Mathf.Clamp01(settings.SpawnChancePerCheck * highestFactor);
+            return spawnChance > 0f;
+        }
+
+        private bool IsValidPawn(Pawn pawn, DyzePathogenicResidueSettings settings)
         {
             // Todo: Dead pawn shall leave residue if un-frozen. Is it still a pawn? Maybe I can just check for corpse instead of pawn?
             if(pawn == null || pawn.Dead || !pawn.Spawned)
@@ -85,34 +126,31 @@ namespace Dyze.RimWorld.CoreExample
                 return false;
             }
 
-            List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-
-            for(int i = 0; i < hediffs.Count; i++)
-            {
-                Hediff hediff = hediffs[i];
-                if(IsResidueRelevantHediff(hediff))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return true;
         }
 
-        private bool IsResidueRelevantHediff(Hediff hediff)
+        private bool TryGetResidueExtension(Hediff hediff, out DyzePathogenicResidueHediffExtension extension)
         {
+            extension = null;
+
             if (hediff?.def == null)
             {
                 return false;
             }
 
-            if (!hediff.def.isBad)
+            extension = hediff.def.GetModExtension<DyzePathogenicResidueHediffExtension>();
+
+            if (extension == null)
             {
                 return false;
             }
 
-            // Exclude wounds and missing limbs. We want sickness-like conditions for now.
-            if (hediff is Hediff_Injury || hediff is Hediff_MissingPart)
+            if(!extension.enabled)
+            {
+                return false;
+            }
+
+            if(extension.spawnChanceFactor <= 0f)
             {
                 return false;
             }
