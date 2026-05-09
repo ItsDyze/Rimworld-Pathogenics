@@ -123,5 +123,23 @@ namespace Dyze.RimWorld.CoreExample
 
             DyzeLog.DevAction(builder.ToString());
         }
+
+        [DebugAction(
+            "Dyze Pathogenic Residue",
+            "Log movement hook status",
+            actionType = DebugActionType.Action,
+            allowedGameStates = AllowedGameStates.Playing
+        )]
+        public static void LogMovementHookStatus()
+        {
+            DyzePathogenicResidueSettings settings = DyzeCoreExampleMod.Settings;
+
+            string text =
+                $"Movement hook enabled in settings: {settings?.UseMovementHook}\n" +
+                $"Residue enabled: {settings?.Enabled}\n" +
+                $"Harmony patch target: Verse.AI.Pawn_PathFollower.TryEnterNextPathCell";
+
+            Find.WindowStack.Add(new Dialog_MessageBox(text));
+        }
     }
 }

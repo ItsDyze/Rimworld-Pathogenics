@@ -91,6 +91,11 @@ namespace Dyze.RimWorld.CoreExample
                 return;
             }
 
+            if (settings.UseMovementHook)
+            {
+                return;
+            }
+
             settings.ClampValues();
 
             if (Find.TickManager.TicksGame % settings.CheckIntervalTicks != 0)
@@ -99,6 +104,65 @@ namespace Dyze.RimWorld.CoreExample
             }
 
             TrySpawnResidueForSickPawns(settings);
+        }
+
+        public bool TryProcessPawnMovement(Pawn pawn)
+        {
+            DyzePathogenicResidueSettings settings = DyzeCoreExampleMod.Settings;
+
+            if (settings == null || !settings.Enabled)
+            {
+                return false;
+            }
+
+            settings.ClampValues();
+
+            if (!IsValidPawn(pawn, settings))
+            {
+                return false;
+            }
+
+            try
+            {
+                if (!HasPawnMovedIfRequired(pawn, settings))
+                {
+                    return false;
+                }
+
+                if (IsOnCooldown(pawn, settings))
+                {
+                    return false;
+                }
+
+                if (!DyzePathogenicResidueUtility.TryGetResidueSpawnChance(pawn, out float spawnChance))
+                {
+                    return false;
+                }
+
+                if (DyzePathogenicResidueUtility.CellAlreadyHasPathogenicResidue(pawn.Position, map))
+                {
+                    return false;
+                }
+
+                if (!Rand.Chance(spawnChance))
+                {
+                    return false;
+                }
+
+                if (!DyzePathogenicResidueUtility.TryPlaceResidueAt(pawn.Position, map))
+                {
+                    return false;
+                }
+
+                lastResidueTickByPawnId[pawn.thingIDNumber] = Find.TickManager.TicksGame;
+                DyzeLog.Message($"Placed residue through movement hook at {pawn.Position} for pawn {pawn.LabelShort}.");
+
+                return true;
+            }
+            finally
+            {
+                RememberCheckedCell(pawn);
+            }
         }
 
         private void TrySpawnResidueForSickPawns(DyzePathogenicResidueSettings settings)

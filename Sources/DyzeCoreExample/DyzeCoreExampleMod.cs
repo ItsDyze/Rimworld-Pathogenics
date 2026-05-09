@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using HarmonyLib;
 using UnityEngine;
 using Verse;
 
@@ -12,6 +14,11 @@ namespace Dyze.RimWorld.CoreExample
         public DyzeCoreExampleMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<DyzePathogenicResidueSettings>();
+
+
+            Harmony harmony = new Harmony("dyze.coreexample");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+
             DyzeLog.Message("Mod assembly loaded successfully.");
         }
 
@@ -85,6 +92,12 @@ namespace Dyze.RimWorld.CoreExample
                 "Dyze_PathogenicResidue_DebugLogging_Desc".Translate()
             );
 
+            listing.CheckboxLabeled(
+                "Dyze_PathogenicResidue_UseMovementHook_Label".Translate(),
+                ref Settings.UseMovementHook,
+                "Dyze_PathogenicResidue_UseMovementHook_Desc".Translate()
+            );
+
             listing.GapLine();
 
             if (listing.ButtonText("Dyze_PathogenicResidue_Reset_Label".Translate()))
@@ -96,6 +109,7 @@ namespace Dyze.RimWorld.CoreExample
                 Settings.MinTicksBetweenResiduePerPawn = 1000;
                 Settings.SpawnChancePerCheck = 0.08f;
                 Settings.EnableDebugLogging = false;
+                Settings.UseMovementHook = true;
             }
 
             listing.End();

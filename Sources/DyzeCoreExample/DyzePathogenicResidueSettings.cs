@@ -13,6 +13,7 @@ namespace Dyze.RimWorld.CoreExample
         public bool RequireMovement = true;
         public int MinTicksBetweenResiduePerPawn = 1000;
         public bool EnableDebugLogging = false;
+        public bool UseMovementHook = true;
 
         public override void ExposeData()
         {
@@ -24,6 +25,7 @@ namespace Dyze.RimWorld.CoreExample
             Scribe_Values.Look(ref RequireMovement, "RequireMovement", true);
             Scribe_Values.Look(ref MinTicksBetweenResiduePerPawn, "MinTicksBetweenResiduePerPawn", 1000);
             Scribe_Values.Look(ref EnableDebugLogging, "enableDebugLogging", false);
+            Scribe_Values.Look(ref UseMovementHook, "useMovementHook", true);
             if(Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 ClampValues();
