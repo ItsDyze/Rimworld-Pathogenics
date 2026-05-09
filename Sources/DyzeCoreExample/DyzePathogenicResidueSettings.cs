@@ -12,6 +12,7 @@ namespace Dyze.RimWorld.CoreExample
         public float SpawnChancePerCheck = 0.08f;
         public bool RequireMovement = true;
         public int MinTicksBetweenResiduePerPawn = 1000;
+        public bool EnableDebugLogging = false;
 
         public override void ExposeData()
         {
@@ -22,6 +23,7 @@ namespace Dyze.RimWorld.CoreExample
             Scribe_Values.Look(ref SpawnChancePerCheck, "SpawnChancePerCheck", 0.08f);
             Scribe_Values.Look(ref RequireMovement, "RequireMovement", true);
             Scribe_Values.Look(ref MinTicksBetweenResiduePerPawn, "MinTicksBetweenResiduePerPawn", 1000);
+            Scribe_Values.Look(ref EnableDebugLogging, "enableDebugLogging", false);
             if(Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 ClampValues();

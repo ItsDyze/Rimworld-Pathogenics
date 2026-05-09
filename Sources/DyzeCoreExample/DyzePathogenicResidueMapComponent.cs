@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
@@ -7,11 +8,76 @@ namespace Dyze.RimWorld.CoreExample
 {
     public class PathogenicResidueMapComponent : MapComponent
     {
-        private readonly Dictionary<int, int> lastResidueTickByPawnId = new Dictionary<int, int>();
-        private readonly Dictionary<int, IntVec3> lastCheckedCellByPawnId = new Dictionary<int, IntVec3>();
+        private Dictionary<int, int> lastResidueTickByPawnId = new Dictionary<int, int>();
+        private Dictionary<int, IntVec3> lastCheckedCellByPawnId = new Dictionary<int, IntVec3>();
 
         public PathogenicResidueMapComponent(Map map) : base(map)
         {
+        }
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+
+            Scribe_Collections.Look(
+                ref lastResidueTickByPawnId,
+                "lastResidueTickByPawnId",
+                LookMode.Value,
+                LookMode.Value
+            );
+
+            Scribe_Collections.Look(
+                ref lastCheckedCellByPawnId,
+                "lastCheckedCellByPawnId",
+                LookMode.Value,
+                LookMode.Value
+            );
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                lastResidueTickByPawnId ??= new Dictionary<int, int>();
+                lastCheckedCellByPawnId ??= new Dictionary<int, IntVec3>();
+
+                CleanStalePawnData();
+            }
+        }
+
+        private void CleanStalePawnData()
+        {
+            HashSet<int> currentPawnIds = new HashSet<int>();
+
+            var pawns = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                currentPawnIds.Add(pawns[i].thingIDNumber);
+            }
+
+            RemoveMissingPawnIds(lastResidueTickByPawnId, currentPawnIds);
+            RemoveMissingPawnIds(lastCheckedCellByPawnId, currentPawnIds);
+        }
+
+        private void RemoveMissingPawnIds<TValue>(Dictionary<int, TValue> dictionary, HashSet<int> currentPawnIds)
+        {
+            List<int> idsToRemove = null;
+
+            foreach (int pawnId in dictionary.Keys)
+            {
+                if (!currentPawnIds.Contains(pawnId))
+                {
+                    idsToRemove ??= new List<int>();
+                    idsToRemove.Add(pawnId);
+                }
+            }
+
+            if (idsToRemove == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < idsToRemove.Count; i++)
+            {
+                dictionary.Remove(idsToRemove[i]);
+            }
         }
 
         public override void MapComponentTick()
@@ -43,7 +109,10 @@ namespace Dyze.RimWorld.CoreExample
             {
                 Pawn pawn = pawns[i];
 
-                if (!TryGetResidueSpawnChance(pawn, settings, out float spawnChance))
+                
+
+                if (!IsValidPawn(pawn, settings) || 
+                    !DyzePathogenicResidueUtility.TryGetResidueSpawnChance(pawn, out float spawnChance))
                 {
                     RememberCheckedCell(pawn);
                     continue;
@@ -61,7 +130,7 @@ namespace Dyze.RimWorld.CoreExample
                     continue;
                 }
 
-                if (CellAlreadyHasPathogenicResidue(pawn.Position))
+                if (DyzePathogenicResidueUtility.CellAlreadyHasPathogenicResidue(pawn.Position, map))
                 {
                     RememberCheckedCell(pawn);
                     continue;
@@ -73,58 +142,13 @@ namespace Dyze.RimWorld.CoreExample
                     continue;
                 }
 
-                if (TryPlaceResidueAt(pawn.Position))
+                if (DyzePathogenicResidueUtility.TryPlaceResidueAt(pawn.Position, map))
                 {
                     lastResidueTickByPawnId[pawn.thingIDNumber] = Find.TickManager.TicksGame;
                 }
 
                 RememberCheckedCell(pawn);
             }
-        }
-
-        private bool TryGetResidueSpawnChance(
-            Pawn pawn,
-            DyzePathogenicResidueSettings settings,
-            out float spawnChance
-        )
-        {
-            spawnChance = 0f;
-
-            if (!IsValidPawn(pawn, settings))
-            {
-                return false;
-            }
-
-            List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-            float highestFactor = 0f;
-
-            for (int i = 0; i < hediffs.Count; i++)
-            {
-                Hediff hediff = hediffs[i];
-
-                if (!TryGetResidueExtension(hediff, out DyzePathogenicResidueHediffExtension extension))
-                {
-                    continue;
-                }
-
-                if (hediff.Severity < extension.minSeverity)
-                {
-                    continue;
-                }
-
-                if (extension.spawnChanceFactor > highestFactor)
-                {
-                    highestFactor = extension.spawnChanceFactor;
-                }
-            }
-
-            if (highestFactor <= 0f)
-            {
-                return false;
-            }
-
-            spawnChance = Mathf.Clamp01(settings.SpawnChancePerCheck * highestFactor);
-            return spawnChance > 0f;
         }
 
         private bool IsValidPawn(Pawn pawn, DyzePathogenicResidueSettings settings)
@@ -150,38 +174,6 @@ namespace Dyze.RimWorld.CoreExample
             }
 
             if (pawn.health?.hediffSet?.hediffs == null)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool TryGetResidueExtension(
-            Hediff hediff,
-            out DyzePathogenicResidueHediffExtension extension
-        )
-        {
-            extension = null;
-
-            if (hediff?.def == null)
-            {
-                return false;
-            }
-
-            extension = hediff.def.GetModExtension<DyzePathogenicResidueHediffExtension>();
-
-            if (extension == null)
-            {
-                return false;
-            }
-
-            if (!extension.enabled)
-            {
-                return false;
-            }
-
-            if (extension.spawnChanceFactor <= 0f)
             {
                 return false;
             }
@@ -228,49 +220,6 @@ namespace Dyze.RimWorld.CoreExample
             }
 
             lastCheckedCellByPawnId[pawn.thingIDNumber] = pawn.Position;
-        }
-
-        private bool CellAlreadyHasPathogenicResidue(IntVec3 cell)
-        {
-            List<Thing> things = cell.GetThingList(map);
-
-            for (int i = 0; i < things.Count; i++)
-            {
-                if (things[i].def == DyzeThingDefOf.Dyze_Filth_PathogenicResidue)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool TryPlaceResidueAt(IntVec3 cell)
-        {
-            if (!cell.InBounds(map))
-            {
-                return false;
-            }
-
-            if (cell.Fogged(map))
-            {
-                return false;
-            }
-
-            if (!cell.Walkable(map))
-            {
-                return false;
-            }
-
-            FilthMaker.TryMakeFilth(
-                cell,
-                map,
-                DyzeThingDefOf.Dyze_Filth_PathogenicResidue,
-                1,
-                FilthSourceFlags.None
-            );
-
-            return true;
         }
     }
 }

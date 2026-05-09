@@ -12,7 +12,7 @@ namespace Dyze.RimWorld.CoreExample
         public DyzeCoreExampleMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<DyzePathogenicResidueSettings>();
-            Log.Message("[DyzeCoreExample] Mod assembly loaded successfully.");
+            DyzeLog.Message("Mod assembly loaded successfully.");
         }
 
         public override string SettingsCategory()
@@ -79,6 +79,14 @@ namespace Dyze.RimWorld.CoreExample
 
             listing.GapLine();
 
+            listing.CheckboxLabeled(
+                "Dyze_PathogenicResidue_DebugLogging_Label".Translate(),
+                ref Settings.EnableDebugLogging,
+                "Dyze_PathogenicResidue_DebugLogging_Desc".Translate()
+            );
+
+            listing.GapLine();
+
             if (listing.ButtonText("Dyze_PathogenicResidue_Reset_Label".Translate()))
             {
                 Settings.Enabled = true;
@@ -87,6 +95,7 @@ namespace Dyze.RimWorld.CoreExample
                 Settings.CheckIntervalTicks = 250;
                 Settings.MinTicksBetweenResiduePerPawn = 1000;
                 Settings.SpawnChancePerCheck = 0.08f;
+                Settings.EnableDebugLogging = false;
             }
 
             listing.End();
