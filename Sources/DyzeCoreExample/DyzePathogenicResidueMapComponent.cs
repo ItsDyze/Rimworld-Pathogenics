@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using RimWorld;
 using Verse;
@@ -9,9 +10,6 @@ namespace Dyze.RimWorld.CoreExample
     public class DyzePathogenicResidueMapComponent : MapComponent
     {
 
-        private const int CheckIntervalTicks = 250;
-        private const float SpawnChancePerCheck = 0.08f;
-
         public DyzePathogenicResidueMapComponent(Map map) : base(map)
         {
         }
@@ -19,14 +17,25 @@ namespace Dyze.RimWorld.CoreExample
         public override void MapComponentTick()
         {
             base.MapComponentTick();
-            
-            if(Find.TickManager.TicksGame % CheckIntervalTicks == 0)
+
+            DyzePathogenicResidueSettings settings = DyzeCoreExampleMod.Settings;
+
+            if (settings == null || !settings.Enabled)
             {
-                TrySpawnResidueForSickPawns();
+                return;
             }
+
+            settings.ClampValues();
+
+            if (Find.TickManager.TicksGame % settings.CheckIntervalTicks != 0)
+            {
+                return;
+            }
+
+            TrySpawnResidueForSickPawns(settings);
         }
 
-        private void TrySpawnResidueForSickPawns()
+        private void TrySpawnResidueForSickPawns(DyzePathogenicResidueSettings settings)
         {
             List<Pawn> allPawns = map.mapPawns.AllPawns;
 
@@ -34,12 +43,12 @@ namespace Dyze.RimWorld.CoreExample
             {
                 Pawn pawn = allPawns[i];
                 
-                if(!ShouldPawnLeaveResidue(pawn))
+                if(!ShouldPawnLeaveResidue(pawn, settings))
                 {
                     continue;
                 }
 
-                if(!Rand.Chance(SpawnChancePerCheck))
+                if(!Rand.Chance(settings.SpawnChancePerCheck))
                 {
                     continue;
                 }
@@ -48,7 +57,7 @@ namespace Dyze.RimWorld.CoreExample
             }
         }
 
-        private bool ShouldPawnLeaveResidue(Pawn pawn)
+        private bool ShouldPawnLeaveResidue(Pawn pawn, DyzePathogenicResidueSettings settings)
         {
             // Todo: Dead pawn shall leave residue if un-frozen. Is it still a pawn? Maybe I can just check for corpse instead of pawn?
             if(pawn == null || pawn.Dead || !pawn.Spawned)
@@ -62,6 +71,11 @@ namespace Dyze.RimWorld.CoreExample
             }
 
             if (pawn.RaceProps == null || !pawn.RaceProps.Humanlike)
+            {
+                return false;
+            }
+
+            if (settings.AffectColonistsOnly && !pawn.IsColonist)
             {
                 return false;
             }
