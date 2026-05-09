@@ -14,6 +14,11 @@ namespace Dyze.RimWorld.CoreExample
         {
             spawnChance = 0f;
 
+            if (DyzeThingDefOf.Dyze_Filth_PathogenicResidue == null)
+            {
+                return false;
+            }
+
             if (pawn?.health?.hediffSet?.hediffs == null)
             {
                 return false;
