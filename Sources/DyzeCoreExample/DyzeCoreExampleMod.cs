@@ -32,11 +32,19 @@ namespace Dyze.RimWorld.CoreExample
                 ref Settings.Enabled,
                 "Dyze_PathogenicResidue_Enable_Desc".Translate()
             );
+            
+            listing.GapLine();
 
             listing.CheckboxLabeled(
                 "Dyze_PathogenicResidue_AffectColonistsOnly_Label".Translate(),
                 ref Settings.AffectColonistsOnly,
                 "Dyze_PathogenicResidue_AffectColonistsOnly_Desc".Translate()
+            );
+
+            listing.CheckboxLabeled(
+                "Dyze_PathogenicResidue_RequireMovement_Label".Translate(),
+                ref Settings.RequireMovement,
+                "Dyze_PathogenicResidue_RequireMovement_Desc".Translate()
             );
 
             listing.GapLine();
@@ -48,6 +56,15 @@ namespace Dyze.RimWorld.CoreExample
 
             float interval = listing.Slider(Settings.CheckIntervalTicks, 60f, 5000f);
             Settings.CheckIntervalTicks = Mathf.RoundToInt(interval);
+
+            listing.Label(
+                "Dyze_PathogenicResidue_Cooldown_Label"
+                    .Translate(Settings.MinTicksBetweenResiduePerPawn)
+            );
+
+            float cooldown = listing.Slider(Settings.MinTicksBetweenResiduePerPawn, 0f, 10000f);
+            Settings.MinTicksBetweenResiduePerPawn = Mathf.RoundToInt(cooldown);
+
 
             listing.Label(
                 "Dyze_PathogenicResidue_SpawnChance_Label"
@@ -66,7 +83,9 @@ namespace Dyze.RimWorld.CoreExample
             {
                 Settings.Enabled = true;
                 Settings.AffectColonistsOnly = false;
+                Settings.RequireMovement = true;
                 Settings.CheckIntervalTicks = 250;
+                Settings.MinTicksBetweenResiduePerPawn = 1000;
                 Settings.SpawnChancePerCheck = 0.08f;
             }
 
