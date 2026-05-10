@@ -14,7 +14,6 @@
         <severityPerDayNotImmune>0.25</severityPerDayNotImmune>
         <severityPerDayImmune>-0.1</severityPerDayImmune>
         <immunityPerDaySick>0.13</immunityPerDaySick>
-        <severityPerDayTendedOffset>-0.35</severityPerDayTendedOffset>
       </li>
     </comps>
     <stages>
