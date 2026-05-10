@@ -2,109 +2,75 @@
 
 ## Status
 
-Planned for v0.2
+Implemented for v0.2
 
 ## Goal
 
 Create a clean simulation layer for one standalone respiratory disease without expanding the old residue system.
 
-## Proposed folders
+## Actual implementation
+
+### Folder structure
 
 ```text
-Source/
-├─ Defs/
+Sources/DyzePathogenics/
+├─ Runtime/
+│   ├─ PathogenicsMapComponent.cs
+│   └─ PawnDiseaseState.cs
 ├─ Settings/
-├─ Simulation/
-├─ Utility/
-├─ Components/
-├─ UI/
-└─ Debug/
+│   └─ DyzePathogenicsSettings.cs
+├─ Debug/
+│   └─ DyzeDebugAction.cs
+└─ (other supporting files)
 ```
 
-## Main components
+### Implemented components
 
-### Map component
+#### Map component
 
-Responsible for ticking the simulation and storing map-level state.
-
-Suggested file:
-
-```text
-Source/Components/PathogenicDiseaseMapComponent.cs
-```
+File: `Sources/DyzePathogenics/Runtime/PathogenicsMapComponent.cs`
 
 Responsibilities:
 
-- track pawn disease states
-- process exposure decay
-- process incubation progression
-- process respiratory transmission
-- detect outsider importation
-- expose debug data
-- save/load simulation state
+- store pawn disease states in `pawnDiseaseStates` dictionary
+- provide get/create methods for disease state
+- handle save/load via Scribe
+- (progression logic reserved for future features)
 
-### Disease state tracker
+#### Disease state
 
-Suggested file:
+File: `Sources/DyzePathogenics/Runtime/PawnDiseaseState.cs`
 
-```text
-Source/Simulation/DiseaseStateTracker.cs
-```
+Contains:
 
-Responsibilities:
+- `SimulatedDiseaseStage` enum with stages: None, Exposed, Incubating, PreSymptomaticInfectious, Symptomatic, Recovering, Recovered
+- `PawnDiseaseState` class tracking: Stage, ExposedTick, InfectiousStartTick, SymptomOnsetTick, RecoveringTick, RecoveredTick
+- Implements `IExposable` for save/load
 
-- store per-pawn disease state
-- add exposure
-- transition to incubation
-- transition to symptoms
-- clear or recover states
+#### Debug actions
 
-### Respiratory transmission worker
+File: `Sources/DyzePathogenics/Debug/DyzeDebugAction.cs`
 
-Suggested file:
+Actions:
 
-```text
-Source/Simulation/RespiratoryTransmissionWorker.cs
-```
+- "Expose selected pawn (hidden infection)" - apply hidden disease state
+- "Apply pathogenic flu to selected pawn" - apply visible HediffDef and sync hidden state
+- "Remove pathogenic flu from selected pawn" - remove HediffDef and clear hidden state
+- "Clear hidden disease state for selected pawn" - clear only hidden state
+- "Log disease state for selected pawn" - show current stage and timing
+- "Log mod status" - show settings
 
-Responsibilities:
+### Key design: Separate visible and hidden state
 
-- find infectious pawns
-- find nearby exposed pawns
-- calculate distance and room factors
-- apply exposure
+The visible disease (`DP_PathogenicFlu` HediffDef) and the hidden disease state (`PawnDiseaseState`) are **separate but synchronized**.
 
-### Disease importation worker
+- The HediffDef represents what shows in the health tab
+- The PawnDiseaseState tracks pre-symptomatic progression
+- Debug actions ensure both stay in sync
+- This allows the disease to be "incubating" before it becomes visible
 
-Suggested file:
+### Design constraint
 
-```text
-Source/Simulation/DiseaseImportationWorker.cs
-```
+The v0.2 simulation runs without any floor residue mechanic.
 
-Responsibilities:
-
-- detect newly spawned outsider pawns
-- roll import chance
-- seed hidden disease state
-
-### Debug actions
-
-Suggested file:
-
-```text
-Source/Debug/PathogenicDiseaseDebugActions.cs
-```
-
-Responsibilities:
-
-- apply disease state
-- add exposure
-- clear disease state
-- print selected pawn state
-
-## Design constraint
-
-Do not hardwire the old floor residue mechanic into the new disease simulation.
-
-The simulation should be able to run without spawning any residue `Thing`.
+The old residue system is deprecated and retained only for legacy save cleanup.

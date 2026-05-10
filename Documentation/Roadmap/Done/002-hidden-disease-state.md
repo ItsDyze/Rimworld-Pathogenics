@@ -87,6 +87,21 @@ Debug actions added:
 - [x] debug readout shows current stage
 - [x] hidden state is separate from visible `HediffDef`
 
+## Implementation detail: Visible and hidden state are separate
+
+**Important nuance discovered during testing:**
+
+The visible disease (`DP_PathogenicFlu` HediffDef) and the hidden disease state (`PawnDiseaseState`) are **separate systems** that must be synchronized:
+
+- **Visible:** `DP_PathogenicFlu` is a standard RimWorld `HediffDef` that appears in the health tab
+- **Hidden:** `PawnDiseaseState` tracks pre-symptomatic progression before the HediffDef is applied
+- **Synchronization:** Debug actions were updated to keep both in sync:
+  - "Apply pathogenic flu" now creates/updates both the visible HediffDef AND the hidden PawnDiseaseState
+  - "Remove pathogenic flu" clears both
+  - "Log disease state" checks both: if a pawn has visible HediffDef but no hidden state, it creates one
+
+This separation allows the disease simulation to track incubation before symptoms appear, while still using RimWorld's native Hediff system for the visible disease representation.
+
 ## v0.2 Expansion: Residue System Removal
 
 **Merged from Feature 010**
