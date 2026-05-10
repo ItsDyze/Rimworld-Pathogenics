@@ -7,7 +7,6 @@
     <scenarioCanAdd>true</scenarioCanAdd>
     <isBad>true</isBad>
     <initialSeverity>0.001</initialSeverity>
-    <lethalSeverity>1.0</lethalSeverity>
     <tendable>true</tendable>
     <comps>
       <li Class="HediffCompProperties_Immunizable">
@@ -26,7 +25,6 @@
         <minSeverity>0.40</minSeverity>
         <label>late symptomatic</label>
         <painOffset>0.15</painOffset>
-        <lifeThreatening>true</lifeThreatening>
         <capMods>
           <li>
             <capacity>Moving</capacity>
