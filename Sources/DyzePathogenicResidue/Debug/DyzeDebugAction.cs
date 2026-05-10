@@ -87,9 +87,22 @@ namespace Dyze.RimWorld.PathogenicResidue
                         continue;
                     }
 
-                    builder.AppendLine(
-                        $"- {hediff.def.defName}: severity={hediff.Severity:0.###}, minSeverity={extension.minSeverity:0.###}, factor={extension.spawnChanceFactor:0.###}, enabled={extension.enabled}"
-                    );
+                    // Show severity progression info for custom comps
+                    float severityPerDay = 0f;
+                    var severityComp = hediff.TryGetComp<Dyze.RimWorld.PathogenicResidue.HediffComp_SeverityPerDay>();
+                    if (severityComp != null)
+                    {
+                        severityPerDay = severityComp.Props.severityPerDay;
+                        builder.AppendLine(
+                            $"- {hediff.def.defName}: severity={hediff.Severity:0.###}, minSeverity={extension.minSeverity:0.###}, factor={extension.spawnChanceFactor:0.###}, enabled={extension.enabled}, severityPerDay={severityPerDay}"
+                        );
+                    }
+                    else
+                    {
+                        builder.AppendLine(
+                            $"- {hediff.def.defName}: severity={hediff.Severity:0.###}, minSeverity={extension.minSeverity:0.###}, factor={extension.spawnChanceFactor:0.###}, enabled={extension.enabled}"
+                        );
+                    }
                 }
             }
 

@@ -9,10 +9,9 @@
     <initialSeverity>0.001</initialSeverity>
     <tendable>true</tendable>
     <comps>
-      <li Class="HediffCompProperties_Immunizable">
-        <severityPerDayNotImmune>0.25</severityPerDayNotImmune>
-        <severityPerDayImmune>-0.1</severityPerDayImmune>
-        <immunityPerDaySick>0.13</immunityPerDaySick>
+      <li Class="Dyze.RimWorld.PathogenicResidue.HediffCompProperties_SeverityPerDay">
+        <severityPerDay>0.25</severityPerDay>
+        <maxSeverity>1.0</maxSeverity>
       </li>
     </comps>
     <stages>
