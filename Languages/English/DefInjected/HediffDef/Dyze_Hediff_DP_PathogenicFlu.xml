@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <DP_PathogenicFlu.label>pathogenic flu</DP_PathogenicFlu.label>
+  <DP_PathogenicFlu.description>A standalone respiratory illness used to prototype the Pathogenics v0.2 disease simulation. It appears as a visible disease after incubation and can be applied manually for testing.</DP_PathogenicFlu.description>
+  <DP_PathogenicFlu.stages.early_symptomatic.label>early symptomatic</DP_PathogenicFlu.stages.early_symptomatic.label>
+  <DP_PathogenicFlu.stages.late_symptomatic.label>late symptomatic</DP_PathogenicFlu.stages.late_symptomatic.label>
+</LanguageData>

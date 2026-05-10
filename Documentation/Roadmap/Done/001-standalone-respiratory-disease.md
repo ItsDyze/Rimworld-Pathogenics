@@ -19,7 +19,7 @@ Add a new `HediffDef`.
 Implemented def name:
 
 ```text
-PR_PathogenicFlu
+DP_PathogenicFlu
 ```
 
 The disease does not replace vanilla Flu.
@@ -52,7 +52,7 @@ This implementation intentionally delivers the visible disease layer plus debug 
 
 ## Acceptance criteria
 
-- [x] `PR_PathogenicFlu` exists as a custom `HediffDef`
+- [x] `DP_PathogenicFlu` exists as a custom `HediffDef`
 - [x] disease appears correctly in the pawn health tab when applied
 - [x] disease has English localization
 - [x] disease has French localization

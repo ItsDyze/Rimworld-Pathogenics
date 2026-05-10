@@ -28,7 +28,7 @@ infectiousEndTick
 recoveryTick
 ```
 
-At `symptomOnsetTick`, apply the visible `PR_PathogenicFlu` hediff.
+At `symptomOnsetTick`, apply the visible `DP_PathogenicFlu` hediff.
 
 ## Scope
 

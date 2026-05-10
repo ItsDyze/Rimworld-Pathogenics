@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LanguageData>
-  <PR_PathogenicFlu.label>pathogenic flu</PR_PathogenicFlu.label>
-  <PR_PathogenicFlu.description>A standalone respiratory illness used to prototype the Pathogenics v0.2 disease simulation. It appears as a visible disease after incubation and can be applied manually for testing.</PR_PathogenicFlu.description>
-</LanguageData>

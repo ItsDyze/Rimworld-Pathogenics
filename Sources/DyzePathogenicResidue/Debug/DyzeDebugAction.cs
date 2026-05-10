@@ -7,11 +7,11 @@ namespace Dyze.RimWorld.PathogenicResidue
 {
     public static class DyzeDebugActions
     {
-        private const string PathogenicFluDefName = "PR_PathogenicFlu";
+        private const string PathogenicFluDefName = "DP_PathogenicFlu";
         private const float DefaultPathogenicFluSeverity = 0.15f;
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Spawn residue on clicked cell",
             actionType = DebugActionType.ToolMap,
             allowedGameStates = AllowedGameStates.PlayingOnMap
@@ -46,7 +46,7 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Inspect clicked pawn residue status",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
@@ -97,7 +97,7 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Apply pathogenic flu to selected pawn",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
@@ -153,7 +153,7 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Remove pathogenic flu from selected pawn",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
@@ -218,7 +218,7 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Log residue-capable HediffDefs",
             actionType = DebugActionType.Action,
             allowedGameStates = AllowedGameStates.Playing
@@ -249,7 +249,7 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Log movement hook status",
             actionType = DebugActionType.Action,
             allowedGameStates = AllowedGameStates.Playing
