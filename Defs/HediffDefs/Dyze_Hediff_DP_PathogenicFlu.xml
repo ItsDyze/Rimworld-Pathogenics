@@ -4,8 +4,10 @@
     <defName>DP_PathogenicFlu</defName>
     <hediffClass>HediffWithComps</hediffClass>
     <comps>
-      <li Class="HediffCompProperties_GrowthRate">
-        <growthRate>0.004</growthRate>
+      <li Class="HediffCompProperties_Immunizable">
+        <severityPerDayNotImmune>0.25</severityPerDayNotImmune>
+        <severityPerDayImmune>-0.1</severityPerDayImmune>
+        <immunityPerDaySick>0.13</immunityPerDaySick>
       </li>
     </comps>
     <label>pathogenic flu</label>
