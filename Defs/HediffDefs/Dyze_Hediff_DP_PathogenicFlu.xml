@@ -3,6 +3,11 @@
   <HediffDef>
     <defName>DP_PathogenicFlu</defName>
     <hediffClass>HediffWithComps</hediffClass>
+    <comps>
+      <li Class="HediffCompProperties_GrowthRate">
+        <growthRate>0.004</growthRate>
+      </li>
+    </comps>
     <label>pathogenic flu</label>
     <description>A standalone respiratory illness used to prototype the Pathogenics v0.2 disease simulation. It appears as a visible disease after incubation and can be applied manually for testing.</description>
     <isBad>true</isBad>
