@@ -1,6 +1,6 @@
 using Verse;
 
-namespace Dyze.RimWorld.PathogenicResidue
+namespace Dyze.RimWorld.Pathogenics
 {
     /// <summary>
     /// Simple severity progression comp - increments severity over time without immunizable mechanics.

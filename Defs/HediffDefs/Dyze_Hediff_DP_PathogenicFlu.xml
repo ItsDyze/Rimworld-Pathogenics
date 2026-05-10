@@ -9,7 +9,7 @@
     <initialSeverity>0.001</initialSeverity>
     <tendable>true</tendable>
     <comps>
-      <li Class="Dyze.RimWorld.PathogenicResidue.HediffCompProperties_SeverityPerDay">
+      <li Class="Dyze.RimWorld.Pathogenics.HediffCompProperties_SeverityPerDay">
         <severityPerDay>0.25</severityPerDay>
         <maxSeverity>1.0</maxSeverity>
       </li>
