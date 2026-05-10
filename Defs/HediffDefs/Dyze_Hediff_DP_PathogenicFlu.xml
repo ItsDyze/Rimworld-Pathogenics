@@ -3,27 +3,31 @@
   <HediffDef>
     <defName>DP_PathogenicFlu</defName>
     <hediffClass>HediffWithComps</hediffClass>
+    <makesSickThought>true</makesSickThought>
+    <scenarioCanAdd>true</scenarioCanAdd>
+    <isBad>true</isBad>
+    <initialSeverity>0.001</initialSeverity>
+    <lethalSeverity>1.0</lethalSeverity>
+    <tendable>true</tendable>
     <comps>
       <li Class="HediffCompProperties_Immunizable">
         <severityPerDayNotImmune>0.25</severityPerDayNotImmune>
         <severityPerDayImmune>-0.1</severityPerDayImmune>
         <immunityPerDaySick>0.13</immunityPerDaySick>
+        <severityPerDayTendedOffset>-0.35</severityPerDayTendedOffset>
       </li>
     </comps>
-    <label>pathogenic flu</label>
-    <description>A standalone respiratory illness used to prototype the Pathogenics v0.2 disease simulation. It appears as a visible disease after incubation and can be applied manually for testing.</description>
-    <isBad>true</isBad>
-    <scenarioCanAdd>true</scenarioCanAdd>
     <stages>
       <li>
         <minSeverity>0.01</minSeverity>
         <label>early symptomatic</label>
-        <painFactor>1.1</painFactor>
+        <painOffset>0.05</painOffset>
       </li>
       <li>
-        <minSeverity>0.4</minSeverity>
+        <minSeverity>0.40</minSeverity>
         <label>late symptomatic</label>
-        <painFactor>1.3</painFactor>
+        <painOffset>0.15</painOffset>
+        <lifeThreatening>true</lifeThreatening>
         <capMods>
           <li>
             <capacity>Moving</capacity>
@@ -36,5 +40,7 @@
         </capMods>
       </li>
     </stages>
+    <label>pathogenic flu</label>
+    <description>A standalone respiratory illness used to prototype the Pathogenics v0.2 disease simulation. It appears as a visible disease after incubation and can be applied manually for testing.</description>
   </HediffDef>
 </Defs>
