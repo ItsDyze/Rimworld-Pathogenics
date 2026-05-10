@@ -7,8 +7,11 @@ namespace Dyze.RimWorld.PathogenicResidue
 {
     public static class DyzeDebugActions
     {
+        private const string PathogenicFluDefName = "DP_PathogenicFlu";
+        private const float DefaultPathogenicFluSeverity = 0.15f;
+
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Spawn residue on clicked cell",
             actionType = DebugActionType.ToolMap,
             allowedGameStates = AllowedGameStates.PlayingOnMap
@@ -43,7 +46,7 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Inspect clicked pawn residue status",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
@@ -84,9 +87,22 @@ namespace Dyze.RimWorld.PathogenicResidue
                         continue;
                     }
 
-                    builder.AppendLine(
-                        $"- {hediff.def.defName}: severity={hediff.Severity:0.###}, minSeverity={extension.minSeverity:0.###}, factor={extension.spawnChanceFactor:0.###}, enabled={extension.enabled}"
-                    );
+                    // Show severity progression info for custom comps
+                    float severityPerDay = 0f;
+                    var severityComp = hediff.TryGetComp<Dyze.RimWorld.PathogenicResidue.HediffComp_SeverityPerDay>();
+                    if (severityComp != null)
+                    {
+                        severityPerDay = severityComp.Props.severityPerDay;
+                        builder.AppendLine(
+                            $"- {hediff.def.defName}: severity={hediff.Severity:0.###}, minSeverity={extension.minSeverity:0.###}, factor={extension.spawnChanceFactor:0.###}, enabled={extension.enabled}, severityPerDay={severityPerDay}"
+                        );
+                    }
+                    else
+                    {
+                        builder.AppendLine(
+                            $"- {hediff.def.defName}: severity={hediff.Severity:0.###}, minSeverity={extension.minSeverity:0.###}, factor={extension.spawnChanceFactor:0.###}, enabled={extension.enabled}"
+                        );
+                    }
                 }
             }
 
@@ -94,7 +110,128 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
+            "Apply pathogenic flu to selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ApplyPathogenicFluToPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message(
+                    "No pawn selected.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            HediffDef pathogenicFlu = GetPathogenicFluDef();
+            if (pathogenicFlu == null)
+            {
+                Messages.Message(
+                    $"Could not find HediffDef '{PathogenicFluDefName}'.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            Hediff existing = pawn.health?.hediffSet?.GetFirstHediffOfDef(pathogenicFlu);
+            if (existing != null)
+            {
+                if (existing.Severity < DefaultPathogenicFluSeverity)
+                {
+                    existing.Severity = DefaultPathogenicFluSeverity;
+                }
+
+                Messages.Message(
+                    $"{pawn.LabelShort} already has {pathogenicFlu.label}. Severity refreshed.",
+                    MessageTypeDefOf.NeutralEvent,
+                    false
+                );
+                return;
+            }
+
+            Hediff hediff = HediffMaker.MakeHediff(pathogenicFlu, pawn);
+            hediff.Severity = DefaultPathogenicFluSeverity;
+            pawn.health.AddHediff(hediff);
+
+            Messages.Message(
+                $"Applied {pathogenicFlu.label} to {pawn.LabelShort}.",
+                MessageTypeDefOf.PositiveEvent,
+                false
+            );
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Remove pathogenic flu from selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void RemovePathogenicFluFromPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message(
+                    "No pawn selected.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            HediffDef pathogenicFlu = GetPathogenicFluDef();
+            if (pathogenicFlu == null)
+            {
+                Messages.Message(
+                    $"Could not find HediffDef '{PathogenicFluDefName}'.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            var hediffs = pawn.health?.hediffSet?.hediffs;
+            if (hediffs == null)
+            {
+                Messages.Message(
+                    $"{pawn.LabelShort} has no health conditions to inspect.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            int removedCount = 0;
+
+            foreach (Hediff hediff in hediffs.Where(hediff => hediff.def == pathogenicFlu).ToList())
+            {
+                pawn.health.RemoveHediff(hediff);
+                removedCount++;
+            }
+
+            if (removedCount <= 0)
+            {
+                Messages.Message(
+                    $"{pawn.LabelShort} does not have {pathogenicFlu.label}.",
+                    MessageTypeDefOf.NeutralEvent,
+                    false
+                );
+                return;
+            }
+
+            Messages.Message(
+                $"Removed {pathogenicFlu.label} from {pawn.LabelShort}.",
+                MessageTypeDefOf.PositiveEvent,
+                false
+            );
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
             "Log residue-capable HediffDefs",
             actionType = DebugActionType.Action,
             allowedGameStates = AllowedGameStates.Playing
@@ -125,7 +262,7 @@ namespace Dyze.RimWorld.PathogenicResidue
         }
 
         [DebugAction(
-            "Dyze Pathogenic Residue",
+            "Dyze Pathogenics",
             "Log movement hook status",
             actionType = DebugActionType.Action,
             allowedGameStates = AllowedGameStates.Playing
@@ -140,6 +277,11 @@ namespace Dyze.RimWorld.PathogenicResidue
                 $"Harmony patch target: Verse.AI.Pawn_PathFollower.TryEnterNextPathCell";
 
             Find.WindowStack.Add(new Dialog_MessageBox(text));
+        }
+
+        private static HediffDef GetPathogenicFluDef()
+        {
+            return DefDatabase<HediffDef>.GetNamedSilentFail(PathogenicFluDefName);
         }
     }
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <DP_PathogenicFlu.label>grippe pathogénique</DP_PathogenicFlu.label>
+  <DP_PathogenicFlu.description>Une maladie respiratoire autonome utilisée pour prototyper la simulation de maladie v0.2 de Pathogenics. Elle apparaît comme une maladie visible après incubation et peut être appliquée manuellement pour les tests.</DP_PathogenicFlu.description>
+  <DP_PathogenicFlu.stages.0.label>symptomatique précoce</DP_PathogenicFlu.stages.0.label>
+  <DP_PathogenicFlu.stages.1.label>symptomatique avancé</DP_PathogenicFlu.stages.1.label>
+</LanguageData>
