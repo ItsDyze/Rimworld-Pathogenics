@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Dyze_Pathogenics_SettingsCategory>Dyze's Pathogenics</Dyze_Pathogenics_SettingsCategory>
+
+  <Dyze_Pathogenics_Enable_Label>Enable disease simulation</Dyze_Pathogenics_Enable_Label>
+  <Dyze_Pathogenics_Enable_Desc>Enable the standalone respiratory disease simulation with hidden disease state tracking.</Dyze_Pathogenics_Enable_Desc>
+
+  <Dyze_Pathogenics_AffectColonistsOnly_Label>Affect colonists only</Dyze_Pathogenics_AffectColonistsOnly_Label>
+  <Dyze_Pathogenics_AffectColonistsOnly_Desc>If enabled, only colonists can be affected by the disease simulation.</Dyze_Pathogenics_AffectColonistsOnly_Desc>
+
+  <Dyze_Pathogenics_Reset_Label>Reset to defaults</Dyze_Pathogenics_Reset_Label>
+
+  <Dyze_Pathogenics_DebugLogging_Label>Enable debug logging</Dyze_Pathogenics_DebugLogging_Label>
+  <Dyze_Pathogenics_DebugLogging_Desc>If enabled, the mod writes extra diagnostic messages to the RimWorld log.</Dyze_Pathogenics_DebugLogging_Desc>
+</LanguageData>

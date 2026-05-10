@@ -1,6 +1,6 @@
 using Verse;
 
-namespace Dyze.RimWorld.PathogenicResidue
+namespace Dyze.RimWorld.Pathogenics
 {
     /// <summary>
     /// HediffComp that provides simple severity progression over time.

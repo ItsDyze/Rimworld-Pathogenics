@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AssemblyName>DyzePathogenicResidue</AssemblyName>
-    <RootNamespace>Dyze.RimWorld.PathogenicResidue</RootNamespace>
+    <AssemblyName>DyzePathogenics</AssemblyName>
+    <RootNamespace>Dyze.RimWorld.Pathogenics</RootNamespace>
     <LangVersion>latest</LangVersion>
     <OutputPath>..\..\Assemblies\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

@@ -10,7 +10,7 @@ Prevent the old floor-residue implementation from being required by the new dise
 
 ## Player-facing behavior
 
-The standalone respiratory disease should work without spawning pathogenic residue on the floor.
+The standalone respiratory disease should work without spawning residue on the floor.
 
 ## Technical approach
 

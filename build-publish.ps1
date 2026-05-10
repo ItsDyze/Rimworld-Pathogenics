@@ -2,8 +2,8 @@ $ErrorActionPreference = "Stop"
 
 # --- Adjust if needed ---
 $RepoRoot = $PSScriptRoot
-$PublishDir = "D:\SteamLibrary\steamapps\common\RimWorld\Mods\DyzePathogenicResidue"
-$ProjectPath = Join-Path $RepoRoot "Sources\DyzePathogenicResidue\DyzePathogenicResidue.csproj"
+$PublishDir = "D:\SteamLibrary\steamapps\common\RimWorld\Mods\DyzePathogenics"
+$ProjectPath = Join-Path $RepoRoot "Sources\DyzePathogenics\DyzePathogenics.csproj"
 
 Write-Host "Building Release DLL..."
 dotnet build $ProjectPath -c Release

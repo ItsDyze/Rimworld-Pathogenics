@@ -6,7 +6,7 @@ Deprecated for v0.2
 
 ## Summary
 
-The original pathogenic residue system should not be expanded as the main disease simulation mechanic.
+The original residue system should not be expanded as the main disease simulation mechanic.
 
 It can be kept temporarily for reference, testing, or legacy support, but v0.2 should not build more features on top of generic floor residue.
 
@@ -19,7 +19,7 @@ Pawn has supported disease
         ↓
 Pawn walks
         ↓
-Pathogenic residue may spawn on the floor
+Legacy residue may spawn on the floor
         ↓
 Other pawns may interact with the residue
 ```

@@ -1,4 +1,4 @@
-# Feature: v0.1 Pathogenic Residue Foundation
+# Feature: v0.1 Residue Foundation
 
 ## Status
 
@@ -6,11 +6,11 @@ Done / Deprecated as v0.2 foundation
 
 ## Goal
 
-The original goal was to create a generic pathogenic residue mechanic for selected diseases.
+The original goal was to create a generic residue mechanic for selected diseases.
 
 ## Player-facing behavior
 
-Sick pawns could leave pathogenic residue on floors. Colonies had an additional cleanliness concern around hospitals, prisons, quarantine areas, and infected pawns.
+Sick pawns could leave residue on floors. Colonies had an additional cleanliness concern around hospitals, prisons, quarantine areas, and infected pawns.
 
 ## Technical approach
 

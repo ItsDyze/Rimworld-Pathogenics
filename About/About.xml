@@ -1,75 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <packageId>dyze.pathogenicresidue</packageId>
-  <name>Dyze Pathogenic Residue</name>
+  <packageId>dyze.pathogenics</packageId>
+  <name>Dyze's Pathogenics</name>
   <author>Dyze</author>
-  <description>
-[h1]Dyze's Pathogenics[/h1]
+  <description>Dyze's Pathogenics is a RimWorld mod focused on disease simulation instead of random one-off illness events.
 
-[b]Realistic disease spread for RimWorld colonies.[/b]
+The current v0.2 slice adds the foundation for a standalone respiratory disease.
 
-Dyze's Pathogenics adds a more realistic disease transmission system to RimWorld.
+Included in this slice:
+- hidden disease state before symptoms appear
+- a visible standalone disease for testing
+- debug actions to expose a pawn, inspect state, clear state, and force symptom onset
 
-Instead of diseases appearing only as isolated random events, infections can enter the colony through outsiders such as visitors, traders, raiders, prisoners, refugees, and other temporary pawns.
-
-Pawns may carry an illness before symptoms appear, spread it through close contact and shared air, and trigger colony-wide outbreaks if the infection is not contained.
-
-[hr][/hr]
-
-[h2]Current focus[/h2]
-
-The first version focuses on a standalone respiratory disease prototype.
-
-[list]
-    [*]Outsider-based disease importation
-    [*]Hidden incubation before visible symptoms
-    [*]Pre-symptomatic infectious stage
-    [*]Exposure accumulation instead of instant infection rolls
-    [*]Proximity-based respiratory spread
-    [*]Higher risk in shared indoor spaces
-    [*]Debug tools for testing and balancing
-[/list]
-
-[hr][/hr]
-
-[h2]Design goal[/h2]
-
-Dyze's Pathogenics aims to make disease feel less like a random medical event and more like a colony management problem.
-
-Shared bedrooms, dining rooms, hospitals, prisons, visitors, and quarantine decisions should matter. A sick pawn is not just a patient. They are a possible outbreak source.
-
-[hr][/hr]
-
-[h2]Development status[/h2]
-
-This mod is currently in active development.
-
-The old floor-residue concept is being replaced by a cleaner disease simulation model focused on infection paths, incubation, exposure, and transmission behavior.
-
-[h3]Planned direction[/h3]
-
-[list]
-    [*]Standalone simulated respiratory disease
-    [*]More detailed outbreak behavior
-    [*]Disease-specific transmission paths
-    [*]Better player feedback
-    [*]Optional future support for surface contamination, quarantine tools, and additional disease types
-[/list]
-
-[hr][/hr]
-
-[h2]Compatibility[/h2]
-
-Dyze's Pathogenics is designed to avoid overwriting vanilla Defs where possible.
-
-The goal is to build disease behavior through custom Defs, extensions, settings, and lightweight runtime systems rather than hardcoded changes to every disease.
-
-[hr][/hr]
-
-[h2]Safe removal[/h2]
-
-As this mod is still evolving, removing it from an existing save is not recommended unless a safe removal path is explicitly provided for the version you are using.
-  </description>
+Not included yet:
+- proximity transmission
+- exposure accumulation
+- richer player feedback
+- quarantine tools
+- additional disease types</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

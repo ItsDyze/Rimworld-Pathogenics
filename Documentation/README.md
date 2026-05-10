@@ -1,4 +1,4 @@
-# Pathogenic Residue Documentation
+# Pathogenics Documentation
 
 This folder contains design notes, roadmap items, and technical documentation for the mod.
 
