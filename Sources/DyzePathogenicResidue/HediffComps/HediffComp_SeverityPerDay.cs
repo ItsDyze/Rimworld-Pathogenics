@@ -7,6 +7,7 @@ namespace Dyze.RimWorld.PathogenicResidue
     /// 
     /// Unlike HediffComp_Immunizable, this does NOT hook into the vanilla disease widget
     /// or immunity system. It adds a fixed amount of severity each interval.
+    /// When the configured max severity is reached, the disease removes itself.
     /// </summary>
     public class HediffComp_SeverityPerDay : HediffComp
     {
@@ -24,9 +25,14 @@ namespace Dyze.RimWorld.PathogenicResidue
             float severityPerTick = Props.severityPerDay / 60000f;
             float targetSeverity = parent.Severity + severityAdjustment + severityPerTick;
 
-            if (Props.maxSeverity > 0f && targetSeverity > Props.maxSeverity)
+            if (Props.maxSeverity > 0f && targetSeverity >= Props.maxSeverity)
             {
-                severityPerTick = Props.maxSeverity - (parent.Severity + severityAdjustment);
+                Pawn pawn = parent.pawn;
+                if (pawn?.health != null)
+                {
+                    pawn.health.RemoveHediff(parent);
+                }
+                return;
             }
 
             if (severityPerTick > 0f)
