@@ -52,7 +52,7 @@ Example values for testing:
 
 ```text
 threshold: 1.0
-decay per day: 0.15
+decay per day: 1.5
 ```
 
 ## Acceptance criteria

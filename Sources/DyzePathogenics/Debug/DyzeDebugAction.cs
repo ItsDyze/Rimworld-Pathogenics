@@ -47,6 +47,7 @@ namespace Dyze.RimWorld.Pathogenics
             diseaseState.SymptomOnsetTick = -1;
             diseaseState.RecoveringTick = -1;
             diseaseState.RecoveredTick = -1;
+            diseaseState.ClearExposure();
 
             Messages.Message(
                 $"{pawn.LabelShort} now has a hidden exposed state.",
@@ -254,9 +255,21 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
-            if (state != null)
+            if (state == null)
             {
-                state.ClearExposure();
+                Messages.Message(
+                    $"{pawn.LabelShort} has no exposure to clear.",
+                    MessageTypeDefOf.NeutralEvent,
+                    false
+                );
+                return;
+            }
+
+            state.ClearExposure();
+
+            if (state.Stage == SimulatedDiseaseStage.Exposed)
+            {
+                mapComponent.ClearDiseaseState(pawn);
             }
 
             Messages.Message(

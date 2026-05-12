@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace Dyze.RimWorld.Pathogenics
@@ -29,13 +28,13 @@ namespace Dyze.RimWorld.Pathogenics
         private const int RecoveringDurationTicks = 24000; // ~6.7 days
 
         // ===== CONFIGURATION: Exposure accumulation (v0.2.1) =====
-        // Exposure decays over time so repeated contact matters
-        // 0.15 per day = ~6.7 days to fully decay from max exposure
-        private const float ExposureDecayPerDay = 0.15f;
+        // Exposure decays over time so brief contact fades away unless reinforced.
+        // 1.5 per day = one 0.25 debug-step fades in about 4 in-game hours.
+        private const float ExposureDecayPerDay = 1.5f;
         // Ticks per day at default game speed
         private const int TicksPerDay = 60_000;
-        // Track last decay tick per pawn to avoid running every tick
-        private Dictionary<int, int> lastExposureDecayTick = new Dictionary<int, int>();
+        // Process decay in coarse intervals instead of every tick.
+        private const int ExposureDecayIntervalTicks = 250;
 
         public PathogenicsMapComponent(Map map) : base(map)
         {
@@ -80,18 +79,9 @@ namespace Dyze.RimWorld.Pathogenics
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 pawnDiseaseStates ??= new Dictionary<int, PawnDiseaseState>();
-                lastExposureDecayTick ??= new Dictionary<int, int>();
 
                 CleanStaleDiseaseStates();
             }
-
-            // Exposure decay tracking (v0.2.1)
-            Scribe_Collections.Look(
-                ref lastExposureDecayTick,
-                "lastExposureDecayTick",
-                LookMode.Value,
-                LookMode.Value
-            );
         }
 
         private void CleanStaleDiseaseStates()
@@ -189,36 +179,39 @@ namespace Dyze.RimWorld.Pathogenics
         private void ProcessExposureDecay()
         {
             int currentTick = Find.TickManager.TicksGame;
+            if (currentTick % ExposureDecayIntervalTicks != 0)
+            {
+                return;
+            }
+
+            float decayPerInterval = ExposureDecayPerDay * ExposureDecayIntervalTicks / TicksPerDay;
+            List<int> pawnIdsToClear = null;
 
             foreach (var kvp in pawnDiseaseStates)
             {
                 PawnDiseaseState state = kvp.Value;
-
-                // Only decay exposure for pawns in Exposed stage (accumulating exposure)
-                // or those who haven't started incubation yet
-                if (state.Stage != SimulatedDiseaseStage.Exposed)
+                if (state.Stage != SimulatedDiseaseStage.Exposed || state.Exposure <= 0f)
+                {
                     continue;
+                }
+
+                state.AddExposure(-decayPerInterval);
 
                 if (state.Exposure <= 0f)
-                    continue;
-
-                // Check if enough ticks have passed for decay (every ~6 ticks for performance)
-                if (!lastExposureDecayTick.TryGetValue(kvp.Key, out int lastTick) ||
-                    currentTick - lastTick < 6)
-                    continue;
-
-                // Calculate decay: 0.15 per day / (60000 ticks per day / 6 ticks per check)
-                // = 0.15 / 10000 = 0.000015 per tick
-                float decayPerTick = ExposureDecayPerDay / (TicksPerDay / 6f);
-                state.Exposure = Mathf.Max(0f, state.Exposure - decayPerTick);
-
-                lastExposureDecayTick[kvp.Key] = currentTick;
-
-                // Check if exposure threshold crossed (transition to incubating)
-                if (state.Exposure >= 1.0f)
                 {
-                    StartIncubation(state, currentTick);
+                    pawnIdsToClear ??= new List<int>();
+                    pawnIdsToClear.Add(kvp.Key);
                 }
+            }
+
+            if (pawnIdsToClear == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < pawnIdsToClear.Count; i++)
+            {
+                pawnDiseaseStates.Remove(pawnIdsToClear[i]);
             }
         }
 
