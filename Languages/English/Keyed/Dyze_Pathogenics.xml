@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
+  <PathogenicFluDetected>Pathogenic Flu Detected</PathogenicFluDetected>
+
   <Dyze_Pathogenics_SettingsCategory>Dyze's Pathogenics</Dyze_Pathogenics_SettingsCategory>
 
   <Dyze_Pathogenics_Enable_Label>Enable disease simulation</Dyze_Pathogenics_Enable_Label>

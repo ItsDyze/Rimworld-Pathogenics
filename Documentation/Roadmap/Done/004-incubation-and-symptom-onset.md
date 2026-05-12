@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done
 
 ## Goal
 
@@ -61,8 +61,8 @@ infectious end: +5 days
 
 ## Acceptance criteria
 
-- [ ] exposure threshold creates incubation
-- [ ] incubation persists across save/load
-- [ ] symptoms appear after configured time
-- [ ] visible hediff is applied at symptom onset
-- [ ] colonist symptom onset can trigger a letter/message
+- [x] exposure threshold creates incubation
+- [x] incubation persists across save/load
+- [x] symptoms appear after configured time
+- [x] visible hediff is applied at symptom onset
+- [x] colonist symptom onset can trigger a letter/message

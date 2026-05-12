@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
+using UnityEngine;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -22,10 +23,11 @@ namespace Dyze.RimWorld.Pathogenics
 
         // ===== CONFIGURATION: Disease progression timing (v0.2) =====
         // Configuration for hidden disease progression (could move to settings later)
-        private const int IncubationDurationTicks = 60000; // ~17 days at default speed
-        private const int PreSymptomaticInfectiousDurationTicks = 12000; // ~3.3 days
-        private const int SymptomaticDurationTicks = 60000; // ~17 days
-        private const int RecoveringDurationTicks = 24000; // ~6.7 days
+        // Timeline: infectious start +0.5d, symptom onset +1.5d, infectious end +5d
+        private const int PreSymptomaticInfectiousDurationTicks = 30000;  // ~0.5 days (from incubation start)
+        private const int SymptomaticDurationTicks = 60000;            // ~1.0 days (visible disease duration)
+        private const int RecoveringDurationTicks = 240000;            // ~4.0 days (recovery after symptoms end)
+        // Total: 0.5 + 1.0 + 4.0 = 5.5 days from incubation start to recovery
 
         // ===== CONFIGURATION: Exposure accumulation (v0.2.1) =====
         // Exposure decays over time so brief contact fades away unless reinforced.
@@ -170,6 +172,9 @@ namespace Dyze.RimWorld.Pathogenics
             // v0.2: The active core uses hidden disease state tracking.
             // v0.2.1: Process exposure accumulation and decay
             ProcessExposureDecay();
+
+            // v0.3: Process disease stage transitions (incubation → symptom onset → recovery)
+            ProcessStageTransitions();
         }
 
         /// <summary>
@@ -217,14 +222,188 @@ namespace Dyze.RimWorld.Pathogenics
 
         /// <summary>
         /// Transition a pawn from Exposed (accumulated exposure) to Incubating stage.
+        /// Timeline: incubating starts now → infectious at +0.5d → symptoms at +1.5d → recovery at +5d
         /// </summary>
         private void StartIncubation(PawnDiseaseState state, int currentTick)
         {
             state.Stage = SimulatedDiseaseStage.Incubating;
-            state.InfectiousStartTick = currentTick + IncubationDurationTicks;
-            state.SymptomOnsetTick = state.InfectiousStartTick + PreSymptomaticInfectiousDurationTicks;
+            // Pre-symptomatic infectious starts at +0.5 days (30000 ticks)
+            state.InfectiousStartTick = currentTick + PreSymptomaticInfectiousDurationTicks;
+            // Symptom onset at +1.5 days (30000 + 60000 = 90000 ticks)
+            state.SymptomOnsetTick = currentTick + PreSymptomaticInfectiousDurationTicks + SymptomaticDurationTicks;
 
             DyzeLog.Message($"Pawn (ID: {state.PawnId}) has accumulated enough exposure and is now incubating.");
+        }
+
+        /// <summary>
+        /// Process stage transitions based on scheduled ticks.
+        /// Called every tick to check if a pawn should advance to the next disease stage.
+        /// </summary>
+        public void ProcessStageTransitions()
+        {
+            int currentTick = Find.TickManager.TicksGame;
+            List<int> pawnIdsToRemove = null;
+            List<Pawn> pawnsToNotify = null;
+
+            foreach (var kvp in pawnDiseaseStates)
+            {
+                PawnDiseaseState state = kvp.Value;
+
+                // Skip if no active disease state
+                if (!state.HasDiseaseState())
+                {
+                    continue;
+                }
+
+                // Find the pawn
+                Pawn pawn = FindPawnById(state.PawnId);
+                if (pawn == null)
+                {
+                    continue;
+                }
+
+                // Process stage transitions based on current tick
+                switch (state.Stage)
+                {
+                    case SimulatedDiseaseStage.Incubating:
+                        // Transition to pre-symptomatic infectious when infectious start tick is reached
+                        if (state.InfectiousStartTick > 0 && currentTick >= state.InfectiousStartTick)
+                        {
+                            state.Stage = SimulatedDiseaseStage.PreSymptomaticInfectious;
+                            state.RecoveringTick = currentTick + SymptomaticDurationTicks;
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} is now pre-symptomatic infectious.");
+                        }
+                        break;
+
+                    case SimulatedDiseaseStage.PreSymptomaticInfectious:
+                        // Transition to symptomatic (apply visible hediff) when symptom onset tick is reached
+                        if (state.SymptomOnsetTick > 0 && currentTick >= state.SymptomOnsetTick)
+                        {
+                            state.Stage = SimulatedDiseaseStage.Symptomatic;
+                            ApplyVisibleHediff(pawn);
+
+                            // Track for notification if this is a colonist
+                            if (pawn.IsColonist)
+                            {
+                                pawnsToNotify ??= new List<Pawn>();
+                                pawnsToNotify.Add(pawn);
+                            }
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} has developed visible symptoms!");
+                        }
+                        break;
+
+                    case SimulatedDiseaseStage.Symptomatic:
+                        // Transition to recovering when recovering tick is reached
+                        if (state.RecoveringTick > 0 && currentTick >= state.RecoveringTick)
+                        {
+                            state.Stage = SimulatedDiseaseStage.Recovering;
+                            state.RecoveredTick = currentTick + RecoveringDurationTicks;
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} is now recovering.");
+                        }
+                        break;
+
+                    case SimulatedDiseaseStage.Recovering:
+                        // Transition to recovered when recovered tick is reached
+                        if (state.RecoveredTick > 0 && currentTick >= state.RecoveredTick)
+                        {
+                            state.Stage = SimulatedDiseaseStage.Recovered;
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} has recovered from the disease.");
+
+                            // Clean up state for recovered pawns
+                            pawnIdsToRemove ??= new List<int>();
+                            pawnIdsToRemove.Add(kvp.Key);
+                        }
+                        break;
+                }
+            }
+
+            // Send notifications for colonist symptom onset
+            if (pawnsToNotify != null)
+            {
+                foreach (Pawn pawn in pawnsToNotify)
+                {
+                    SendSymptomOnsetNotification(pawn);
+                }
+            }
+
+            // Clean up recovered pawns
+            if (pawnIdsToRemove != null)
+            {
+                foreach (int pawnId in pawnIdsToRemove)
+                {
+                    pawnDiseaseStates.Remove(pawnId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find a pawn by ID in the current map.
+        /// </summary>
+        private Pawn FindPawnById(int pawnId)
+        {
+            var pawns = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                if (pawns[i].thingIDNumber == pawnId)
+                {
+                    return pawns[i];
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Apply the visible disease hediff to a pawn.
+        /// </summary>
+        private void ApplyVisibleHediff(Pawn pawn)
+        {
+            if (pawn == null || pawn.health == null)
+            {
+                return;
+            }
+
+            // Check if pawn already has the hediff
+            Hediff existingHediff = pawn.health.hediffSet.GetHediff(DefDatabase<HediffDef>.GetNamed("DP_PathogenicFlu"));
+            if (existingHediff != null)
+            {
+                // Already has the hediff, just update severity
+                existingHediff.Severity = 0.001f;
+                return;
+            }
+
+            // Add the new hediff
+            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamed("DP_PathogenicFlu");
+            Hediff newHediff = HediffMaker.MakeHediff(hediffDef, pawn);
+            newHediff.Severity = 0.001f;
+            pawn.health.AddHediff(newHediff);
+
+            // Mark visible hediff as applied
+            PawnDiseaseState state = GetDiseaseState(pawn);
+            if (state != null)
+            {
+                state.VisibleHediffApplied = true;
+            }
+        }
+
+        /// <summary>
+        /// Send a notification letter when a colonist develops symptoms.
+        /// </summary>
+        private void SendSymptomOnsetNotification(Pawn pawn)
+        {
+            if (pawn == null || !pawn.IsColonist)
+            {
+                return;
+            }
+
+            string label = "PathogenicFluDetected";
+            string text = $"{pawn.Name.ToStringShort} has developed symptoms of the pathogenic flu!\n\n" +
+                         $"The disease has progressed from its incubation phase. " +
+                         "Ensure the colonist receives medical attention.";
+
+            LetterDef letterDef = LetterDefOf.ThreatSmall;
+            LookTargets lookTargets = new LookTargets(pawn);
+
+            Find.LetterStack.ReceiveLetter(label, text, letterDef, lookTargets);
         }
 
         /// <summary>
