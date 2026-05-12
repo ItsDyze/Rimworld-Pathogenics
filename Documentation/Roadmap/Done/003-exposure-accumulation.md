@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done (v0.2.1)
 
 ## Goal
 
@@ -52,14 +52,14 @@ Example values for testing:
 
 ```text
 threshold: 1.0
-decay per day: 0.15
+decay per day: 1.5
 ```
 
 ## Acceptance criteria
 
-- [ ] pawn can receive exposure
-- [ ] exposure decays over time
-- [ ] exposure crossing threshold starts incubation
-- [ ] debug action can add exposure
-- [ ] debug action can clear exposure
-- [ ] debug readout shows current exposure
+- [x] pawn can receive exposure
+- [x] exposure decays over time
+- [x] exposure crossing threshold starts incubation
+- [x] debug action can add exposure
+- [x] debug action can clear exposure
+- [x] debug readout shows current exposure

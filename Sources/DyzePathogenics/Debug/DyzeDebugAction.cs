@@ -47,6 +47,7 @@ namespace Dyze.RimWorld.Pathogenics
             diseaseState.SymptomOnsetTick = -1;
             diseaseState.RecoveringTick = -1;
             diseaseState.RecoveredTick = -1;
+            diseaseState.ClearExposure();
 
             Messages.Message(
                 $"{pawn.LabelShort} now has a hidden exposed state.",
@@ -178,6 +179,101 @@ namespace Dyze.RimWorld.Pathogenics
 
             Messages.Message(
                 $"Removed {pathogenicFlu.label} from {pawn.LabelShort} and cleared hidden disease state.",
+                MessageTypeDefOf.PositiveEvent,
+                false
+            );
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Add exposure (0.25) to selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void AddExposureToPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message(
+                    "No pawn selected.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message(
+                    "Could not get map component.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            mapComponent.AddExposureToPawn(pawn, 0.25f);
+
+            var state = mapComponent.GetDiseaseState(pawn);
+            float currentExposure = state?.Exposure ?? 0f;
+
+            Messages.Message(
+                $"{pawn.LabelShort} gained exposure. Current: {currentExposure:F2} / 1.00",
+                MessageTypeDefOf.PositiveEvent,
+                false
+            );
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Clear exposure for selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ClearExposureForPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message(
+                    "No pawn selected.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message(
+                    "Could not get map component.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
+            if (state == null)
+            {
+                Messages.Message(
+                    $"{pawn.LabelShort} has no exposure to clear.",
+                    MessageTypeDefOf.NeutralEvent,
+                    false
+                );
+                return;
+            }
+
+            state.ClearExposure();
+
+            if (state.Stage == SimulatedDiseaseStage.Exposed)
+            {
+                mapComponent.ClearDiseaseState(pawn);
+            }
+
+            Messages.Message(
+                $"Cleared exposure for {pawn.LabelShort}.",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
