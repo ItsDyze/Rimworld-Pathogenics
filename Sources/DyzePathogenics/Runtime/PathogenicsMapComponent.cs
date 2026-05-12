@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
-using UnityEngine;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -270,7 +269,6 @@ namespace Dyze.RimWorld.Pathogenics
                         if (state.InfectiousStartTick > 0 && currentTick >= state.InfectiousStartTick)
                         {
                             state.Stage = SimulatedDiseaseStage.PreSymptomaticInfectious;
-                            state.RecoveringTick = currentTick + SymptomaticDurationTicks;
                             DyzeLog.Message($"Pawn {pawn.LabelShort} is now pre-symptomatic infectious.");
                         }
                         break;
@@ -280,6 +278,7 @@ namespace Dyze.RimWorld.Pathogenics
                         if (state.SymptomOnsetTick > 0 && currentTick >= state.SymptomOnsetTick)
                         {
                             state.Stage = SimulatedDiseaseStage.Symptomatic;
+                            state.RecoveringTick = currentTick + SymptomaticDurationTicks;
                             ApplyVisibleHediff(pawn);
 
                             // Track for notification if this is a colonist
@@ -395,10 +394,8 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            string label = "PathogenicFluDetected";
-            string text = $"{pawn.Name.ToStringShort} has developed symptoms of the pathogenic flu!\n\n" +
-                         $"The disease has progressed from its incubation phase. " +
-                         "Ensure the colonist receives medical attention.";
+            string label = "PathogenicFluDetected".Translate();
+            string text = "PathogenicFluDetectedDesc".Translate(pawn.Named("PAWN")).ToString();
 
             LetterDef letterDef = LetterDefOf.ThreatSmall;
             LookTargets lookTargets = new LookTargets(pawn);

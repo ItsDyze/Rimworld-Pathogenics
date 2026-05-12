@@ -2,6 +2,7 @@
 <LanguageData>
 
   <PathogenicFluDetected>Grippe pathogène détectée</PathogenicFluDetected>
+  <PathogenicFluDetectedDesc>{PAWN_nameDef} a développé des symptômes de la grippe pathogène !\n\nLa maladie a progressé depuis sa phase d'incubation. Assurez-vous que ce colon reçoive des soins médicaux.</PathogenicFluDetectedDesc>
 
   <Dyze_Pathogenics_SettingsCategory>Dyze's Pathogenics</Dyze_Pathogenics_SettingsCategory>
 
