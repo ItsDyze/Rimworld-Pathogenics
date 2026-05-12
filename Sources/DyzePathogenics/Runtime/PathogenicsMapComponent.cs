@@ -28,6 +28,15 @@ namespace Dyze.RimWorld.Pathogenics
         private const int SymptomaticDurationTicks = 60000; // ~17 days
         private const int RecoveringDurationTicks = 24000; // ~6.7 days
 
+        // ===== CONFIGURATION: Exposure accumulation (v0.2.1) =====
+        // Exposure decays over time so repeated contact matters
+        // 0.15 per day = ~6.7 days to fully decay from max exposure
+        private const float ExposureDecayPerDay = 0.15f;
+        // Ticks per day at default game speed
+        private const int TicksPerDay = 60_000;
+        // Track last decay tick per pawn to avoid running every tick
+        private Dictionary<int, int> lastExposureDecayTick = new Dictionary<int, int>();
+
         public PathogenicsMapComponent(Map map) : base(map)
         {
         }
@@ -71,9 +80,18 @@ namespace Dyze.RimWorld.Pathogenics
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 pawnDiseaseStates ??= new Dictionary<int, PawnDiseaseState>();
+                lastExposureDecayTick ??= new Dictionary<int, int>();
 
                 CleanStaleDiseaseStates();
             }
+
+            // Exposure decay tracking (v0.2.1)
+            Scribe_Collections.Look(
+                ref lastExposureDecayTick,
+                "lastExposureDecayTick",
+                LookMode.Value,
+                LookMode.Value
+            );
         }
 
         private void CleanStaleDiseaseStates()
@@ -160,8 +178,89 @@ namespace Dyze.RimWorld.Pathogenics
             base.MapComponentTick();
 
             // v0.2: The active core uses hidden disease state tracking.
-            // TODO: Future v0.2 features may use this tick for proximity-based transmission calculations
-            // when the disease simulation is more fully developed.
+            // v0.2.1: Process exposure accumulation and decay
+            ProcessExposureDecay();
+        }
+
+        /// <summary>
+        /// Process exposure decay for all pawns with disease state.
+        /// Called every tick for timely decay.
+        /// </summary>
+        private void ProcessExposureDecay()
+        {
+            int currentTick = Find.TickManager.TicksGame;
+
+            foreach (var kvp in pawnDiseaseStates)
+            {
+                PawnDiseaseState state = kvp.Value;
+
+                // Only decay exposure for pawns in Exposed stage (accumulating exposure)
+                // or those who haven't started incubation yet
+                if (state.Stage != SimulatedDiseaseStage.Exposed)
+                    continue;
+
+                if (state.Exposure <= 0f)
+                    continue;
+
+                // Check if enough ticks have passed for decay (every ~6 ticks for performance)
+                if (!lastExposureDecayTick.TryGetValue(kvp.Key, out int lastTick) ||
+                    currentTick - lastTick < 6)
+                    continue;
+
+                // Calculate decay: 0.15 per day / (60000 ticks per day / 6 ticks per check)
+                // = 0.15 / 10000 = 0.000015 per tick
+                float decayPerTick = ExposureDecayPerDay / (TicksPerDay / 6f);
+                state.Exposure = Mathf.Max(0f, state.Exposure - decayPerTick);
+
+                lastExposureDecayTick[kvp.Key] = currentTick;
+
+                // Check if exposure threshold crossed (transition to incubating)
+                if (state.Exposure >= 1.0f)
+                {
+                    StartIncubation(state, currentTick);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Transition a pawn from Exposed (accumulated exposure) to Incubating stage.
+        /// </summary>
+        private void StartIncubation(PawnDiseaseState state, int currentTick)
+        {
+            state.Stage = SimulatedDiseaseStage.Incubating;
+            state.InfectiousStartTick = currentTick + IncubationDurationTicks;
+            state.SymptomOnsetTick = state.InfectiousStartTick + PreSymptomaticInfectiousDurationTicks;
+
+            DyzeLog.Message($"Pawn (ID: {state.PawnId}) has accumulated enough exposure and is now incubating.");
+        }
+
+        /// <summary>
+        /// Add exposure to a pawn's disease state.
+        /// </summary>
+        public void AddExposureToPawn(Pawn pawn, float amount)
+        {
+            if (pawn == null)
+                return;
+
+            PawnDiseaseState state = GetOrCreateDiseaseState(pawn);
+            int currentTick = Find.TickManager.TicksGame;
+
+            // Initialize exposed state if needed
+            if (state.Stage == SimulatedDiseaseStage.None || state.Stage == SimulatedDiseaseStage.Recovered)
+            {
+                state.Stage = SimulatedDiseaseStage.Exposed;
+                state.ExposedTick = currentTick;
+                state.ClearExposure();
+            }
+
+            // Add exposure
+            bool thresholdCrossed = state.AddExposure(amount);
+
+            if (thresholdCrossed)
+            {
+                // Immediate transition to incubating
+                StartIncubation(state, currentTick);
+            }
         }
     }
 }

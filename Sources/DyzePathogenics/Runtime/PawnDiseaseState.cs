@@ -36,6 +36,11 @@ namespace Dyze.RimWorld.Pathogenics
         // Track which map this state belongs to (for cleanup)
         public int MapId = -1;
 
+        // ===== EXPOSURE ACCUMULATION (v0.2.1) =====
+        // Exposure accumulates from transmission events (0.0 to 1.0)
+        // When exposure >= threshold, incubation begins
+        public float Exposure = 0f;
+
         public PawnDiseaseState()
         {
         }
@@ -56,6 +61,9 @@ namespace Dyze.RimWorld.Pathogenics
             Scribe_Values.Look(ref RecoveringTick, "recoveringTick", -1);
             Scribe_Values.Look(ref RecoveredTick, "recoveredTick", -1);
             Scribe_Values.Look(ref MapId, "mapId", -1);
+
+            // Exposure accumulation (v0.2.1)
+            Scribe_Values.Look(ref Exposure, "exposure", 0f);
         }
 
         public bool HasDiseaseState()
@@ -76,6 +84,25 @@ namespace Dyze.RimWorld.Pathogenics
             SymptomOnsetTick = -1;
             RecoveringTick = -1;
             RecoveredTick = -1;
+            Exposure = 0f;
+        }
+
+        /// <summary>
+        /// Add exposure amount to this pawn's disease state.
+        /// Returns true if exposure threshold was crossed (incubation begins).
+        /// </summary>
+        public bool AddExposure(float amount)
+        {
+            Exposure = Mathf.Clamp01(Exposure + amount);
+            return Exposure >= 1.0f;
+        }
+
+        /// <summary>
+        /// Clear exposure accumulation for this pawn.
+        /// </summary>
+        public void ClearExposure()
+        {
+            Exposure = 0f;
         }
 
         public string GetStageLabel()
@@ -104,6 +131,9 @@ namespace Dyze.RimWorld.Pathogenics
             sb.AppendLine($"Symptom onset: {(SymptomOnsetTick > 0 ? SymptomOnsetTick.ToString() : "N/A")}");
             sb.AppendLine($"Recovering: {(RecoveringTick > 0 ? RecoveringTick.ToString() : "N/A")}");
             sb.AppendLine($"Recovered: {(RecoveredTick > 0 ? RecoveredTick.ToString() : "N/A")}");
+
+            // Exposure accumulation (v0.2.1)
+            sb.AppendLine($"Exposure: {Exposure:F2} / 1.00");
 
             int currentTick = Find.TickManager.TicksGame;
             if (ExposedTick > 0 && currentTick > ExposedTick)

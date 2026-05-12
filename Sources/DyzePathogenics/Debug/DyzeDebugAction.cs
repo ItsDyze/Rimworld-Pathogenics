@@ -185,6 +185,89 @@ namespace Dyze.RimWorld.Pathogenics
 
         [DebugAction(
             "Dyze Pathogenics",
+            "Add exposure (0.25) to selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void AddExposureToPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message(
+                    "No pawn selected.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message(
+                    "Could not get map component.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            mapComponent.AddExposureToPawn(pawn, 0.25f);
+
+            var state = mapComponent.GetDiseaseState(pawn);
+            float currentExposure = state?.Exposure ?? 0f;
+
+            Messages.Message(
+                $"{pawn.LabelShort} gained exposure. Current: {currentExposure:F2} / 1.00",
+                MessageTypeDefOf.PositiveEvent,
+                false
+            );
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Clear exposure for selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ClearExposureForPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message(
+                    "No pawn selected.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message(
+                    "Could not get map component.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
+            if (state != null)
+            {
+                state.ClearExposure();
+            }
+
+            Messages.Message(
+                $"Cleared exposure for {pawn.LabelShort}.",
+                MessageTypeDefOf.PositiveEvent,
+                false
+            );
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
             "Clear hidden disease state for selected pawn",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
