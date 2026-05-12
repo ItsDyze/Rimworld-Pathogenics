@@ -93,7 +93,17 @@ namespace Dyze.RimWorld.Pathogenics
         /// </summary>
         public bool AddExposure(float amount)
         {
-            Exposure = Mathf.Clamp01(Exposure + amount);
+            Exposure += amount;
+
+            if (Exposure < 0f)
+            {
+                Exposure = 0f;
+            }
+            else if (Exposure > 1.0f)
+            {
+                Exposure = 1.0f;
+            }
+
             return Exposure >= 1.0f;
         }
 
