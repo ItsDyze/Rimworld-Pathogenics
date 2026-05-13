@@ -67,7 +67,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return;
 
             // Get all spawned pawns
-            List<Pawn> allPawns = map.mapPawns.AllPawnsSpawned;
+            var allPawns = map.mapPawns.AllPawnsSpawned;
             if (allPawns.Count == 0)
                 return;
 
@@ -109,7 +109,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         private static void ProcessSourcePawn(Pawn sourcePawn, float sourceInfectiousness, 
             PathogenicsMapComponent mapComponent, int currentTick)
         {
-            List<Pawn> allPawns = sourcePawn.Map.mapPawns.AllPawnsSpawned;
+            var allPawns = sourcePawn.Map.mapPawns.AllPawnsSpawned;
             IntVec3 sourcePos = sourcePawn.Position;
 
             for (int i = 0; i < allPawns.Count; i++)
@@ -192,7 +192,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
             // Calculate distance factor (inverse square falloff)
             float distanceFactor = 1f - (distance / MaxTransmissionRadius);
-            distanceFactor = MathF.Pow(Math.Max(0f, distanceFactor), DistanceFalloffPower);
+            distanceFactor = (float)Math.Pow(Math.Max(0f, distanceFactor), DistanceFalloffPower);
 
             // Final exposure formula:
             // exposure = baseExposure × sourceInfectiousness × distanceFactor × roomFactor
@@ -208,8 +208,8 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         private static float GetRoomFactor(Pawn source, Pawn target)
         {
             // Check if they're outdoors
-            bool sourceOutdoor = source.Position.GetZone(source.Map) == ZoneManager.ZoneType.Outdoor;
-            bool targetOutdoor = target.Position.GetZone(target.Map) == ZoneManager.ZoneType.Outdoor;
+            bool sourceOutdoor = IsOutdoors(source);
+            bool targetOutdoor = IsOutdoors(target);
 
             // If either is outdoors, use outdoor factor
             if (sourceOutdoor || targetOutdoor)
@@ -250,8 +250,8 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         /// </summary>
         private static string GetRoomStatus(Pawn source, Pawn target)
         {
-            bool sourceOutdoor = source.Position.GetZone(source.Map) == ZoneManager.ZoneType.Outdoor;
-            bool targetOutdoor = target.Position.GetZone(target.Map) == ZoneManager.ZoneType.Outdoor;
+            bool sourceOutdoor = IsOutdoors(source);
+            bool targetOutdoor = IsOutdoors(target);
 
             if (sourceOutdoor || targetOutdoor)
             {
@@ -270,6 +270,14 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return "same-room";
             
             return "different-rooms-blocked";
+        }
+
+        private static bool IsOutdoors(Pawn pawn)
+        {
+            if (pawn == null || pawn.Map == null)
+                return false;
+
+            return !pawn.Position.Roofed(pawn.Map);
         }
     }
 }
