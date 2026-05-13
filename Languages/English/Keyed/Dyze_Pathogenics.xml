@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
+  <PathogenicFluDetected>Pathogenic Flu Detected</PathogenicFluDetected>
+  <PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the pathogenic flu!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</PathogenicFluDetectedDesc>
+
   <Dyze_Pathogenics_SettingsCategory>Dyze's Pathogenics</Dyze_Pathogenics_SettingsCategory>
 
   <Dyze_Pathogenics_Enable_Label>Enable disease simulation</Dyze_Pathogenics_Enable_Label>

@@ -36,6 +36,9 @@ namespace Dyze.RimWorld.Pathogenics
         // Track which map this state belongs to (for cleanup)
         public int MapId = -1;
 
+        // Track whether the visible hediff has been applied
+        public bool VisibleHediffApplied = false;
+
         // ===== EXPOSURE ACCUMULATION (v0.2.1) =====
         // Exposure accumulates from transmission events (0.0 to 1.0)
         // When exposure >= threshold, incubation begins
@@ -61,6 +64,9 @@ namespace Dyze.RimWorld.Pathogenics
             Scribe_Values.Look(ref RecoveringTick, "recoveringTick", -1);
             Scribe_Values.Look(ref RecoveredTick, "recoveredTick", -1);
             Scribe_Values.Look(ref MapId, "mapId", -1);
+
+            // Visible hediff tracking
+            Scribe_Values.Look(ref VisibleHediffApplied, "visibleHediffApplied", false);
 
             // Exposure accumulation (v0.2.1)
             Scribe_Values.Look(ref Exposure, "exposure", 0f);
