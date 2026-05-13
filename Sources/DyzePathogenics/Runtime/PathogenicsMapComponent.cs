@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Simulation;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -171,6 +172,9 @@ namespace Dyze.RimWorld.Pathogenics
             // v0.2: The active core uses hidden disease state tracking.
             // v0.2.1: Process exposure accumulation and decay
             ProcessExposureDecay();
+
+            // v0.2.1: Process respiratory proximity transmission
+            RespiratoryTransmissionWorker.ProcessTransmission(map);
 
             // v0.3: Process disease stage transitions (incubation → symptom onset → recovery)
             ProcessStageTransitions();
