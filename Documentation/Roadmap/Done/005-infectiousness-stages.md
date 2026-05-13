@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done (v0.2.2)
 
 ## Goal
 
@@ -56,8 +56,8 @@ The simulation should never treat all infected pawns as equally contagious.
 
 ## Acceptance criteria
 
-- [ ] infectiousness is zero before infectious start
-- [ ] pre-symptomatic pawns can be infectious
-- [ ] symptomatic pawns are highly infectious
-- [ ] recovering pawns have reduced infectiousness
-- [ ] recovered pawns are not infectious
+- [x] infectiousness is zero before infectious start
+- [x] pre-symptomatic pawns can be infectious
+- [x] symptomatic pawns are highly infectious
+- [x] recovering pawns have reduced infectiousness
+- [x] recovered pawns are not infectious

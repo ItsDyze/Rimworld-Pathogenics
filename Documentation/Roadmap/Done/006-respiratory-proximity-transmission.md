@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done (v0.2.2)
 
 ## Goal
 
@@ -87,9 +87,9 @@ Do not create visible zone objects. The zone can be calculated invisibly.
 
 ## Acceptance criteria
 
-- [ ] infectious pawn exposes nearby valid pawns
-- [ ] different rooms block exposure
-- [ ] outdoor exposure is reduced
-- [ ] distance reduces exposure
-- [ ] exposure can lead to incubation
-- [ ] debug logging can show exposure events
+- [x] infectious pawn exposes nearby valid pawns
+- [x] different rooms block exposure
+- [x] outdoor exposure is reduced
+- [x] distance reduces exposure
+- [x] exposure can lead to incubation
+- [x] debug logging can show exposure events

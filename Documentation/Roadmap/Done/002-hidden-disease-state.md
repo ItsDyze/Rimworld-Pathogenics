@@ -70,7 +70,7 @@ Excluded:
 
 For v0.2, the system is specific to DP_PathogenicFlu (the standalone respiratory disease).
 
-The hidden state is kept minimal to avoid over-generalizing. Future features (incubation, exposure accumulation) will extend this foundation.
+The hidden state is kept minimal to avoid over-generalizing. Incubation and exposure accumulation (Features 003, 004) extend this foundation.
 
 Debug actions added:
 - "Expose selected pawn (hidden infection)" - simulate hidden exposure

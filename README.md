@@ -4,19 +4,21 @@ A RimWorld mod focused on disease simulation instead of random one-off illness e
 
 ## Current slice
 
-The current v0.2 slice adds the foundation for a standalone respiratory disease.
+The v0.2.x series adds the foundation for a standalone respiratory disease with proximity transmission.
 
-Included in this slice:
-- hidden disease state before symptoms appear
-- a visible standalone disease for testing
-- debug actions to expose a pawn, inspect state, clear state, and force symptom onset
+### Included features:
+- Hidden disease state before symptoms appear
+- Visible standalone disease for testing
+- Debug actions to expose pawns, inspect/clear state, force symptom onset
+- **v0.2.2**: Respiratory proximity transmission with room-based factors
+- **v0.2.2**: Exposure accumulation and decay system
+- **v0.2.2**: Debug tools for fast transmission testing (10x multiplier, pulse action)
 
-Not included yet:
-- proximity transmission
-- exposure accumulation
-- richer player feedback
-- quarantine tools
-- additional disease types
+### Not included yet:
+- Quarantine tools
+- Additional disease types
+- Player feedback / UI notifications
+- Richer disease progression variants
 
 ## Requirements
 
@@ -26,4 +28,4 @@ Not included yet:
 ## Notes
 
 This mod is still in active development.
-The current goal is to make one disease simulation loop work cleanly before expanding into transmission, balance, and better feedback.
+The current goal is to make one disease simulation loop work cleanly before expanding into balance, feedback, and additional features.

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Simulation;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -30,8 +31,9 @@ namespace Dyze.RimWorld.Pathogenics
 
         // ===== CONFIGURATION: Exposure accumulation (v0.2.1) =====
         // Exposure decays over time so brief contact fades away unless reinforced.
-        // 1.5 per day = one 0.25 debug-step fades in about 4 in-game hours.
-        private const float ExposureDecayPerDay = 1.5f;
+        // v0.2.2: Reduced from 1.5 to 0.5 per day for more forgiving gameplay.
+        // 0.5 per day = one 0.25 debug-step fades in about 12 in-game hours.
+        private const float ExposureDecayPerDay = 0.5f;
         // Ticks per day at default game speed
         private const int TicksPerDay = 60_000;
         // Process decay in coarse intervals instead of every tick.
@@ -171,6 +173,9 @@ namespace Dyze.RimWorld.Pathogenics
             // v0.2: The active core uses hidden disease state tracking.
             // v0.2.1: Process exposure accumulation and decay
             ProcessExposureDecay();
+
+            // v0.2.1: Process respiratory proximity transmission
+            RespiratoryTransmissionWorker.ProcessTransmission(map);
 
             // v0.3: Process disease stage transitions (incubation → symptom onset → recovery)
             ProcessStageTransitions();

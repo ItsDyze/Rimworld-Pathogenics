@@ -2,6 +2,7 @@ using System.Linq;
 using LudeonTK;
 using RimWorld;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Simulation;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -351,6 +352,112 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             DyzeLog.DevAction(diseaseState.GetDebugInfo(pawn));
+        }
+
+        /// <summary>
+        /// v0.2.2: Toggle fast transmission mode (10x) for accelerated testing.
+        /// </summary>
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Toggle Fast Transmission (10x)",
+            actionType = DebugActionType.Action,
+            allowedGameStates = AllowedGameStates.Playing
+        )]
+        public static void ToggleFastTransmission()
+        {
+            bool newValue = RespiratoryTransmissionWorker.DebugTransmissionMultiplier != 10f;
+            RespiratoryTransmissionWorker.DebugTransmissionMultiplier = newValue ? 10f : 1f;
+
+            Messages.Message(
+                $"Fast transmission {(newValue ? "ENABLED" : "DISABLED")} (10x multiplier)",
+                newValue ? MessageTypeDefOf.PositiveEvent : MessageTypeDefOf.NeutralEvent,
+                false
+            );
+        }
+
+        /// <summary>
+        /// v0.2.2: Force a transmission pulse from selected pawn to all nearby targets.
+        /// Useful for testing spread without waiting for natural accumulation.
+        /// </summary>
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Force transmission pulse",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ForceTransmissionPulse(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message(
+                    "No pawn selected.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message(
+                    "Could not get map component.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            // Check if pawn is infectious
+            float infectiousness = InfectiousnessUtility.GetInfectiousness(pawn);
+            if (infectiousness <= 0f)
+            {
+                Messages.Message(
+                    $"{pawn.LabelShort} is not infectious (no disease state or not contagious yet).",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            // Force transmission pulse with high exposure
+            const float PulseExposureAmount = 0.5f;
+            int targetsHit = 0;
+
+            var allPawns = pawn.Map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < allPawns.Count; i++)
+            {
+                Pawn target = allPawns[i];
+                if (target == null || target == pawn || !target.Spawned || target.Dead)
+                    continue;
+
+                if (!target.RaceProps.Humanlike)
+                    continue;
+
+                // Check distance - use the max radius
+                float distance = pawn.Position.DistanceTo(target.Position);
+                if (distance > RespiratoryTransmissionWorker.MaxTransmissionRadius || distance < 0.1f)
+                    continue;
+
+                // Check if target is valid (not already symptomatic)
+                PathogenicsMapComponent targetMapComponent = target.Map?.GetComponent<PathogenicsMapComponent>();
+                if (targetMapComponent != null)
+                {
+                    PawnDiseaseState targetState = targetMapComponent.GetDiseaseState(target);
+                    if (targetState != null && targetState.Stage >= SimulatedDiseaseStage.Symptomatic)
+                        continue;
+                }
+
+                // Apply exposure
+                mapComponent.AddExposureToPawn(target, PulseExposureAmount);
+                targetsHit++;
+            }
+
+            Messages.Message(
+                $"Transmission pulse from {pawn.LabelShort}: hit {targetsHit} targets (+{PulseExposureAmount:F2} exposure each)",
+                MessageTypeDefOf.PositiveEvent,
+                false
+            );
         }
 
         [DebugAction(
