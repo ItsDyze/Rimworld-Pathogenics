@@ -17,6 +17,9 @@ Sources/DyzePathogenics/
 ├─ Runtime/
 │   ├─ PathogenicsMapComponent.cs
 │   └─ PawnDiseaseState.cs
+├─ Simulation/
+│   ├─ InfectiousnessUtility.cs
+│   └─ RespiratoryTransmissionWorker.cs
 ├─ Settings/
 │   └─ DyzePathogenicsSettings.cs
 ├─ Debug/
@@ -35,7 +38,7 @@ Responsibilities:
 - store pawn disease states in `pawnDiseaseStates` dictionary
 - provide get/create methods for disease state
 - handle save/load via Scribe
-- (progression logic reserved for future features)
+- run respiratory transmission worker periodically
 
 #### Disease state
 
@@ -56,8 +59,12 @@ Actions:
 - "Expose selected pawn (hidden infection)" - apply hidden disease state
 - "Apply pathogenic flu to selected pawn" - apply visible HediffDef and sync hidden state
 - "Remove pathogenic flu from selected pawn" - remove HediffDef and clear hidden state
+- "Add exposure (0.25) to selected pawn" - manually add exposure for testing
+- "Clear exposure for selected pawn" - clear exposure for one pawn
 - "Clear hidden disease state for selected pawn" - clear only hidden state
 - "Log disease state for selected pawn" - show current stage and timing
+- "Toggle Fast Transmission (10x)" - debug multiplier for accelerated testing
+- "Force transmission pulse" - force exposure to all nearby pawns
 - "Log mod status" - show settings
 
 ### Key design: Separate visible and hidden state

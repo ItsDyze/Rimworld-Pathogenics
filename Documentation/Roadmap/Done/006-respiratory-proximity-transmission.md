@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress (Feature 5 branch)
+Done (v0.2.2)
 
 ## Goal
 
