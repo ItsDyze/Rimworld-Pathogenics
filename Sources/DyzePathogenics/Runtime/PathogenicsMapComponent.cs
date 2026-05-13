@@ -362,7 +362,8 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             // Check if pawn already has the hediff
-            Hediff existingHediff = pawn.health.hediffSet.GetHediff(DefDatabase<HediffDef>.GetNamed("DP_PathogenicFlu"));
+            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamed("DP_PathogenicFlu");
+            Hediff existingHediff = pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef);
             if (existingHediff != null)
             {
                 // Already has the hediff, just update severity
@@ -371,7 +372,6 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             // Add the new hediff
-            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamed("DP_PathogenicFlu");
             Hediff newHediff = HediffMaker.MakeHediff(hediffDef, pawn);
             newHediff.Severity = 0.001f;
             pawn.health.AddHediff(newHediff);
