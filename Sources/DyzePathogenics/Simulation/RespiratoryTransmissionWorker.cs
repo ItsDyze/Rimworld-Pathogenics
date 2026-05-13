@@ -23,14 +23,16 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         
         /// <summary>
         /// Maximum distance for proximity transmission in tiles.
+        /// v0.2.2: Increased from 5 to 15 for more colony-realistic spread.
         /// </summary>
-        public const float MaxTransmissionRadius = 5f;
+        public const float MaxTransmissionRadius = 15f;
         
         /// <summary>
         /// Base exposure added per transmission tick when at optimal distance/same room.
-        /// 0.01 means ~1% exposure per tick, so ~100 ticks (about 17 seconds) to full exposure.
+        /// v0.2.2: Increased from 0.008 to 0.020 for realistic gameplay pacing.
+        /// 0.020 × infectiousness × distanceFactor × roomFactor per 250-tick interval.
         /// </summary>
-        public const float BaseExposurePerTick = 0.008f;
+        public const float BaseExposurePerTick = 0.020f;
         
         /// <summary>
         /// Exposure multipliers by room condition.
@@ -38,6 +40,12 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         public const float SameRoomIndoorFactor = 1.0f;
         public const float OutdoorFactor = 0.25f;
         public const float DifferentRoomFactor = 0.0f;
+        
+        /// <summary>
+        /// Debug/test multiplier for accelerated transmission testing.
+        /// v0.2.2: Set to 10x for fast testing, 1x for normal gameplay.
+        /// </summary>
+        public static float DebugTransmissionMultiplier = 1f;
         
         /// <summary>
         /// Distance falloff parameters - exposure drops with distance squared.
@@ -195,8 +203,8 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             distanceFactor = (float)Math.Pow(Math.Max(0f, distanceFactor), DistanceFalloffPower);
 
             // Final exposure formula:
-            // exposure = baseExposure × sourceInfectiousness × distanceFactor × roomFactor
-            float exposure = BaseExposurePerTick * sourceInfectiousness * distanceFactor * roomFactor;
+            // exposure = baseExposure × sourceInfectiousness × distanceFactor × roomFactor × debugMultiplier
+            float exposure = BaseExposurePerTick * sourceInfectiousness * distanceFactor * roomFactor * DebugTransmissionMultiplier;
 
             return exposure;
         }
