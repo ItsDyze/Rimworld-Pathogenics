@@ -154,17 +154,19 @@ namespace Dyze.RimWorld.Pathogenics
         }
 
         /// <summary>
-        /// Get active disease states for currently spawned, alive pawns on this map.
+        /// Get active disease states relevant to the player: alive spawned pawns on this map,
+        /// plus alive player pawns currently traveling in caravans.
         /// </summary>
         public List<KeyValuePair<Pawn, PawnDiseaseState>> GetActiveDiseaseStates()
         {
             List<KeyValuePair<Pawn, PawnDiseaseState>> activeStates = new List<KeyValuePair<Pawn, PawnDiseaseState>>();
+            HashSet<int> addedPawnIds = new HashSet<int>();
 
             var pawns = map.mapPawns.AllPawnsSpawned;
             for (int i = 0; i < pawns.Count; i++)
             {
                 Pawn pawn = pawns[i];
-                if (pawn == null || !pawn.Spawned || pawn.Dead)
+                if (!IsRelevantDebugPawn(pawn))
                     continue;
 
                 if (!pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state))
@@ -174,9 +176,41 @@ namespace Dyze.RimWorld.Pathogenics
                     continue;
 
                 activeStates.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+                addedPawnIds.Add(pawn.thingIDNumber);
+            }
+
+            List<Pawn> caravanPawns = PawnsFinder.AllCaravansAndTravelingTransportPods_Alive_Colonists;
+            for (int i = 0; i < caravanPawns.Count; i++)
+            {
+                Pawn pawn = caravanPawns[i];
+                if (!IsRelevantDebugPawn(pawn))
+                    continue;
+
+                if (addedPawnIds.Contains(pawn.thingIDNumber))
+                    continue;
+
+                if (!pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state))
+                    continue;
+
+                if (state == null || !state.HasDiseaseState())
+                    continue;
+
+                activeStates.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+                addedPawnIds.Add(pawn.thingIDNumber);
             }
 
             return activeStates;
+        }
+
+        private static bool IsRelevantDebugPawn(Pawn pawn)
+        {
+            if (pawn == null || pawn.Dead)
+                return false;
+
+            if (pawn.Spawned)
+                return true;
+
+            return pawn.IsColonist && pawn.GetCaravan() != null;
         }
 
         /// <summary>
