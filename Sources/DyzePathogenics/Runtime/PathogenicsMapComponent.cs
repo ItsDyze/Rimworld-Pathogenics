@@ -154,18 +154,19 @@ namespace Dyze.RimWorld.Pathogenics
         }
 
         /// <summary>
-        /// Get active disease states for alive spawned pawns on this map.
-        /// This intentionally excludes stale/off-map/dead pawns.
+        /// Get active disease states relevant to gameplay: alive spawned pawns on this map,
+        /// plus alive player caravan colonists when available from the current RimWorld API surface.
         /// </summary>
         public List<KeyValuePair<Pawn, PawnDiseaseState>> GetActiveDiseaseStates()
         {
             List<KeyValuePair<Pawn, PawnDiseaseState>> activeStates = new List<KeyValuePair<Pawn, PawnDiseaseState>>();
+            HashSet<int> addedPawnIds = new HashSet<int>();
 
             var pawns = map.mapPawns.AllPawnsSpawned;
             for (int i = 0; i < pawns.Count; i++)
             {
                 Pawn pawn = pawns[i];
-                if (pawn == null || !pawn.Spawned || pawn.Dead)
+                if (!IsAliveRelevantMapPawn(pawn))
                     continue;
 
                 if (!pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state))
@@ -175,9 +176,74 @@ namespace Dyze.RimWorld.Pathogenics
                     continue;
 
                 activeStates.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+                addedPawnIds.Add(pawn.thingIDNumber);
+            }
+
+            foreach (Pawn pawn in GetAliveCaravanColonists())
+            {
+                if (pawn == null || pawn.Dead || !pawn.IsColonist)
+                    continue;
+
+                if (addedPawnIds.Contains(pawn.thingIDNumber))
+                    continue;
+
+                if (!pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state))
+                    continue;
+
+                if (state == null || !state.HasDiseaseState())
+                    continue;
+
+                activeStates.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+                addedPawnIds.Add(pawn.thingIDNumber);
             }
 
             return activeStates;
+        }
+
+        private static bool IsAliveRelevantMapPawn(Pawn pawn)
+        {
+            return pawn != null && pawn.Spawned && !pawn.Dead;
+        }
+
+        private static IEnumerable<Pawn> GetAliveCaravanColonists()
+        {
+            Type pawnsFinderType = typeof(PawnsFinder);
+            string[] memberNames =
+            {
+                "AllMapsCaravansAndTravelingTransportPods_Alive_Colonists",
+                "AllCaravansAndTravelingTransportPods_Alive_Colonists",
+                "AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists",
+                "AllCaravansAndTravelingTransportPods_Alive_FreeColonists",
+                "AllMapsCaravansAndTravelingTransportPods_Alive",
+                "AllCaravansAndTravelingTransportPods_Alive"
+            };
+
+            for (int i = 0; i < memberNames.Length; i++)
+            {
+                string memberName = memberNames[i];
+
+                var property = pawnsFinderType.GetProperty(memberName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (property != null)
+                {
+                    if (property.GetValue(null, null) is IEnumerable<Pawn> pawns)
+                        return pawns;
+
+                    if (property.GetValue(null, null) is IEnumerable<object> pawnObjects)
+                        return pawnObjects.OfType<Pawn>();
+                }
+
+                var method = pawnsFinderType.GetMethod(memberName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, Type.EmptyTypes, null);
+                if (method != null)
+                {
+                    if (method.Invoke(null, null) is IEnumerable<Pawn> pawns)
+                        return pawns;
+
+                    if (method.Invoke(null, null) is IEnumerable<object> pawnObjects)
+                        return pawnObjects.OfType<Pawn>();
+                }
+            }
+
+            return Enumerable.Empty<Pawn>();
         }
 
         /// <summary>
