@@ -620,13 +620,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            string label = "PathogenicFluDetected".Translate();
-            string text = "PathogenicFluDetectedDesc".Translate(pawn.Named("PAWN")).ToString();
-
-            LetterDef letterDef = LetterDefOf.ThreatSmall;
-            LookTargets lookTargets = new LookTargets(pawn);
-
-            Find.LetterStack.ReceiveLetter(label, text, letterDef, lookTargets);
+            DiseaseLetterUtility.SendSymptomOnsetLetter(pawn);
         }
 
         /// <summary>

@@ -5,19 +5,20 @@
   <author>Dyze</author>
   <description>Dyze's Pathogenics is a RimWorld mod focused on disease simulation instead of random one-off illness events.
 
-The current v0.2 slice adds the foundation for a standalone respiratory disease.
+The current v0.3 slice adds a complete standalone respiratory disease loop with hidden progression, outsider importation, player feedback, and balancing controls.
 
 Included in this slice:
 - Hidden disease state before symptoms appear
-- Visible standalone disease for testing
-- Debug actions to expose a pawn, inspect state, clear state, and force symptom onset
-- Proximity-based respiratory transmission
-- Exposure accumulation with decay
+- Visible symptomatic disease for player feedback and testing
+- Proximity-based respiratory transmission with configurable spread multiplier
+- Outsider importation from visitors, traders, raiders, refugees, prisoners, and quest pawns
+- Symptom-onset notifications and debug readout tools
+- Settings for simulation toggles and balancing
 
 Not included yet:
 - Quarantine tools
 - Additional disease types
-- Richer player feedback</description>
+- World map spread</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

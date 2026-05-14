@@ -52,7 +52,7 @@ The current goal is to make one disease simulation loop work cleanly before expa
 ### Outsider Importation
 - Disease can now enter the colony through outsiders (visitors, traders, raiders, refugees, prisoners, quest pawns)
 - Configurable import chance (default 15%)
-- Disease state distribution: 70% incubating, 25% pre-symptomatic infectious, 5% symptomatic
+- Imported outsider states can start as incubating, pre-symptomatic infectious, or symptomatic
 - Can be enabled/disabled in settings
 
 ### Player Feedback
@@ -65,5 +65,10 @@ The current goal is to make one disease simulation loop work cleanly before expa
 - Outsider importation can be toggled on/off
 - Respiratory spread can be toggled on/off
 - Import chance slider (1% - 50%)
-- Exposure gain multiplier slider (0.1x - 5.0x)
+- Exposure gain multiplier slider (0.1x - 5.0x, default 3.0x)
 - Debug readout visibility toggle
+
+### Persistence / Travel Notes
+- Hidden disease state is preserved across save/load
+- Colonist disease state is preserved across off-map travel and caravan transitions
+- Debug readout currently focuses on the active map view; off-map continuity is enforced at the simulation/state level
