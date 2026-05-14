@@ -11,7 +11,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
     /// 
     /// Heuristic: A pawn is considered "wearing a mask" if worn apparel looks like
     /// respiratory protection by one of these compile-safe signals:
-    /// - it covers the FullHead or Jaw body part groups
+    /// - it covers the FullHead, Jaw, or Mouth body part groups
     /// - it uses the FaceCover apparel layer
     /// - it provides ToxicEnvironmentResistance
     /// 
@@ -21,6 +21,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
     public static class MaskUtility
     {
         private static BodyPartGroupDef JawBodyPartGroupDef => DefDatabase<BodyPartGroupDef>.GetNamedSilentFail("Jaw");
+        private static BodyPartGroupDef MouthBodyPartGroupDef => DefDatabase<BodyPartGroupDef>.GetNamedSilentFail("Mouth");
         private static ApparelLayerDef FaceCoverApparelLayerDef => DefDatabase<ApparelLayerDef>.GetNamedSilentFail("FaceCover");
         private static StatDef ToxicEnvironmentResistanceStatDef => DefDatabase<StatDef>.GetNamedSilentFail("ToxicEnvironmentResistance");
 
@@ -97,10 +98,12 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return false;
 
             BodyPartGroupDef jawGroup = JawBodyPartGroupDef;
+            BodyPartGroupDef mouthGroup = MouthBodyPartGroupDef;
             foreach (BodyPartGroupDef bodyPartGroup in apparelDef.apparel.bodyPartGroups)
             {
                 if (bodyPartGroup == BodyPartGroupDefOf.FullHead ||
-                    (jawGroup != null && bodyPartGroup == jawGroup))
+                    (jawGroup != null && bodyPartGroup == jawGroup) ||
+                    (mouthGroup != null && bodyPartGroup == mouthGroup))
                 {
                     return true;
                 }
@@ -180,13 +183,16 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             {
                 var maskedApparel = new System.Collections.Generic.List<string>();
                 BodyPartGroupDef jawGroup = JawBodyPartGroupDef;
+                BodyPartGroupDef mouthGroup = MouthBodyPartGroupDef;
                 foreach (Apparel apparel in pawn.apparel.WornApparel)
                 {
                     if (apparel?.def?.apparel != null)
                     {
                         foreach (var bpg in apparel.def.apparel.bodyPartGroups)
                         {
-                            if (bpg == BodyPartGroupDefOf.FullHead || (jawGroup != null && bpg == jawGroup))
+                            if (bpg == BodyPartGroupDefOf.FullHead ||
+                                (jawGroup != null && bpg == jawGroup) ||
+                                (mouthGroup != null && bpg == mouthGroup))
                             {
                                 maskedApparel.Add(apparel.LabelShort);
                                 break;

@@ -52,7 +52,7 @@ The current goal is to make one disease simulation loop work cleanly before expa
 
 ### Mask Protection (v0.3.1)
 - **Masks reduce disease exposure** during respiratory transmission
-- Detection heuristic: pawns wearing apparel that covers Jaw/FullHead, uses the FaceCover layer, or provides ToxicEnvironmentResistance are considered "masked"
+- Detection heuristic: pawns wearing apparel that covers Mouth/Jaw/FullHead, uses the FaceCover layer, or provides ToxicEnvironmentResistance are considered "masked"
 - This includes cloth/dust masks, advanced dust masks, gas masks, full face helmets, and similar items
 - **Transmission reduction:**
   - Both source AND target masked: **0% exposure** (completely blocked)
