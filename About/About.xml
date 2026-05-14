@@ -3,22 +3,19 @@
   <packageId>dyze.pathogenics</packageId>
   <name>Dyze's Pathogenics</name>
   <author>Dyze</author>
-  <description>Dyze's Pathogenics is a RimWorld mod focused on disease simulation instead of random one-off illness events.
+  <description>Dyze's Pathogenics replaces random illness events with a realistic disease simulation.
 
-The current v0.3 slice adds a complete standalone respiratory disease loop with hidden progression, outsider importation, player feedback, and balancing controls.
+Disease enters your colony through visitors, traders, raiders, and refugees — then spreads through proximity exposure. The catch: symptoms don't appear immediately. Infected colonists can spread illness before you even know they're sick.
 
-Included in this slice:
-- Hidden disease state before symptoms appear
-- Visible symptomatic disease for player feedback and testing
-- Proximity-based respiratory transmission with configurable spread multiplier
-- Outsider importation from visitors, traders, raiders, refugees, prisoners, and quest pawns
-- Symptom-onset notifications and debug readout tools
-- Settings for simulation toggles and balancing
+Features:
+- Proximity-based respiratory transmission
+- Hidden incubation period before symptoms appear
+- Outsider importation (visitors, traders, raiders, refugees, prisoners, quest pawns)
+- Mask protection from face-covering apparel
+- Symptom notifications and debug overlay
+- Configurable balancing settings
 
-Not included yet:
-- Quarantine tools
-- Additional disease types
-- World map spread</description>
+v0.3.1 — Active development. Requires RimWorld 1.6 and Harmony.</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

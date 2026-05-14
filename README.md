@@ -1,89 +1,89 @@
 # Dyze's Pathogenics
 
-A RimWorld mod focused on disease simulation instead of random one-off illness events.
+A RimWorld mod that replaces random illness events with a realistic disease simulation loop.
 
-## Current slice
+## What It Is
 
-The v0.3.x series adds complete disease simulation with outsider importation, player feedback, and configurable balancing.
+Pathogenics implements a standalone respiratory disease that enters your colony through outsiders, spreads via proximity exposure, and progresses through distinct stages before becoming visible to players.
 
-### Included features:
-- Hidden disease state before symptoms appear
-- Visible standalone disease for testing
-- **v0.2.1**: Exposure accumulation and decay system
-- **v0.2.2**: Respiratory proximity transmission with room-based factors
-- **v0.2.2**: Debug tools for fast transmission testing (10x multiplier, pulse action)
-- **v0.3.0**: Outsider importation (disease enters via visitors, traders, raiders, etc.)
-- **v0.3.0**: Player feedback - symptom onset notifications with transmission warnings
-- **v0.3.0**: Debug readout overlay showing all pawns with disease state
-- **v0.3.0**: Expanded settings for balancing (import chance, exposure multiplier)
-- **v0.3.1**: Mask protection - face-covering apparel reduces disease transmission
+Unlike vanilla's random one-off illness events, this mod models disease as a propagating system: infected colonists can spread illness before showing symptoms, giving quarantine and distance meaningful gameplay value.
 
-### Not included yet:
-- Quarantine tools
+## Current Status
+
+**v0.3.1** — Active development. The core disease loop is functional. Focus is on stabilizing the simulation, adding player feedback tools, and expanding configuration options.
+
+### Implemented Features
+
+| Feature | Version |
+|---------|---------|
+| Hidden disease state (incubation before symptoms) | v0.2 |
+| Exposure accumulation and decay | v0.2.1 |
+| Respiratory proximity transmission | v0.2.2 |
+| Debug tools (transmission multiplier, pulse action) | v0.2.2 |
+| Outsider importation (visitors, traders, raiders, refugees, prisoners, quest pawns) | v0.3 |
+| Symptom onset notifications | v0.3 |
+| Debug readout overlay | v0.3 |
+| Configurable balancing (import chance, exposure multiplier) | v0.3 |
+| Mask protection (face-covering apparel blocks transmission) | v0.3.1 |
+
+### Not Yet Implemented
+
+- Quarantine management tools
 - Additional disease types
 - Richer disease progression variants
 - World map spread
 
+## Disease Loop
+
+```
+Outsider arrives infected or incubating
+        ↓
+Pawn may become infectious before symptoms appear
+        ↓
+Nearby pawns accumulate exposure through shared air
+        ↓
+Exposure threshold triggers incubation
+        ↓
+Symptoms appear as visible disease
+        ↓
+Isolation and distance reduce spread
+```
+
 ## Requirements
 
 - RimWorld 1.6
-- Harmony
+- Harmony (brrainz.harmony)
 
-## Development setup
+## Building from Source
 
-The project expects RimWorld managed assemblies at build time.
+The project requires RimWorld managed assemblies at build time. Set one of these MSBuild properties:
 
-You can build by setting one of these MSBuild properties:
-- `RimWorldInstallDir` → root RimWorld install directory
-- `RimWorldManagedDir` → direct path to the game's `Managed` folder
+- `RimWorldInstallDir` — Root RimWorld install directory
+- `RimWorldManagedDir` — Direct path to `Managed` folder
 
-Examples:
-- Windows: `dotnet build /p:RimWorldInstallDir="D:\\SteamLibrary\\steamapps\\common\\RimWorld"`
-- Linux: `dotnet build /p:RimWorldInstallDir="$HOME/.steam/steam/steamapps/common/RimWorld"`
+**Windows:**
+```powershell
+dotnet build /p:RimWorldInstallDir="D:\SteamLibrary\steamapps\common\RimWorld"
+```
 
-If neither property is set, the project tries a few common install paths first and then fails with a clear error.
+**Linux:**
+```bash
+dotnet build /p:RimWorldInstallDir="$HOME/.steam/steam/steamapps/common/RimWorld"
+```
 
-## Notes
+If neither property is set, the build attempts common install paths before failing with a clear error.
 
-This mod is still in active development.
-The current goal is to make one disease simulation loop work cleanly before expanding into balance, feedback, and additional features.
+## Design Philosophy
 
-## v0.3.1 Changes
+- **One complete loop first.** The mod focuses on making a single respiratory disease work cleanly before adding variety.
+- **Transparency where useful.** Debug tools and overlays help players understand what's happening.
+- **Configurable.** Settings let players tune import frequency, transmission rates, and toggle features.
+- **Honest scope.** "Not included yet" features are documented. This is not a promise.
 
-### Mask Protection (v0.3.1)
-- **Masks reduce disease exposure** during respiratory transmission
-- Detection heuristic: pawns wearing apparel that covers Mouth/Jaw/FullHead, uses the FaceCover layer, or provides ToxicEnvironmentResistance are considered "masked"
-- This includes cloth/dust masks, advanced dust masks, gas masks, full face helmets, and similar items
-- **Transmission reduction:**
-  - Both source AND target masked: **0% exposure** (completely blocked)
-  - Only source masked: **75% reduction** (only 25% escapes)
-  - Only target masked: **75% reduction** (only 25% inhaled)
-  - Neither masked: **100% exposure** (normal transmission)
-- Debug readout now shows mask status for each pawn (YES/-)
-- Debug logs include mask status in transmission events
+## Documentation
 
-## v0.3.0 Changes
+Design decisions and technical details are in `Documentation/`:
 
-### Outsider Importation
-- Disease can now enter the colony through outsiders (visitors, traders, raiders, refugees, prisoners, quest pawns)
-- Configurable import chance (default 15%)
-- Imported outsider states can start as incubating, pre-symptomatic infectious, or symptomatic
-- Can be enabled/disabled in settings
-
-### Player Feedback
-- Colonist symptom onset creates a letter notification
-- Optional transmission warning in the notification
-- On-screen debug readout (toggleable in settings)
-
-### Settings & Balancing
-- New settings UI with clear sections
-- Outsider importation can be toggled on/off
-- Respiratory spread can be toggled on/off
-- Import chance slider (1% - 50%)
-- Exposure gain multiplier slider (0.1x - 5.0x, default 3.0x)
-- Debug readout visibility toggle
-
-### Persistence / Travel Notes
-- Hidden disease state is preserved across save/load
-- Colonist disease state is preserved across off-map travel and caravan transitions
-- Debug readout currently focuses on the active map view; off-map continuity is enforced at the simulation/state level
+- `Design/` — Rationale for major features
+- `Technical/` — Architecture, save data, performance notes
+- `Roadmap/` — Implemented and planned features
