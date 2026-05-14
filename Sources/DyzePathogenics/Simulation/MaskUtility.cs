@@ -10,11 +10,12 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
     /// v0.3.1: Masks reduce disease exposure during respiratory transmission.
     /// 
     /// Heuristic: A pawn is considered "wearing a mask" if they have any worn apparel
-    /// that covers the FullHead body part group. This includes:
-    /// - Dust masks (basic respiratory protection)
+    /// that covers facial breathing areas via either the FullHead or Jaw body part groups.
+    /// This includes:
+    /// - Cloth / dust masks that primarily cover the jaw-mouth area
     /// - Advanced dust masks
     /// - Full face helmets/goggles
-    /// - Any other apparel that covers the full head including mouth/nose
+    /// - Any other apparel that covers the lower face or full head
     /// 
     /// Note: This uses a compile-safe heuristic based on body part group coverage,
     /// as specific apparel def checking would require maintaining a list of def names.
@@ -65,8 +66,8 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 if (apparel == null || apparel.def == null)
                     continue;
 
-                // Check if this apparel covers the full head
-                if (CoversFullHead(apparel.def))
+                // Check if this apparel covers the breathing path / lower face
+                if (ProvidesRespiratoryProtection(apparel.def))
                     return true;
             }
 
@@ -74,21 +75,24 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         }
 
         /// <summary>
-        /// Check if an apparel def covers the full head (including mouth/nose).
+        /// Check if an apparel def covers the breathing path / lower face.
         /// </summary>
         /// <param name="apparelDef">The apparel def to check</param>
-        /// <returns>True if it covers the full head</returns>
-        private static bool CoversFullHead(ThingDef apparelDef)
+        /// <returns>True if it covers the jaw/lower face or full head</returns>
+        private static bool ProvidesRespiratoryProtection(ThingDef apparelDef)
         {
-            if (apparelDef?.apparel == null)
+            if (apparelDef?.apparel?.bodyPartGroups == null)
                 return false;
 
-            // Check body part groups covered by this apparel
+            // Jaw catches cloth masks and similar lower-face gear.
+            // FullHead catches full-face helmets/masks.
             foreach (BodyPartGroupDef bodyPartGroup in apparelDef.apparel.bodyPartGroups)
             {
-                // FullHead includes coverage of mouth and nose
-                if (bodyPartGroup == BodyPartGroupDefOf.FullHead)
+                if (bodyPartGroup == BodyPartGroupDefOf.FullHead ||
+                    bodyPartGroup == BodyPartGroupDefOf.Jaw)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -143,7 +147,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                     {
                         foreach (var bpg in apparel.def.apparel.bodyPartGroups)
                         {
-                            if (bpg == BodyPartGroupDefOf.FullHead)
+                            if (bpg == BodyPartGroupDefOf.FullHead || bpg == BodyPartGroupDefOf.Jaw)
                             {
                                 maskedApparel.Add(apparel.LabelShort);
                                 break;
