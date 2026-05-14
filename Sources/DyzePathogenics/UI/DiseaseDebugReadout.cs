@@ -47,7 +47,7 @@ namespace Dyze.RimWorld.Pathogenics
             // Calculate required height
             int pawnCount = Math.Min(activeStates.Count, 15); // Limit to 15 to avoid overflow
             float height = Padding + (pawnCount + 3) * LineHeight + Padding;
-            float width = ColumnWidth * 2 + Padding * 2;
+            float width = ColumnWidth * 3 + Padding * 2; // v0.3.1: Added column for mask status
 
             // Position in top-right corner
             Rect rect = new Rect(UI.screenWidth - width - 10f, 10f, width, height);
@@ -72,8 +72,10 @@ namespace Dyze.RimWorld.Pathogenics
             float y = titleRect.y + LineHeight;
             Rect pawnHeaderRect = new Rect(rect.x + Padding, y, ColumnWidth, LineHeight);
             Rect stateHeaderRect = new Rect(rect.x + Padding + ColumnWidth, y, ColumnWidth, LineHeight);
+            Rect maskHeaderRect = new Rect(rect.x + Padding + ColumnWidth * 2, y, ColumnWidth, LineHeight);
             Widgets.Label(pawnHeaderRect, "Pawn");
             Widgets.Label(stateHeaderRect, "State (Exposure)");
+            Widgets.Label(maskHeaderRect, "Mask"); // v0.3.1: New mask column
 
             // Draw pawn states
             int drawn = 0;
@@ -96,8 +98,13 @@ namespace Dyze.RimWorld.Pathogenics
                     stateInfo = $"{state.Exposure:F2}/1.0";
                 }
 
+                // v0.3.1: Get mask status
+                bool isMasked = Simulation.MaskUtility.IsWearingMask(pawn);
+                string maskInfo = isMasked ? "YES" : "-";
+
                 Rect pawnRect = new Rect(rect.x + Padding, y, ColumnWidth, LineHeight);
                 Rect stateRect = new Rect(rect.x + Padding + ColumnWidth, y, ColumnWidth, LineHeight);
+                Rect maskRect = new Rect(rect.x + Padding + ColumnWidth * 2, y, ColumnWidth, LineHeight);
 
                 // Color code based on stage
                 if (state.IsInfectious())
@@ -112,6 +119,11 @@ namespace Dyze.RimWorld.Pathogenics
 
                 Widgets.Label(pawnRect, pawnName);
                 Widgets.Label(stateRect, stateInfo);
+                
+                // v0.3.1: Show mask status in separate color
+                GUI.color = isMasked ? new Color(0.3f, 1f, 0.3f) : new Color(0.5f, 0.5f, 0.5f);
+                Widgets.Label(maskRect, maskInfo);
+                
                 drawn++;
             }
 
