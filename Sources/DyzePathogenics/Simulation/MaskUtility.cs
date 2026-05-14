@@ -22,6 +22,8 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
     /// </summary>
     public static class MaskUtility
     {
+        private static BodyPartGroupDef JawBodyPartGroupDef => DefDatabase<BodyPartGroupDef>.GetNamedSilentFail("Jaw");
+
         /// <summary>
         /// Multiplier applied when only the SOURCE pawn is wearing a mask.
         /// Reduces emitted exposure by 75% (only 25% escapes).
@@ -86,10 +88,11 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
             // Jaw catches cloth masks and similar lower-face gear.
             // FullHead catches full-face helmets/masks.
+            BodyPartGroupDef jawGroup = JawBodyPartGroupDef;
             foreach (BodyPartGroupDef bodyPartGroup in apparelDef.apparel.bodyPartGroups)
             {
                 if (bodyPartGroup == BodyPartGroupDefOf.FullHead ||
-                    bodyPartGroup == BodyPartGroupDefOf.Jaw)
+                    (jawGroup != null && bodyPartGroup == jawGroup))
                 {
                     return true;
                 }
@@ -141,13 +144,14 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             if (masked && pawn.apparel != null)
             {
                 var maskedApparel = new System.Collections.Generic.List<string>();
+                BodyPartGroupDef jawGroup = JawBodyPartGroupDef;
                 foreach (Apparel apparel in pawn.apparel.WornApparel)
                 {
                     if (apparel?.def?.apparel != null)
                     {
                         foreach (var bpg in apparel.def.apparel.bodyPartGroups)
                         {
-                            if (bpg == BodyPartGroupDefOf.FullHead || bpg == BodyPartGroupDefOf.Jaw)
+                            if (bpg == BodyPartGroupDefOf.FullHead || (jawGroup != null && bpg == jawGroup))
                             {
                                 maskedApparel.Add(apparel.LabelShort);
                                 break;
