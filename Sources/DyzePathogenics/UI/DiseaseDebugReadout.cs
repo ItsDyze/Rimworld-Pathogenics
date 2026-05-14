@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -142,8 +143,8 @@ namespace Dyze.RimWorld.Pathogenics
     /// <summary>
     /// Harmony patch to inject the debug readout rendering.
     /// </summary>
-    [HarmonyPatch(typeof(UIRoot_Game), "OnGUI")]
-    public static class UIRoot_Game_OnGUI_Patch
+    [HarmonyPatch(typeof(UIRoot_Play), nameof(UIRoot_Play.UIRootOnGUI))]
+    public static class UIRoot_Play_UIRootOnGUI_Patch
     {
         [HarmonyPostfix]
         public static void Postfix()
