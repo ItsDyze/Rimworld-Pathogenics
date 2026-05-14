@@ -509,25 +509,25 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            if (mapComponent.PawnDiseaseStates.Count == 0)
+            var activeStates = mapComponent.GetActiveDiseaseStates();
+            if (activeStates.Count == 0)
             {
-                Messages.Message("No pawns with disease state on this map.", MessageTypeDefOf.NeutralEvent, false);
+                Messages.Message("No pawns with active disease state on this map.", MessageTypeDefOf.NeutralEvent, false);
                 return;
             }
 
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             sb.AppendLine("=== Pathogenics Simulation State ===");
             sb.AppendLine($"Map ID: {map.uniqueID}");
-            sb.AppendLine($"Pawns with disease state: {mapComponent.PawnDiseaseStates.Count}");
+            sb.AppendLine($"Pawns with active disease state: {activeStates.Count}");
             sb.AppendLine();
 
-            foreach (var kvp in mapComponent.PawnDiseaseStates)
+            foreach (var kvp in activeStates)
             {
-                Pawn pawn = FindPawnById(map, kvp.Key);
+                Pawn pawn = kvp.Key;
                 PawnDiseaseState state = kvp.Value;
 
-                string pawnName = pawn != null ? pawn.LabelShort : $"ID:{kvp.Key}";
-                sb.AppendLine($"--- {pawnName} ---");
+                sb.AppendLine($"--- {pawn.LabelShort} ---");
                 sb.Append(state.GetDebugInfo(pawn));
                 sb.AppendLine();
             }

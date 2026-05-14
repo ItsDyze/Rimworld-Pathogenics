@@ -154,6 +154,32 @@ namespace Dyze.RimWorld.Pathogenics
         }
 
         /// <summary>
+        /// Get active disease states for currently spawned, alive pawns on this map.
+        /// </summary>
+        public List<KeyValuePair<Pawn, PawnDiseaseState>> GetActiveDiseaseStates()
+        {
+            List<KeyValuePair<Pawn, PawnDiseaseState>> activeStates = new List<KeyValuePair<Pawn, PawnDiseaseState>>();
+
+            var pawns = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                Pawn pawn = pawns[i];
+                if (pawn == null || !pawn.Spawned || pawn.Dead)
+                    continue;
+
+                if (!pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state))
+                    continue;
+
+                if (state == null || !state.HasDiseaseState())
+                    continue;
+
+                activeStates.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+            }
+
+            return activeStates;
+        }
+
+        /// <summary>
         /// Clear hidden disease state for a specific pawn.
         /// </summary>
         public void ClearDiseaseState(Pawn pawn)

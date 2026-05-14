@@ -37,11 +37,15 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
 
             PathogenicsMapComponent mapComponent = map.GetComponent<PathogenicsMapComponent>();
-            if (mapComponent == null || mapComponent.PawnDiseaseStates.Count == 0)
+            if (mapComponent == null)
+                return;
+
+            List<KeyValuePair<Pawn, PawnDiseaseState>> activeStates = mapComponent.GetActiveDiseaseStates();
+            if (activeStates.Count == 0)
                 return;
 
             // Calculate required height
-            int pawnCount = Math.Min(mapComponent.PawnDiseaseStates.Count, 15); // Limit to 15 to avoid overflow
+            int pawnCount = Math.Min(activeStates.Count, 15); // Limit to 15 to avoid overflow
             float height = Padding + (pawnCount + 3) * LineHeight + Padding;
             float width = ColumnWidth * 2 + Padding * 2;
 
@@ -73,17 +77,17 @@ namespace Dyze.RimWorld.Pathogenics
 
             // Draw pawn states
             int drawn = 0;
-            foreach (var kvp in mapComponent.PawnDiseaseStates)
+            foreach (var kvp in activeStates)
             {
                 if (drawn >= pawnCount)
                     break;
 
                 y += LineHeight;
 
-                Pawn pawn = FindPawnById(map, kvp.Key);
+                Pawn pawn = kvp.Key;
                 PawnDiseaseState state = kvp.Value;
 
-                string pawnName = pawn != null ? pawn.LabelShort : $"ID:{kvp.Key}";
+                string pawnName = pawn.LabelShort;
                 string stateInfo = state.GetStageLabel();
 
                 // Add exposure info if relevant
@@ -123,21 +127,6 @@ namespace Dyze.RimWorld.Pathogenics
             GUI.color = oldColor;
         }
 
-        /// <summary>
-        /// Find a pawn by ID in the map.
-        /// </summary>
-        private static Pawn FindPawnById(Map map, int pawnId)
-        {
-            var pawns = map.mapPawns.AllPawnsSpawned;
-            for (int i = 0; i < pawns.Count; i++)
-            {
-                if (pawns[i].thingIDNumber == pawnId)
-                {
-                    return pawns[i];
-                }
-            }
-            return null;
-        }
     }
 
     /// <summary>
