@@ -145,11 +145,12 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
                 // Calculate exposure
                 float exposure = CalculateExposure(sourcePawn, targetPawn, distance, sourceInfectiousness);
-                if (exposure <= 0f)
-                    continue;
 
-                // Add exposure to target through the map component
-                mapComponent.AddExposureToPawn(targetPawn, exposure);
+                // Add exposure to target through the map component (if > 0)
+                if (exposure > 0f)
+                {
+                    mapComponent.AddExposureToPawn(targetPawn, exposure);
+                }
 
                 // Debug log occasionally
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true && 
@@ -157,11 +158,40 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 {
                     PawnDiseaseState targetState = mapComponent.GetDiseaseState(targetPawn);
                     string roomStatus = GetRoomStatus(sourcePawn, targetPawn);
-                    DyzeLog.Message($"{sourcePawn.LabelShort} -> {targetPawn.LabelShort}: " +
-                        $"+{exposure:F4} exposure (dist={distance:F1}, inf={sourceInfectiousness:F2}, {roomStatus}) " +
-                        $"(target exposure: {targetState?.Exposure:F2})");
+                    
+                    // v0.3.1: Include mask status in debug output
+                    bool sourceMasked = MaskUtility.IsWearingMask(sourcePawn);
+                    bool targetMasked = MaskUtility.IsWearingMask(targetPawn);
+                    string maskStatus = GetMaskDebugStatus(sourceMasked, targetMasked);
+                    
+                    if (exposure <= 0f)
+                    {
+                        // Exposure blocked - likely due to both masks
+                        DyzeLog.Message(sourcePawn.LabelShort + " -> " + targetPawn.LabelShort + ": BLOCKED " +
+                            "(dist=" + distance.ToString("F1") + ", " + roomStatus + ", " + maskStatus + ")");
+                    }
+                    else
+                    {
+                        DyzeLog.Message(sourcePawn.LabelShort + " -> " + targetPawn.LabelShort + ": " +
+                            "+" + exposure.ToString("F4") + " exposure (dist=" + distance.ToString("F1") + ", inf=" + sourceInfectiousness.ToString("F2") + ", " + roomStatus + ", " + maskStatus + ") " +
+                            "(target exposure: " + targetState?.Exposure.ToString("F2") + ")");
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// Get a debug status string for mask wearing.
+        /// </summary>
+        private static string GetMaskDebugStatus(bool sourceMasked, bool targetMasked)
+        {
+            if (sourceMasked && targetMasked)
+                return "both-masked";
+            if (sourceMasked)
+                return "source-masked";
+            if (targetMasked)
+                return "target-masked";
+            return "no-masks";
         }
 
         /// <summary>
@@ -204,6 +234,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
         /// <summary>
         /// Calculate the exposure amount for a target based on proximity and room factors.
+        /// v0.3.1: Now factors in mask-wearing status of both source and target.
         /// </summary>
         private static float CalculateExposure(Pawn source, Pawn target, float distance, float sourceInfectiousness)
         {
@@ -219,9 +250,14 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             // v0.3: Get exposure multiplier from settings
             float exposureMultiplier = DyzePathogenicsMod.Settings?.ExposureGainMultiplier ?? 1.0f;
 
+            // v0.3.1: Get mask multiplier - masks reduce disease transmission
+            float maskMultiplier = MaskUtility.GetExposureMultiplier(source, target);
+            if (maskMultiplier <= 0f)
+                return 0f; // Complete block when both wear masks
+
             // Final exposure formula:
-            // exposure = baseExposure × sourceInfectiousness × distanceFactor × roomFactor × debugMultiplier × exposureMultiplier
-            float exposure = BaseExposurePerTick * sourceInfectiousness * distanceFactor * roomFactor * DebugTransmissionMultiplier * exposureMultiplier;
+            // exposure = baseExposure × sourceInfectiousness × distanceFactor × roomFactor × debugMultiplier × exposureMultiplier × maskMultiplier
+            float exposure = BaseExposurePerTick * sourceInfectiousness * distanceFactor * roomFactor * DebugTransmissionMultiplier * exposureMultiplier * maskMultiplier;
 
             return exposure;
         }

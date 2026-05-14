@@ -16,6 +16,7 @@ The v0.3.x series adds complete disease simulation with outsider importation, pl
 - **v0.3.0**: Player feedback - symptom onset notifications with transmission warnings
 - **v0.3.0**: Debug readout overlay showing all pawns with disease state
 - **v0.3.0**: Expanded settings for balancing (import chance, exposure multiplier)
+- **v0.3.1**: Mask protection - face-covering apparel reduces disease transmission
 
 ### Not included yet:
 - Quarantine tools
@@ -46,6 +47,20 @@ If neither property is set, the project tries a few common install paths first a
 
 This mod is still in active development.
 The current goal is to make one disease simulation loop work cleanly before expanding into balance, feedback, and additional features.
+
+## v0.3.1 Changes
+
+### Mask Protection (v0.3.1)
+- **Masks reduce disease exposure** during respiratory transmission
+- Detection heuristic: pawns wearing apparel that covers the FullHead body part group are considered "masked"
+- This includes dust masks, advanced dust masks, full face helmets, and similar items
+- **Transmission reduction:**
+  - Both source AND target masked: **0% exposure** (completely blocked)
+  - Only source masked: **75% reduction** (only 25% escapes)
+  - Only target masked: **75% reduction** (only 25% inhaled)
+  - Neither masked: **100% exposure** (normal transmission)
+- Debug readout now shows mask status for each pawn (YES/-)
+- Debug logs include mask status in transmission events
 
 ## v0.3.0 Changes
 
