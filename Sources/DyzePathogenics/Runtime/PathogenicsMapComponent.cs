@@ -110,8 +110,15 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             List<int> idsToRemove = null;
-            foreach (int pawnId in pawnDiseaseStates.Keys)
+            foreach (var kvp in pawnDiseaseStates)
             {
+                int pawnId = kvp.Key;
+                PawnDiseaseState state = kvp.Value;
+                if (state != null && state.PreserveAcrossMaps)
+                {
+                    continue;
+                }
+
                 if (!currentPawnIds.Contains(pawnId))
                 {
                     idsToRemove ??= new List<int>();
@@ -143,6 +150,9 @@ namespace Dyze.RimWorld.Pathogenics
                 state = new PawnDiseaseState(pawnId, map?.uniqueID ?? 0);
                 pawnDiseaseStates[pawnId] = state;
             }
+
+            state.MapId = map?.uniqueID ?? 0;
+            state.PreserveAcrossMaps = pawn.IsColonist;
 
             return state;
         }
@@ -458,7 +468,19 @@ namespace Dyze.RimWorld.Pathogenics
 
                 // Find the pawn
                 Pawn pawn = ResolveTrackedPawn(state.PawnId);
-                if (pawn == null || pawn.Dead)
+                if (pawn == null)
+                {
+                    if (state.PreserveAcrossMaps)
+                    {
+                        continue;
+                    }
+
+                    pawnIdsToRemove ??= new List<int>();
+                    pawnIdsToRemove.Add(kvp.Key);
+                    continue;
+                }
+
+                if (pawn.Dead)
                 {
                     pawnIdsToRemove ??= new List<int>();
                     pawnIdsToRemove.Add(kvp.Key);
