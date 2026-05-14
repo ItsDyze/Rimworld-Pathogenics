@@ -170,6 +170,10 @@ namespace Dyze.RimWorld.Pathogenics
         {
             base.MapComponentTick();
 
+            // Skip if disease simulation is disabled
+            if (DyzePathogenicsMod.Settings?.Enabled != true)
+                return;
+
             // v0.2: The active core uses hidden disease state tracking.
             // v0.2.1: Process exposure accumulation and decay
             ProcessExposureDecay();
@@ -414,6 +418,10 @@ namespace Dyze.RimWorld.Pathogenics
         public void AddExposureToPawn(Pawn pawn, float amount)
         {
             if (pawn == null)
+                return;
+
+            // Check AffectColonistsOnly setting
+            if (DyzePathogenicsMod.Settings?.AffectColonistsOnly == true && !pawn.IsColonist)
                 return;
 
             PawnDiseaseState state = GetOrCreateDiseaseState(pawn);

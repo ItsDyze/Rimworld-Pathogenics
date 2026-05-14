@@ -87,11 +87,15 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 if (pawn == null || !pawn.Spawned || pawn.Dead)
                     continue;
 
-                if (InfectiousnessUtility.IsInfectious(pawn))
-                {
-                    infectiousPawns ??= new List<Pawn>();
-                    infectiousPawns.Add(pawn);
-                }
+                if (!InfectiousnessUtility.IsInfectious(pawn))
+                    continue;
+
+                // Apply AffectColonistsOnly filter to source pawns too
+                if (DyzePathogenicsMod.Settings?.AffectColonistsOnly == true && !pawn.IsColonist)
+                    continue;
+
+                infectiousPawns ??= new List<Pawn>();
+                infectiousPawns.Add(pawn);
             }
 
             if (infectiousPawns == null || infectiousPawns.Count == 0)
@@ -117,6 +121,8 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         private static void ProcessSourcePawn(Pawn sourcePawn, float sourceInfectiousness, 
             PathogenicsMapComponent mapComponent, int currentTick)
         {
+            if (sourcePawn == null || mapComponent == null)
+                return;
             var allPawns = sourcePawn.Map.mapPawns.AllPawnsSpawned;
             IntVec3 sourcePos = sourcePawn.Position;
 
@@ -173,6 +179,10 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
             // Only humanlike pawns
             if (!target.RaceProps.Humanlike)
+                return false;
+
+            // Check AffectColonistsOnly setting
+            if (DyzePathogenicsMod.Settings?.AffectColonistsOnly == true && !target.IsColonist)
                 return false;
 
             // Skip if target is already fully progressed in disease (symptomatic onwards)

@@ -25,6 +25,20 @@ The v0.2.x series adds the foundation for a standalone respiratory disease with 
 - RimWorld 1.6
 - Harmony
 
+## Development setup
+
+The project expects RimWorld managed assemblies at build time.
+
+You can build by setting one of these MSBuild properties:
+- `RimWorldInstallDir` → root RimWorld install directory
+- `RimWorldManagedDir` → direct path to the game's `Managed` folder
+
+Examples:
+- Windows: `dotnet build /p:RimWorldInstallDir="D:\\SteamLibrary\\steamapps\\common\\RimWorld"`
+- Linux: `dotnet build /p:RimWorldInstallDir="$HOME/.steam/steam/steamapps/common/RimWorld"`
+
+If neither property is set, the project tries a few common install paths first and then fails with a clear error.
+
 ## Notes
 
 This mod is still in active development.
