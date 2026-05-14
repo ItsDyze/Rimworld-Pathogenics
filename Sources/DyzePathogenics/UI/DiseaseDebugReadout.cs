@@ -28,7 +28,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
 
             // Only render during gameplay
-            if (Find.CurrentMap == null || !Find.GameInfo.Started)
+            if (Find.CurrentMap == null)
                 return;
 
             // Find the current map

@@ -578,7 +578,7 @@ namespace Dyze.RimWorld.Pathogenics
             string content = diseaseState.GetDebugInfo(pawn);
 
             // Add infectiousness info
-            float infectiousness = DiseaseImportationWorker.GetInfectiousnessForPawn(pawn);
+            float infectiousness = InfectiousnessUtility.GetInfectiousnessForPawn(pawn);
             content += $"\nInfectiousness: {infectiousness:F2}";
 
             // Add recent exposure events if we had them (for now, just summary)
