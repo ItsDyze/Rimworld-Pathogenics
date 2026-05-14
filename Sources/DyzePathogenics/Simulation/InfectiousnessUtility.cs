@@ -76,6 +76,14 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         }
 
         /// <summary>
+        /// Get infectiousness for a pawn (public version for external access).
+        /// </summary>
+        public static float GetInfectiousnessForPawn(Pawn pawn)
+        {
+            return GetInfectiousness(pawn);
+        }
+
+        /// <summary>
         /// Get a readable label for the infectiousness level.
         /// </summary>
         /// <param name="infectiousness">The infectiousness multiplier</param>

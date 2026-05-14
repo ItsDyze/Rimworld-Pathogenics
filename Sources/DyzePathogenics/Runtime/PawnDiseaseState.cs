@@ -36,6 +36,9 @@ namespace Dyze.RimWorld.Pathogenics
         // Track which map this state belongs to (for cleanup)
         public int MapId = -1;
 
+        // Track whether this disease state belongs to a player-controlled colonist and should survive off-map travel.
+        public bool PreserveAcrossMaps = false;
+
         // Track whether the visible hediff has been applied
         public bool VisibleHediffApplied = false;
 
@@ -64,6 +67,7 @@ namespace Dyze.RimWorld.Pathogenics
             Scribe_Values.Look(ref RecoveringTick, "recoveringTick", -1);
             Scribe_Values.Look(ref RecoveredTick, "recoveredTick", -1);
             Scribe_Values.Look(ref MapId, "mapId", -1);
+            Scribe_Values.Look(ref PreserveAcrossMaps, "preserveAcrossMaps", false);
 
             // Visible hediff tracking
             Scribe_Values.Look(ref VisibleHediffApplied, "visibleHediffApplied", false);

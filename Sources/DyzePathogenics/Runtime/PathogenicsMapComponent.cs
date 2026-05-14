@@ -82,8 +82,6 @@ namespace Dyze.RimWorld.Pathogenics
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 pawnDiseaseStates ??= new Dictionary<int, PawnDiseaseState>();
-
-                CleanStaleDiseaseStates();
             }
         }
 
@@ -94,12 +92,33 @@ namespace Dyze.RimWorld.Pathogenics
             var pawns = map.mapPawns.AllPawnsSpawned;
             for (int i = 0; i < pawns.Count; i++)
             {
-                currentPawnIds.Add(pawns[i].thingIDNumber);
+                Pawn pawn = pawns[i];
+                if (pawn == null || !pawn.Spawned || pawn.Dead)
+                {
+                    continue;
+                }
+
+                currentPawnIds.Add(pawn.thingIDNumber);
+            }
+
+            foreach (Pawn pawn in GetAliveCaravanColonists())
+            {
+                if (pawn == null || pawn.Dead || !pawn.IsColonist)
+                    continue;
+
+                currentPawnIds.Add(pawn.thingIDNumber);
             }
 
             List<int> idsToRemove = null;
-            foreach (int pawnId in pawnDiseaseStates.Keys)
+            foreach (var kvp in pawnDiseaseStates)
             {
+                int pawnId = kvp.Key;
+                PawnDiseaseState state = kvp.Value;
+                if (state != null && state.PreserveAcrossMaps)
+                {
+                    continue;
+                }
+
                 if (!currentPawnIds.Contains(pawnId))
                 {
                     idsToRemove ??= new List<int>();
@@ -132,6 +151,9 @@ namespace Dyze.RimWorld.Pathogenics
                 pawnDiseaseStates[pawnId] = state;
             }
 
+            state.MapId = map?.uniqueID ?? 0;
+            state.PreserveAcrossMaps = pawn.IsColonist;
+
             return state;
         }
 
@@ -144,7 +166,155 @@ namespace Dyze.RimWorld.Pathogenics
                 return null;
 
             pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state);
+            if (state == null && PawnHasVisiblePathogenicFlu(pawn))
+            {
+                state = EnsureSymptomaticDiseaseState(pawn);
+            }
+
             return state;
+        }
+
+        /// <summary>
+        /// Get active disease states relevant to gameplay: alive spawned pawns on this map,
+        /// plus alive player caravan colonists when available from the current RimWorld API surface.
+        /// </summary>
+        public List<KeyValuePair<Pawn, PawnDiseaseState>> GetActiveDiseaseStates()
+        {
+            List<KeyValuePair<Pawn, PawnDiseaseState>> activeStates = new List<KeyValuePair<Pawn, PawnDiseaseState>>();
+            HashSet<int> addedPawnIds = new HashSet<int>();
+
+            var pawns = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                Pawn pawn = pawns[i];
+                if (!IsAliveRelevantMapPawn(pawn))
+                    continue;
+
+                if (!pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state))
+                    continue;
+
+                if (state == null || !state.HasDiseaseState())
+                    continue;
+
+                activeStates.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+                addedPawnIds.Add(pawn.thingIDNumber);
+            }
+
+            foreach (Pawn pawn in GetAliveCaravanColonists())
+            {
+                if (pawn == null || pawn.Dead || !pawn.IsColonist)
+                    continue;
+
+                if (addedPawnIds.Contains(pawn.thingIDNumber))
+                    continue;
+
+                if (!pawnDiseaseStates.TryGetValue(pawn.thingIDNumber, out PawnDiseaseState state))
+                    continue;
+
+                if (state == null || !state.HasDiseaseState())
+                    continue;
+
+                activeStates.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+                addedPawnIds.Add(pawn.thingIDNumber);
+            }
+
+            return activeStates;
+        }
+
+        private static bool IsAliveRelevantMapPawn(Pawn pawn)
+        {
+            return pawn != null && pawn.Spawned && !pawn.Dead;
+        }
+
+        private bool PawnHasVisiblePathogenicFlu(Pawn pawn)
+        {
+            HediffDef pathogenicFlu = DefDatabase<HediffDef>.GetNamedSilentFail("DP_PathogenicFlu");
+            return pathogenicFlu != null && pawn.health?.hediffSet?.GetFirstHediffOfDef(pathogenicFlu) != null;
+        }
+
+        private PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn)
+        {
+            if (pawn == null)
+                return null;
+
+            int currentTick = Find.TickManager.TicksGame;
+            PawnDiseaseState diseaseState = GetOrCreateDiseaseState(pawn);
+
+            if (diseaseState.ExposedTick < 0)
+            {
+                diseaseState.ExposedTick = currentTick;
+            }
+
+            if (diseaseState.InfectiousStartTick < 0)
+            {
+                diseaseState.InfectiousStartTick = currentTick;
+            }
+
+            diseaseState.Stage = SimulatedDiseaseStage.Symptomatic;
+            diseaseState.SymptomOnsetTick = currentTick;
+            if (diseaseState.RecoveringTick < 0)
+            {
+                diseaseState.RecoveringTick = currentTick + SymptomaticDurationTicks;
+            }
+            diseaseState.VisibleHediffApplied = true;
+
+            return diseaseState;
+        }
+
+        private Pawn ResolveTrackedPawn(int pawnId)
+        {
+            Pawn pawn = FindPawnById(pawnId);
+            if (pawn != null)
+                return pawn;
+
+            foreach (Pawn caravanPawn in GetAliveCaravanColonists())
+            {
+                if (caravanPawn != null && caravanPawn.thingIDNumber == pawnId)
+                    return caravanPawn;
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<Pawn> GetAliveCaravanColonists()
+        {
+            Type pawnsFinderType = typeof(PawnsFinder);
+            string[] memberNames =
+            {
+                "AllMapsCaravansAndTravelingTransportPods_Alive_Colonists",
+                "AllCaravansAndTravelingTransportPods_Alive_Colonists",
+                "AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists",
+                "AllCaravansAndTravelingTransportPods_Alive_FreeColonists",
+                "AllMapsCaravansAndTravelingTransportPods_Alive",
+                "AllCaravansAndTravelingTransportPods_Alive"
+            };
+
+            for (int i = 0; i < memberNames.Length; i++)
+            {
+                string memberName = memberNames[i];
+
+                var property = pawnsFinderType.GetProperty(memberName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (property != null)
+                {
+                    if (property.GetValue(null, null) is IEnumerable<Pawn> pawns)
+                        return pawns;
+
+                    if (property.GetValue(null, null) is IEnumerable<object> pawnObjects)
+                        return pawnObjects.OfType<Pawn>();
+                }
+
+                var method = pawnsFinderType.GetMethod(memberName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, Type.EmptyTypes, null);
+                if (method != null)
+                {
+                    if (method.Invoke(null, null) is IEnumerable<Pawn> pawns)
+                        return pawns;
+
+                    if (method.Invoke(null, null) is IEnumerable<object> pawnObjects)
+                        return pawnObjects.OfType<Pawn>();
+                }
+            }
+
+            return Enumerable.Empty<Pawn>();
         }
 
         /// <summary>
@@ -174,6 +344,12 @@ namespace Dyze.RimWorld.Pathogenics
             if (DyzePathogenicsMod.Settings?.Enabled != true)
                 return;
 
+            if (Find.TickManager.TicksGame % ExposureDecayIntervalTicks == 0)
+            {
+                ResyncVisibleDiseaseStates();
+                CleanStaleDiseaseStates();
+            }
+
             // v0.2: The active core uses hidden disease state tracking.
             // v0.2.1: Process exposure accumulation and decay
             ProcessExposureDecay();
@@ -181,8 +357,30 @@ namespace Dyze.RimWorld.Pathogenics
             // v0.2.1: Process respiratory proximity transmission
             RespiratoryTransmissionWorker.ProcessTransmission(map);
 
+            // v0.3: Process outsider importation
+            DiseaseImportationWorker.ProcessOutsiderSpawns(map);
+
             // v0.3: Process disease stage transitions (incubation → symptom onset → recovery)
             ProcessStageTransitions();
+        }
+
+        private void ResyncVisibleDiseaseStates()
+        {
+            var pawns = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                Pawn pawn = pawns[i];
+                if (!IsAliveRelevantMapPawn(pawn))
+                    continue;
+
+                if (!PawnHasVisiblePathogenicFlu(pawn))
+                    continue;
+
+                if (GetDiseaseState(pawn) == null)
+                {
+                    EnsureSymptomaticDiseaseState(pawn);
+                }
+            }
         }
 
         /// <summary>
@@ -235,10 +433,15 @@ namespace Dyze.RimWorld.Pathogenics
         private void StartIncubation(PawnDiseaseState state, int currentTick)
         {
             state.Stage = SimulatedDiseaseStage.Incubating;
+            state.ExposedTick = currentTick;
+            state.ClearExposure();
+            state.VisibleHediffApplied = false;
             // Pre-symptomatic infectious starts at +0.5 days (30000 ticks)
             state.InfectiousStartTick = currentTick + PreSymptomaticInfectiousDurationTicks;
             // Symptom onset at +1.5 days (30000 + 60000 = 90000 ticks)
             state.SymptomOnsetTick = currentTick + PreSymptomaticInfectiousDurationTicks + SymptomaticDurationTicks;
+            state.RecoveringTick = -1;
+            state.RecoveredTick = -1;
 
             DyzeLog.Message($"Pawn (ID: {state.PawnId}) has accumulated enough exposure and is now incubating.");
         }
@@ -264,9 +467,23 @@ namespace Dyze.RimWorld.Pathogenics
                 }
 
                 // Find the pawn
-                Pawn pawn = FindPawnById(state.PawnId);
+                Pawn pawn = ResolveTrackedPawn(state.PawnId);
                 if (pawn == null)
                 {
+                    if (state.PreserveAcrossMaps)
+                    {
+                        continue;
+                    }
+
+                    pawnIdsToRemove ??= new List<int>();
+                    pawnIdsToRemove.Add(kvp.Key);
+                    continue;
+                }
+
+                if (pawn.Dead)
+                {
+                    pawnIdsToRemove ??= new List<int>();
+                    pawnIdsToRemove.Add(kvp.Key);
                     continue;
                 }
 
@@ -403,13 +620,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            string label = "PathogenicFluDetected".Translate();
-            string text = "PathogenicFluDetectedDesc".Translate(pawn.Named("PAWN")).ToString();
-
-            LetterDef letterDef = LetterDefOf.ThreatSmall;
-            LookTargets lookTargets = new LookTargets(pawn);
-
-            Find.LetterStack.ReceiveLetter(label, text, letterDef, lookTargets);
+            DiseaseLetterUtility.SendSymptomOnsetLetter(pawn);
         }
 
         /// <summary>
@@ -438,7 +649,7 @@ namespace Dyze.RimWorld.Pathogenics
             // Add exposure
             bool thresholdCrossed = state.AddExposure(amount);
 
-            if (thresholdCrossed)
+            if (thresholdCrossed && state.Stage == SimulatedDiseaseStage.Exposed)
             {
                 // Immediate transition to incubating
                 StartIncubation(state, currentTick);

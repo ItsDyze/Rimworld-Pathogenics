@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done (v0.3.0)
 
 ## Goal
 
@@ -64,9 +64,9 @@ Normal gameplay should remain somewhat uncertain.
 
 ## Acceptance criteria
 
-- [ ] colonist symptom onset creates feedback
-- [ ] debug mode shows hidden disease state
-- [ ] debug mode shows exposure
-- [ ] debug action can infect selected pawn
-- [ ] debug action can clear selected pawn state
-- [ ] debug action can print current simulation state
+- [x] colonist symptom onset creates feedback
+- [x] debug mode shows hidden disease state
+- [x] debug mode shows exposure
+- [x] debug action can infect selected pawn
+- [x] debug action can clear selected pawn state
+- [x] debug action can print current simulation state

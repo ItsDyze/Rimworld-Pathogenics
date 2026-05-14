@@ -473,10 +473,137 @@ namespace Dyze.RimWorld.Pathogenics
             string text =
                 $"Disease Simulation: {settings?.Enabled}\n" +
                 $"Affect Colonists Only: {settings?.AffectColonistsOnly}\n" +
-                $"Debug Logging: {settings?.EnableDebugLogging}\n\n" +
-                "v0.2 uses hidden disease state (PawnDiseaseState).";
+                $"Debug Logging: {settings?.EnableDebugLogging}\n" +
+                $"Outsider Importation: {settings?.EnableOutsiderImportation}\n" +
+                $"Respiratory Spread: {settings?.EnableRespiratorySpread}\n" +
+                $"Outsider Import Chance: {settings?.OutsiderImportChance:P0}\n" +
+                $"Exposure Multiplier: {settings?.ExposureGainMultiplier:F1}x\n" +
+                $"Show Debug Readout: {settings?.ShowDebugReadout}\n\n" +
+                "v0.3 uses hidden disease state (PawnDiseaseState).";
 
             Find.WindowStack.Add(new Dialog_MessageBox(text));
+        }
+
+        /// <summary>
+        /// v0.3: Print current simulation state for all pawns on the map.
+        /// </summary>
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Print simulation state",
+            actionType = DebugActionType.Action,
+            allowedGameStates = AllowedGameStates.Playing
+        )]
+        public static void PrintSimulationState()
+        {
+            Map map = Find.CurrentMap;
+            if (map == null)
+            {
+                Messages.Message("No map loaded.", MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            PathogenicsMapComponent mapComponent = map.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message("No map component found.", MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            var activeStates = mapComponent.GetActiveDiseaseStates();
+            if (activeStates.Count == 0)
+            {
+                Messages.Message("No pawns with active disease state on this map.", MessageTypeDefOf.NeutralEvent, false);
+                return;
+            }
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("=== Pathogenics Simulation State ===");
+            sb.AppendLine($"Map ID: {map.uniqueID}");
+            sb.AppendLine($"Pawns with active disease state: {activeStates.Count}");
+            sb.AppendLine();
+
+            foreach (var kvp in activeStates)
+            {
+                Pawn pawn = kvp.Key;
+                PawnDiseaseState state = kvp.Value;
+
+                sb.AppendLine($"--- {pawn.LabelShort} ---");
+                sb.Append(state.GetDebugInfo(pawn));
+                sb.AppendLine();
+            }
+
+            // Log to console
+            DyzeLog.DevAction(sb.ToString());
+
+            // Also show message
+            Messages.Message("Simulation state logged to console (F12).", MessageTypeDefOf.PositiveEvent, false);
+        }
+
+        /// <summary>
+        /// v0.3: Show detailed debug info for selected pawn in a message box.
+        /// </summary>
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Show pawn disease details",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ShowPawnDiseaseDetails(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                Messages.Message("No pawn selected.", MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message("Could not get map component.", MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            PawnDiseaseState diseaseState = mapComponent.GetDiseaseState(pawn);
+            if (diseaseState == null || !diseaseState.HasDiseaseState())
+            {
+                Messages.Message(
+                    $"{pawn.LabelShort} has no active disease state.",
+                    MessageTypeDefOf.NeutralEvent,
+                    false
+                );
+                return;
+            }
+
+            string title = $"Disease State: {pawn.LabelShort}";
+            string content = diseaseState.GetDebugInfo(pawn);
+
+            // Add infectiousness info
+            float infectiousness = InfectiousnessUtility.GetInfectiousnessForPawn(pawn);
+            content += $"\nInfectiousness: {infectiousness:F2}";
+
+            // Add recent exposure events if we had them (for now, just summary)
+            if (diseaseState.Stage == SimulatedDiseaseStage.Exposed)
+            {
+                content += $"\nExposure: {diseaseState.Exposure:F2} / 1.00";
+            }
+
+            Find.WindowStack.Add(new Dialog_MessageBox(content, title));
+        }
+
+        /// <summary>
+        /// Helper to find pawn by ID.
+        /// </summary>
+        private static Pawn FindPawnById(Map map, int pawnId)
+        {
+            var pawns = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < pawns.Count; i++)
+            {
+                if (pawns[i].thingIDNumber == pawnId)
+                {
+                    return pawns[i];
+                }
+            }
+            return null;
         }
 
         private static PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn)
