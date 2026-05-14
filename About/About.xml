@@ -8,16 +8,16 @@
 The current v0.2 slice adds the foundation for a standalone respiratory disease.
 
 Included in this slice:
-- hidden disease state before symptoms appear
-- a visible standalone disease for testing
-- debug actions to expose a pawn, inspect state, clear state, and force symptom onset
+- Hidden disease state before symptoms appear
+- Visible standalone disease for testing
+- Debug actions to expose a pawn, inspect state, clear state, and force symptom onset
+- Proximity-based respiratory transmission
+- Exposure accumulation with decay
 
 Not included yet:
-- proximity transmission
-- exposure accumulation
-- richer player feedback
-- quarantine tools
-- additional disease types</description>
+- Quarantine tools
+- Additional disease types
+- Richer player feedback</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

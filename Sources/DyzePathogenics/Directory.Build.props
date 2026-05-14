@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <RimWorldInstallDir Condition="'$(RimWorldInstallDir)' == '' and '$(OS)' == 'Windows_NT'">D:\SteamLibrary\steamapps\common\RimWorld</RimWorldInstallDir>
+    <RimWorldInstallDir Condition="'$(RimWorldInstallDir)' == '' and '$(OS)' != 'Windows_NT' and Exists('/Applications/RimWorld/RimWorldMac.app')">/Applications/RimWorld/RimWorldMac.app/Contents</RimWorldInstallDir>
+    <RimWorldInstallDir Condition="'$(RimWorldInstallDir)' == '' and '$(OS)' != 'Windows_NT' and Exists('$(HOME)/.steam/steam/steamapps/common/RimWorld')">$(HOME)/.steam/steam/steamapps/common/RimWorld</RimWorldInstallDir>
+    <RimWorldInstallDir Condition="'$(RimWorldInstallDir)' == '' and '$(OS)' != 'Windows_NT' and Exists('$(HOME)/.local/share/Steam/steamapps/common/RimWorld')">$(HOME)/.local/share/Steam/steamapps/common/RimWorld</RimWorldInstallDir>
+    <RimWorldManagedDir Condition="'$(RimWorldManagedDir)' == '' and '$(OS)' == 'Windows_NT' and '$(RimWorldInstallDir)' != ''">$(RimWorldInstallDir)\RimWorldWin64_Data\Managed</RimWorldManagedDir>
+    <RimWorldManagedDir Condition="'$(RimWorldManagedDir)' == '' and '$(OS)' != 'Windows_NT' and '$(RimWorldInstallDir)' != ''">$(RimWorldInstallDir)/RimWorldLinux_Data/Managed</RimWorldManagedDir>
+    <RimWorldManagedDir Condition="'$(RimWorldManagedDir)' == '' and Exists('$(RimWorldInstallDir)/RimWorldWin64_Data/Managed')">$(RimWorldInstallDir)/RimWorldWin64_Data/Managed</RimWorldManagedDir>
+    <RimWorldManagedDir Condition="'$(RimWorldManagedDir)' == '' and Exists('$(RimWorldInstallDir)/RimWorldMac.app/Contents/Resources/Data/Managed')">$(RimWorldInstallDir)/RimWorldMac.app/Contents/Resources/Data/Managed</RimWorldManagedDir>
+  </PropertyGroup>
+
+  <Target Name="EnsureRimWorldReferences" BeforeTargets="ResolveReferences" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Condition="'$(RimWorldManagedDir)' == '' or !Exists('$(RimWorldManagedDir)/Assembly-CSharp.dll')"
+           Text="Could not locate RimWorld managed assemblies. Set RimWorldInstallDir or RimWorldManagedDir for your local installation before building." />
+  </Target>
+</Project>
