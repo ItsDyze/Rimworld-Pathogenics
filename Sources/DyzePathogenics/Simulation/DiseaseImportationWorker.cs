@@ -102,16 +102,11 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
         }
 
         /// <summary>
-        /// Check if a pawn has been checked within the cache window.
+        /// Check if a pawn has already been checked on this map visit.
         /// </summary>
         private static bool IsPawnRecentlyChecked(int pawnId, int currentTick)
         {
-            if (!checkedPawnCache.TryGetValue(pawnId, out int lastChecked))
-                return false;
-
-            // Allow re-checking after a reasonable interval (in case they leave and return)
-            // For now, we don't re-check pawns that have already been checked
-            return true;
+            return checkedPawnCache.TryGetValue(pawnId, out _);
         }
 
         /// <summary>
@@ -138,15 +133,22 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             if (pawn.IsColonist)
                 return false;
 
-            // Check for specific outsider types:
-            // - Traders: usually non-hostile and may be visitors
-            // - Refugees: should come from in-mission or spawned
-            // - Prisoners: hostile but can be captured
-            // - Quest pawns: can be visitors or guests
-            
-            // Note: Simple approach - if not player faction, they're an outsider
-            // The mod's intent is that outsiders bring the disease from outside
-            
+            if (pawn.HostileTo(Faction.OfPlayer))
+                return true;
+
+            if (pawn.TraderKind != null)
+                return true;
+
+            if (pawn.IsPrisonerOfColony)
+                return true;
+
+            if (pawn.IsQuestLodger())
+                return true;
+
+            if (pawn.guest != null)
+                return true;
+
+            // Default: any non-player humanlike visitor/raider/guest counts as an outsider.
             return true;
         }
 
@@ -182,6 +184,11 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
             // Disease imported - assign hidden disease state
             PawnDiseaseState state = mapComponent.GetOrCreateDiseaseState(pawn);
+            state.ExposedTick = currentTick;
+            state.Exposure = 0f;
+            state.VisibleHediffApplied = false;
+            state.RecoveringTick = -1;
+            state.RecoveredTick = -1;
 
             // Determine which disease state to assign based on distribution
             float roll = Rand.Value;
@@ -189,11 +196,9 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             {
                 // 70% incubating
                 state.Stage = SimulatedDiseaseStage.Incubating;
-                // Pre-symptomatic infectious starts at +0.5 days
                 state.InfectiousStartTick = currentTick + 30000; // ~0.5 days
-                // Symptom onset at +1.5 days
                 state.SymptomOnsetTick = currentTick + 90000; // ~1.5 days
-                
+
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
                 {
                     DyzeLog.Message($"Outsider {pawn.LabelShort} imported disease (incubating).");
@@ -203,11 +208,9 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             {
                 // 25% pre-symptomatic infectious (already infectious but no symptoms yet)
                 state.Stage = SimulatedDiseaseStage.PreSymptomaticInfectious;
-                // Already infectious as of now
                 state.InfectiousStartTick = currentTick;
-                // Symptom onset at +1.0 day from now
-                state.SymptomOnsetTick = currentTick + 60000; // ~1.0 days
-                
+                state.SymptomOnsetTick = currentTick + 60000; // ~1.0 day
+
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
                 {
                     DyzeLog.Message($"Outsider {pawn.LabelShort} imported disease (pre-symptomatic infectious).");
@@ -217,19 +220,18 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             {
                 // 5% symptomatic (visible disease, should be rare for newcomers)
                 state.Stage = SimulatedDiseaseStage.Symptomatic;
+                state.InfectiousStartTick = currentTick;
                 state.SymptomOnsetTick = currentTick;
-                state.RecoveringTick = currentTick + 60000; // ~1.0 days
-                
+                state.RecoveringTick = currentTick + 60000; // ~1.0 day
+
                 // Apply visible hediff for symptomatic
                 ApplyVisibleHediff(pawn, state);
-                
+
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
                 {
                     DyzeLog.Message($"Outsider {pawn.LabelShort} imported disease (symptomatic - visible!).");
                 }
             }
-
-            state.ExposedTick = currentTick;
         }
 
         /// <summary>

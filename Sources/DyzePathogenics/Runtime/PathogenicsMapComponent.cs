@@ -94,7 +94,13 @@ namespace Dyze.RimWorld.Pathogenics
             var pawns = map.mapPawns.AllPawnsSpawned;
             for (int i = 0; i < pawns.Count; i++)
             {
-                currentPawnIds.Add(pawns[i].thingIDNumber);
+                Pawn pawn = pawns[i];
+                if (pawn == null || !pawn.Spawned || pawn.Dead)
+                {
+                    continue;
+                }
+
+                currentPawnIds.Add(pawn.thingIDNumber);
             }
 
             List<int> idsToRemove = null;
@@ -174,6 +180,11 @@ namespace Dyze.RimWorld.Pathogenics
             if (DyzePathogenicsMod.Settings?.Enabled != true)
                 return;
 
+            if (Find.TickManager.TicksGame % ExposureDecayIntervalTicks == 0)
+            {
+                CleanStaleDiseaseStates();
+            }
+
             // v0.2: The active core uses hidden disease state tracking.
             // v0.2.1: Process exposure accumulation and decay
             ProcessExposureDecay();
@@ -238,10 +249,15 @@ namespace Dyze.RimWorld.Pathogenics
         private void StartIncubation(PawnDiseaseState state, int currentTick)
         {
             state.Stage = SimulatedDiseaseStage.Incubating;
+            state.ExposedTick = currentTick;
+            state.ClearExposure();
+            state.VisibleHediffApplied = false;
             // Pre-symptomatic infectious starts at +0.5 days (30000 ticks)
             state.InfectiousStartTick = currentTick + PreSymptomaticInfectiousDurationTicks;
             // Symptom onset at +1.5 days (30000 + 60000 = 90000 ticks)
             state.SymptomOnsetTick = currentTick + PreSymptomaticInfectiousDurationTicks + SymptomaticDurationTicks;
+            state.RecoveringTick = -1;
+            state.RecoveredTick = -1;
 
             DyzeLog.Message($"Pawn (ID: {state.PawnId}) has accumulated enough exposure and is now incubating.");
         }
@@ -268,8 +284,10 @@ namespace Dyze.RimWorld.Pathogenics
 
                 // Find the pawn
                 Pawn pawn = FindPawnById(state.PawnId);
-                if (pawn == null)
+                if (pawn == null || pawn.Dead || !pawn.Spawned)
                 {
+                    pawnIdsToRemove ??= new List<int>();
+                    pawnIdsToRemove.Add(kvp.Key);
                     continue;
                 }
 
@@ -441,7 +459,7 @@ namespace Dyze.RimWorld.Pathogenics
             // Add exposure
             bool thresholdCrossed = state.AddExposure(amount);
 
-            if (thresholdCrossed)
+            if (thresholdCrossed && state.Stage == SimulatedDiseaseStage.Exposed)
             {
                 // Immediate transition to incubating
                 StartIncubation(state, currentTick);

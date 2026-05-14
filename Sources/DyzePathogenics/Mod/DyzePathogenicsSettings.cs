@@ -51,7 +51,7 @@ namespace Dyze.RimWorld.Pathogenics
         /// Multiplier for exposure gain from transmission events.
         /// Higher values = faster disease spread.
         /// </summary>
-        public float ExposureGainMultiplier = 1.0f;
+        public float ExposureGainMultiplier = 3.0f;
 
         // ===== v0.3: Feature 8 - Player Feedback =====
 
@@ -79,7 +79,7 @@ namespace Dyze.RimWorld.Pathogenics
         private const bool DefaultEnableOutsiderImportation = true;
         private const float DefaultOutsiderImportChance = 0.15f;
         private const bool DefaultEnableRespiratorySpread = true;
-        private const float DefaultExposureGainMultiplier = 1.0f;
+        private const float DefaultExposureGainMultiplier = 3.0f;
         private const bool DefaultShowTransmissionWarning = true;
         private const bool DefaultShowDebugReadout = false;
         private const bool DefaultEnableDebugLogging = false;

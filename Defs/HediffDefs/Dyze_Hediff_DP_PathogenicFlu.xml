@@ -7,7 +7,7 @@
     <scenarioCanAdd>true</scenarioCanAdd>
     <isBad>true</isBad>
     <initialSeverity>0.001</initialSeverity>
-    <tendable>true</tendable>
+    <tendable>false</tendable>
     <comps>
       <li Class="Dyze.RimWorld.Pathogenics.HediffCompProperties_SeverityPerDay">
         <severityPerDay>0.25</severityPerDay>
