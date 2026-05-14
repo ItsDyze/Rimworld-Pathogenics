@@ -66,6 +66,10 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             if (map == null)
                 return;
 
+            // v0.3: Check if respiratory spread is enabled
+            if (DyzePathogenicsMod.Settings?.EnableRespiratorySpread != true)
+                return;
+
             int currentTick = Find.TickManager.TicksGame;
             if (currentTick % TransmissionIntervalTicks != 0)
                 return;
@@ -212,9 +216,12 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             float distanceFactor = 1f - (distance / MaxTransmissionRadius);
             distanceFactor = (float)Math.Pow(Math.Max(0f, distanceFactor), DistanceFalloffPower);
 
+            // v0.3: Get exposure multiplier from settings
+            float exposureMultiplier = DyzePathogenicsMod.Settings?.ExposureGainMultiplier ?? 1.0f;
+
             // Final exposure formula:
-            // exposure = baseExposure × sourceInfectiousness × distanceFactor × roomFactor × debugMultiplier
-            float exposure = BaseExposurePerTick * sourceInfectiousness * distanceFactor * roomFactor * DebugTransmissionMultiplier;
+            // exposure = baseExposure × sourceInfectiousness × distanceFactor × roomFactor × debugMultiplier × exposureMultiplier
+            float exposure = BaseExposurePerTick * sourceInfectiousness * distanceFactor * roomFactor * DebugTransmissionMultiplier * exposureMultiplier;
 
             return exposure;
         }

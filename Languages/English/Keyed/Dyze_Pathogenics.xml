@@ -1,19 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
+  <!-- Disease Detection -->
   <PathogenicFluDetected>Pathogenic Flu Detected</PathogenicFluDetected>
   <PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the pathogenic flu!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</PathogenicFluDetectedDesc>
 
+  <DP_PathogenicFluDetectedLabel>Pathogenic Flu Detected</DP_PathogenicFluDetectedLabel>
+  <DP_PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the pathogenic flu!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</DP_PathogenicFluDetectedDesc>
+  <DP_TransmissionWarning>Warning: The disease is contagious! Anyone in close proximity may be exposed.</DP_TransmissionWarning>
+
+  <DP_PathogenicFluRecoveredLabel>Pathogenic Flu Recovered</DP_PathogenicFluRecoveredLabel>
+  <DP_PathogenicFluRecoveredDesc>{PAWN_nameDef} has recovered from the pathogenic flu.</DP_PathogenicFluRecoveredDesc>
+
+  <!-- Settings Category -->
   <Dyze_Pathogenics_SettingsCategory>Dyze's Pathogenics</Dyze_Pathogenics_SettingsCategory>
 
+  <!-- Section Headers -->
+  <Dyze_Pathogenics_Section_Simulation>Simulation</Dyze_Pathogenics_Section_Simulation>
+  <Dyze_Pathogenics_Section_OutsiderImportation>Outsider Importation</Dyze_Pathogenics_Section_OutsiderImportation>
+  <Dyze_Pathogenics_Section_RespiratorySpread>Respiratory Spread</Dyze_Pathogenics_Section_RespiratorySpread>
+  <Dyze_Pathogenics_Section_PlayerFeedback>Player Feedback</Dyze_Pathogenics_Section_PlayerFeedback>
+  <Dyze_Pathogenics_Section_Debug>Debug</Dyze_Pathogenics_Section_Debug>
+
+  <!-- Core Settings -->
   <Dyze_Pathogenics_Enable_Label>Enable disease simulation</Dyze_Pathogenics_Enable_Label>
   <Dyze_Pathogenics_Enable_Desc>Enable the standalone respiratory disease simulation with hidden disease state tracking.</Dyze_Pathogenics_Enable_Desc>
 
   <Dyze_Pathogenics_AffectColonistsOnly_Label>Affect colonists only</Dyze_Pathogenics_AffectColonistsOnly_Label>
   <Dyze_Pathogenics_AffectColonistsOnly_Desc>If enabled, only colonists can be affected by the disease simulation.</Dyze_Pathogenics_AffectColonistsOnly_Desc>
 
+  <!-- Outsider Importation Settings -->
+  <Dyze_Pathogenics_EnableOutsiderImportation_Label>Enable outsider importation</Dyze_Pathogenics_EnableOutsiderImportation_Label>
+  <Dyze_Pathogenics_EnableOutsiderImportation_Desc>When enabled, outsiders (visitors, traders, raiders, refugees, prisoners, quest pawns) can bring the disease into the colony.</Dyze_Pathogenics_EnableOutsiderImportation_Desc>
+
+  <Dyze_Pathogenics_OutsiderImportChance_Label>Outsider import chance</Dyze_Pathogenics_OutsiderImportChance_Label>
+
+  <!-- Respiratory Spread Settings -->
+  <Dyze_Pathogenics_EnableRespiratorySpread_Label>Enable respiratory spread</Dyze_Pathogenics_EnableRespiratorySpread_Label>
+  <Dyze_Pathogenics_EnableRespiratorySpread_Desc>When enabled, infectious pawns can transmit the disease to nearby pawns in the same room.</Dyze_Pathogenics_EnableRespiratorySpread_Desc>
+
+  <Dyze_Pathogenics_ExposureGainMultiplier_Label>Exposure gain multiplier</Dyze_Pathogenics_ExposureGainMultiplier_Label>
+
+  <!-- Player Feedback Settings -->
+  <Dyze_Pathogenics_ShowTransmissionWarning_Label>Show transmission warning</Dyze_Pathogenics_ShowTransmissionWarning_Label>
+  <Dyze_Pathogenics_ShowTransmissionWarning_Desc>When a colonist develops symptoms, show a warning about disease transmission risk.</Dyze_Pathogenics_ShowTransmissionWarning_Desc>
+
+  <Dyze_Pathogenics_ShowDebugReadout_Label>Show debug readout</Dyze_Pathogenics_ShowDebugReadout_Label>
+  <Dyze_Pathogenics_ShowDebugReadout_Desc>Display an on-screen overlay showing disease state for all pawns (useful for balancing).</Dyze_Pathogenics_ShowDebugReadout_Desc>
+
+  <!-- Debug Settings -->
   <Dyze_Pathogenics_Reset_Label>Reset to defaults</Dyze_Pathogenics_Reset_Label>
 
   <Dyze_Pathogenics_DebugLogging_Label>Enable debug logging</Dyze_Pathogenics_DebugLogging_Label>
   <Dyze_Pathogenics_DebugLogging_Desc>If enabled, the mod writes extra diagnostic messages to the RimWorld log.</Dyze_Pathogenics_DebugLogging_Desc>
+
 </LanguageData>

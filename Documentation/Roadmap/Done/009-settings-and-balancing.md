@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done (v0.3.0)
 
 ## Goal
 
@@ -55,9 +55,9 @@ Most constants can remain internal until the system stabilizes.
 
 ## Acceptance criteria
 
-- [ ] simulation can be disabled
-- [ ] outsider importation can be disabled
-- [ ] respiratory spread can be disabled
-- [ ] import chance can be adjusted
-- [ ] exposure multiplier can be adjusted
-- [ ] debug display can be toggled
+- [x] simulation can be disabled
+- [x] outsider importation can be disabled
+- [x] respiratory spread can be disabled
+- [x] import chance can be adjusted
+- [x] exposure multiplier can be adjusted
+- [x] debug display can be toggled

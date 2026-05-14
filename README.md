@@ -4,21 +4,24 @@ A RimWorld mod focused on disease simulation instead of random one-off illness e
 
 ## Current slice
 
-The v0.2.x series adds the foundation for a standalone respiratory disease with proximity transmission.
+The v0.3.x series adds complete disease simulation with outsider importation, player feedback, and configurable balancing.
 
 ### Included features:
 - Hidden disease state before symptoms appear
 - Visible standalone disease for testing
-- Debug actions to expose pawns, inspect/clear state, force symptom onset
+- **v0.2.1**: Exposure accumulation and decay system
 - **v0.2.2**: Respiratory proximity transmission with room-based factors
-- **v0.2.2**: Exposure accumulation and decay system
 - **v0.2.2**: Debug tools for fast transmission testing (10x multiplier, pulse action)
+- **v0.3.0**: Outsider importation (disease enters via visitors, traders, raiders, etc.)
+- **v0.3.0**: Player feedback - symptom onset notifications with transmission warnings
+- **v0.3.0**: Debug readout overlay showing all pawns with disease state
+- **v0.3.0**: Expanded settings for balancing (import chance, exposure multiplier)
 
 ### Not included yet:
 - Quarantine tools
 - Additional disease types
-- Player feedback / UI notifications
 - Richer disease progression variants
+- World map spread
 
 ## Requirements
 
@@ -43,3 +46,24 @@ If neither property is set, the project tries a few common install paths first a
 
 This mod is still in active development.
 The current goal is to make one disease simulation loop work cleanly before expanding into balance, feedback, and additional features.
+
+## v0.3.0 Changes
+
+### Outsider Importation
+- Disease can now enter the colony through outsiders (visitors, traders, raiders, refugees, prisoners, quest pawns)
+- Configurable import chance (default 15%)
+- Disease state distribution: 70% incubating, 25% pre-symptomatic infectious, 5% symptomatic
+- Can be enabled/disabled in settings
+
+### Player Feedback
+- Colonist symptom onset creates a letter notification
+- Optional transmission warning in the notification
+- On-screen debug readout (toggleable in settings)
+
+### Settings & Balancing
+- New settings UI with clear sections
+- Outsider importation can be toggled on/off
+- Respiratory spread can be toggled on/off
+- Import chance slider (1% - 50%)
+- Exposure gain multiplier slider (0.1x - 5.0x)
+- Debug readout visibility toggle

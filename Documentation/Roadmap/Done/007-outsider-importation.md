@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Done (v0.3.0)
 
 ## Goal
 
@@ -71,8 +71,8 @@ This feature should come after hidden state, incubation, and respiratory transmi
 
 ## Acceptance criteria
 
-- [ ] new outsider pawns can be detected
-- [ ] same pawn is not checked repeatedly
-- [ ] import chance can be configured
-- [ ] imported disease state is assigned correctly
-- [ ] imported pawn can spread disease if infectious
+- [x] new outsider pawns can be detected
+- [x] same pawn is not checked repeatedly
+- [x] import chance can be configured
+- [x] imported disease state is assigned correctly
+- [x] imported pawn can spread disease if infectious

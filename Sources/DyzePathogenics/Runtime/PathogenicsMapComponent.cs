@@ -181,6 +181,9 @@ namespace Dyze.RimWorld.Pathogenics
             // v0.2.1: Process respiratory proximity transmission
             RespiratoryTransmissionWorker.ProcessTransmission(map);
 
+            // v0.3: Process outsider importation
+            DiseaseImportationWorker.ProcessOutsiderSpawns(map);
+
             // v0.3: Process disease stage transitions (incubation → symptom onset → recovery)
             ProcessStageTransitions();
         }
