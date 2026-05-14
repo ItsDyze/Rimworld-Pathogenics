@@ -1,37 +1,42 @@
 [h1]Dyze's Pathogenics[/h1]
 
-[h2]Your colonists can get sick. Now the sickness spreads.[/h2]
+[h2]Disease should spread before you notice it.[/h2]
 
-Replace RimWorld's random illness events with a real disease that behaves like one — spreading through your colony before you even know it exists.
+Dyze's Pathogenics replaces RimWorld's random illness events with a disease system that moves through your colony like an actual outbreak.
 
-[b]Disease enters through visitors, traders, raiders, and refugees.[/b] Infected outsiders bring illness to your doorstep. Once inside, it spreads through proximity: colonists sharing rooms accumulate exposure from infectious pawns. The catch? [b]Symptoms don't appear immediately.[/b] There's an incubation period where infected colonists look perfectly healthy but can still make others sick.
+Visitors, traders, raiders, refugees, prisoners, and quest pawns can bring infection onto the map. From there, disease spreads through proximity exposure. Colonists sharing rooms with infectious pawns slowly build toward infection themselves.
 
-That's the core tension: by the time you see disease, it's already throughout your colony.
+[b]The important part:[/b] symptoms do not appear immediately. A pawn can already be part of the outbreak before the health tab tells you anything is wrong.
+
+That changes the shape of the problem. Layout, crowding, isolation, and protective gear start to matter.
 
 [hr][/hr]
 
-[h2]Features[/h2]
+[h2]What the mod does right now[/h2]
 
 [list]
-[*][b]Proximity-based transmission[/b] — Disease spreads through shared air. Crowded rooms accelerate exposure.
-[*][b]Hidden progression[/b] — Incubation period means disease can spread before visible symptoms appear.
-[*][b]Outsider importation[/b] — Visitors, traders, raiders, refugees, prisoners, and quest pawns can introduce disease.
-[*][b]Mask protection[/b] — Face-covering apparel (masks, gas helmets, full face gear) reduces or blocks transmission entirely.
-[*][b]Player notifications[/b] — Alerted when colonists show symptoms, with info on likely transmission source.
-[*][b]Debug overlay[/b] — See disease state for every pawn on the map.
-[*][b]Settings[/b] — Toggle features, adjust import frequency and transmission rates.
+[*][b]Proximity-based transmission[/b] — disease spreads through shared air instead of firing as a random event.
+[*][b]Hidden incubation[/b] — infected pawns can progress before symptoms become visible.
+[*][b]Outsider importation[/b] — disease can enter through visitors, traders, raiders, refugees, prisoners, and quest pawns.
+[*][b]Mask protection[/b] — face-covering gear can reduce or fully block transmission.
+[*][b]Symptom notifications[/b] — you get alerted when colonists become visibly sick.
+[*][b]Debug overlay[/b] — useful for testing and understanding how the simulation is behaving.
+[*][b]Settings[/b] — tune import chance, exposure gain, and feature toggles.
 [/list]
 
 [hr][/hr]
 
-[h2]Current State[/h2]
+[h2]Current state[/h2]
 
-[b]v0.3.1[/b] — Active development. Core disease loop is functional. More features planned.
+[b]Version:[/b] v0.3.1
 
-[b]Not included yet:[/b] Quarantine tools, additional disease types, world map spread.
+[b]Status:[/b] Active development. The core disease loop is working and playable, but the mod is still expanding.
 
-Requires Harmony. Compatible with RimWorld 1.6.
+[b]Not in yet:[/b] quarantine management tools, more disease types, richer progression variants, world map spread.
+
+Requires Harmony.
+Compatible with RimWorld 1.6.
 
 [hr][/hr]
 
-[i]Designed for players who want disease to be a strategic problem, not just a random annoyance.[/i]
+[i]If you want disease to feel like a colony problem instead of a coin flip, this is the direction.[/i]
