@@ -101,6 +101,14 @@ namespace Dyze.RimWorld.Pathogenics
                 currentPawnIds.Add(pawn.thingIDNumber);
             }
 
+            foreach (Pawn pawn in GetAliveCaravanColonists())
+            {
+                if (pawn == null || pawn.Dead || !pawn.IsColonist)
+                    continue;
+
+                currentPawnIds.Add(pawn.thingIDNumber);
+            }
+
             List<int> idsToRemove = null;
             foreach (int pawnId in pawnDiseaseStates.Keys)
             {
@@ -241,6 +249,21 @@ namespace Dyze.RimWorld.Pathogenics
             diseaseState.VisibleHediffApplied = true;
 
             return diseaseState;
+        }
+
+        private Pawn ResolveTrackedPawn(int pawnId)
+        {
+            Pawn pawn = FindPawnById(pawnId);
+            if (pawn != null)
+                return pawn;
+
+            foreach (Pawn caravanPawn in GetAliveCaravanColonists())
+            {
+                if (caravanPawn != null && caravanPawn.thingIDNumber == pawnId)
+                    return caravanPawn;
+            }
+
+            return null;
         }
 
         private static IEnumerable<Pawn> GetAliveCaravanColonists()
@@ -434,8 +457,8 @@ namespace Dyze.RimWorld.Pathogenics
                 }
 
                 // Find the pawn
-                Pawn pawn = FindPawnById(state.PawnId);
-                if (pawn == null || pawn.Dead || !pawn.Spawned)
+                Pawn pawn = ResolveTrackedPawn(state.PawnId);
+                if (pawn == null || pawn.Dead)
                 {
                     pawnIdsToRemove ??= new List<int>();
                     pawnIdsToRemove.Add(kvp.Key);
