@@ -609,28 +609,21 @@ namespace Dyze.RimWorld.Pathogenics
 
         [DebugAction(
             "Dyze Pathogenics",
-            "Reset Pathogenics state on current map",
+            "Reset all Pathogenics state worldwide",
             actionType = DebugActionType.Action,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
+            allowedGameStates = AllowedGameStates.Playing
         )]
-        public static void ResetPathogenicsStateOnCurrentMap()
+        public static void ResetAllPathogenicsStateWorldwide()
         {
-            Map map = Find.CurrentMap;
-            if (map == null)
+            PathogenicsGameComponent gameComponent = PathogenicsGameComponent.Instance;
+            if (gameComponent == null)
             {
-                Messages.Message("No map loaded.", MessageTypeDefOf.RejectInput, false);
+                Messages.Message("No Pathogenics game component found.", MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
-            PathogenicsMapComponent mapComponent = map.GetComponent<PathogenicsMapComponent>();
-            if (mapComponent == null)
-            {
-                Messages.Message("No map component found.", MessageTypeDefOf.RejectInput, false);
-                return;
-            }
-
-            mapComponent.ClearAllDiseaseStates();
-            Messages.Message("Cleared Pathogenics hidden state and visible hediffs for the current map.", MessageTypeDefOf.PositiveEvent, false);
+            gameComponent.ClearAllDiseaseStates();
+            Messages.Message("Cleared all Pathogenics hidden state, visible hediffs, and outsider import cache worldwide.", MessageTypeDefOf.PositiveEvent, false);
         }
 
         [DebugAction(

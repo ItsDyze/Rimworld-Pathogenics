@@ -106,7 +106,7 @@ That keeps the design goal of pre-symptomatic infection while removing the earli
 
 Re-enabling resumes the same state. Disabling does not silently clear infection.
 
-If a prototype-era save is already inconsistent, use the debug action **Reset Pathogenics state on current map** for a clean reset.
+If a prototype-era save is already inconsistent, use the debug action **Reset all Pathogenics state worldwide** for a clean global reset.
 
 ## Acceptance criteria
 

@@ -64,7 +64,7 @@ This branch hardens the simulation for public-release use:
 - **Save/load stability:** outsider import checks are persisted, removing reload-dependent re-rolls for already-seen outsiders.
 - **No hidden/visible drift:** the hidden disease state now owns visible `DP_PathogenicFlu` application and removal, so symptom timing and hediff lifetime stay aligned.
 - **Pause-safe master toggle:** disabling the mod now pauses both hidden progression and visible Pathogenics severity progression. Re-enabling resumes from the preserved state.
-- **Recovery/reset path:** debug actions now include registry health logging, cross-map state logging, and a current-map Pathogenics reset to recover seamlessly from broken prototype-era states if needed.
+- **Recovery/reset path:** debug actions now include registry health logging, cross-map state logging, and a worldwide Pathogenics reset to recover seamlessly from broken prototype-era states if needed.
 
 ## Save Compatibility
 
@@ -72,7 +72,7 @@ Existing saves are intended to upgrade forward.
 
 - Older map-owned `pawnDiseaseStates` are imported into the new global registry on load.
 - If a prototype save already contains inconsistent visible/hidden Pathogenics state, the new resync logic repairs many common cases automatically.
-- If a save is still in a broken prototype state, use the debug action **"Reset Pathogenics state on current map"** to clear hidden states and visible Pathogenics hediffs on the current map cleanly.
+- If a save is still in a broken prototype state, use the debug action **"Reset all Pathogenics state worldwide"** to clear hidden states, visible Pathogenics hediffs, and outsider import cache cleanly across the whole save.
 
 ## Requirements
 

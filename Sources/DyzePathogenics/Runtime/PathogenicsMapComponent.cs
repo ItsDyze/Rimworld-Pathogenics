@@ -324,34 +324,7 @@ namespace Dyze.RimWorld.Pathogenics
 
         public void ClearAllDiseaseStates()
         {
-            if (Registry == null)
-            {
-                return;
-            }
-
-            List<int> pawnIdsToRemove = new List<int>();
-            foreach (KeyValuePair<int, PawnDiseaseState> kvp in DiseaseStateEntries.ToList())
-            {
-                Pawn pawn = ResolveTrackedPawn(kvp.Key);
-                bool belongsToThisMap = pawn?.Map == map || kvp.Value?.MapId == map.uniqueID;
-                if (!belongsToThisMap)
-                {
-                    continue;
-                }
-
-                if (pawn != null)
-                {
-                    RemoveVisibleHediff(pawn);
-                }
-
-                pawnIdsToRemove.Add(kvp.Key);
-            }
-
-            for (int i = 0; i < pawnIdsToRemove.Count; i++)
-            {
-                Registry.Remove(pawnIdsToRemove[i]);
-            }
-
+            GameComponent?.ClearAllDiseaseStates();
         }
 
         public override void MapComponentTick()

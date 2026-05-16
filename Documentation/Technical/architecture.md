@@ -148,7 +148,7 @@ Forward migration behavior:
 
 Fallback path:
 
-- if an older prototype save still contains an irrecoverably odd disease state, use **Reset Pathogenics state on current map** to clear hidden state and visible Pathogenics hediffs for the current map, then let outsider importation rebuild naturally from fresh checks
+- if an older prototype save still contains an irrecoverably odd disease state, use **Reset all Pathogenics state worldwide** to clear hidden state, visible Pathogenics hediffs, and outsider import cache across the whole save
 
 ## Debug actions relevant to validation
 
@@ -163,7 +163,7 @@ Useful release-validation actions:
 - `Print simulation state`
 - `Log registry health`
 - `Log selected pawn cross-map state`
-- `Reset Pathogenics state on current map`
+- `Reset all Pathogenics state worldwide`
 
 These are the minimum practical tools for validating save/load, symptom onset, recovery, cross-map lookup, and reset behavior in-game.
 

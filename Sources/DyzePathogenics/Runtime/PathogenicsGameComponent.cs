@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using Verse;
 
 namespace Dyze.RimWorld.Pathogenics
@@ -118,7 +119,14 @@ namespace Dyze.RimWorld.Pathogenics
 
         public void ClearAllDiseaseStates()
         {
+            foreach (KeyValuePair<int, PawnDiseaseState> kvp in pawnDiseaseStates.ToList())
+            {
+                Pawn pawn = PathogenicsPawnLookup.FindAnyPawnById(kvp.Key);
+                RemoveVisiblePathogenicsHediff(pawn);
+            }
+
             pawnDiseaseStates.Clear();
+            checkedOutsiderPawnIds.Clear();
         }
 
         public bool HasCheckedOutsider(int pawnId)
@@ -204,6 +212,26 @@ namespace Dyze.RimWorld.Pathogenics
                 state.RecoveringTick,
                 state.RecoveredTick
             }.Max();
+        }
+
+        private static void RemoveVisiblePathogenicsHediff(Pawn pawn)
+        {
+            if (pawn?.health?.hediffSet == null)
+            {
+                return;
+            }
+
+            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamedSilentFail("DP_PathogenicFlu");
+            if (hediffDef == null)
+            {
+                return;
+            }
+
+            Hediff existingHediff = pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef);
+            if (existingHediff != null)
+            {
+                pawn.health.RemoveHediff(existingHediff);
+            }
         }
     }
 }
