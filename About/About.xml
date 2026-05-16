@@ -14,8 +14,13 @@ Features:
 - Mask protection from face-covering apparel
 - Symptom notifications and debug overlay
 - Configurable balancing settings
+- Cross-map registry and release-hardening improvements
 
-v0.3.1 — Active development. Requires RimWorld 1.6 and Harmony.</description>
+If this version ever gets into a broken prototype-like state, use the debug action "Reset all Pathogenics state worldwide".
+
+That's mostly vibe coded.
+
+v1.0-rc — Release candidate. Requires RimWorld 1.6 and Harmony.</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

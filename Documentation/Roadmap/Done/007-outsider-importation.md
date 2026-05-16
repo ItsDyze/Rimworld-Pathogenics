@@ -2,7 +2,7 @@
 
 ## Status
 
-Done (v0.3.0)
+Done (v0.3.0), hardened for release in v0.3.2-dev
 
 ## Goal
 
@@ -16,31 +16,35 @@ They may not show symptoms immediately.
 
 ## Technical approach
 
-Use the map component to detect newly spawned outsider pawns.
+Outsider detection still runs from the map component tick, but the "already checked" memory is now owned by the global `PathogenicsGameComponent` so it survives save/load.
 
-Do not hook every arrival event at first.
-
-Suggested logic:
+Current logic:
 
 ```text
 for each spawned humanlike pawn:
-    if pawn has not been checked:
+    if pawn has not been checked in the global import cache:
         mark as checked
         if pawn is outsider:
             roll import chance
             if successful:
-                assign hidden disease state
+                assign hidden disease state in the global registry
 ```
 
-Suggested file:
+Implemented file:
 
 ```text
-Source/Simulation/DiseaseImportationWorker.cs
+Sources/DyzePathogenics/Simulation/DiseaseImportationWorker.cs
+```
+
+Registry file:
+
+```text
+Sources/DyzePathogenics/Runtime/PathogenicsGameComponent.cs
 ```
 
 ## Imported states
 
-Suggested first distribution:
+Current distribution:
 
 ```text
 70% incubating
@@ -56,6 +60,7 @@ Included:
 - identify non-colony outsiders
 - roll import chance
 - seed disease state
+- persist outsider check state through save/load
 - debug logging
 
 Excluded:
@@ -65,14 +70,17 @@ Excluded:
 - storyteller incident replacement
 - vanilla disease incident suppression
 
-## Implementation notes
+## Release-hardening notes
 
-This feature should come after hidden state, incubation, and respiratory transmission.
+The original implementation used a static runtime cache, which made outsider importation slightly reload-dependent. That is no longer true.
+
+The checked-pawn cache is now serialized in the save, so reloading does not re-roll already-seen outsiders just because the process restarted.
 
 ## Acceptance criteria
 
 - [x] new outsider pawns can be detected
-- [x] same pawn is not checked repeatedly
+- [x] same pawn is not checked repeatedly during a play session
+- [x] same pawn is not re-checked just because the game was reloaded
 - [x] import chance can be configured
 - [x] imported disease state is assigned correctly
 - [x] imported pawn can spread disease if infectious

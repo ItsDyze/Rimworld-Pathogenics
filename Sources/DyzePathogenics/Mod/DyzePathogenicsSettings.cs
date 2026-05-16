@@ -19,7 +19,8 @@ namespace Dyze.RimWorld.Pathogenics
         
         /// <summary>
         /// Master toggle for the mod's disease simulation.
-        /// When true, the hidden disease state system is active.
+        /// When false, both hidden progression and visible Pathogenics severity progression pause.
+        /// Existing state is preserved and resumes when re-enabled.
         /// </summary>
         public bool Enabled = true;
         

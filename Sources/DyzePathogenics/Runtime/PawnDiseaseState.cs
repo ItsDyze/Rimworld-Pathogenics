@@ -83,7 +83,9 @@ namespace Dyze.RimWorld.Pathogenics
 
         public bool IsInfectious()
         {
-            return Stage == SimulatedDiseaseStage.PreSymptomaticInfectious || Stage == SimulatedDiseaseStage.Symptomatic;
+            return Stage == SimulatedDiseaseStage.PreSymptomaticInfectious ||
+                   Stage == SimulatedDiseaseStage.Symptomatic ||
+                   Stage == SimulatedDiseaseStage.Recovering;
         }
 
         public void Clear()
@@ -94,6 +96,7 @@ namespace Dyze.RimWorld.Pathogenics
             SymptomOnsetTick = -1;
             RecoveringTick = -1;
             RecoveredTick = -1;
+            VisibleHediffApplied = false;
             Exposure = 0f;
         }
 
