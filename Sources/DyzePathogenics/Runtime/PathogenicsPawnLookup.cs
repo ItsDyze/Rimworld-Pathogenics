@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using RimWorld;
 using Verse;
 
 namespace Dyze.RimWorld.Pathogenics
@@ -22,7 +23,7 @@ namespace Dyze.RimWorld.Pathogenics
                     continue;
                 }
 
-                List<Pawn> pawns = map.mapPawns.AllPawnsSpawned;
+                IReadOnlyList<Pawn> pawns = map.mapPawns.AllPawnsSpawned;
                 for (int i = 0; i < pawns.Count; i++)
                 {
                     Pawn pawn = pawns[i];
