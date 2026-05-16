@@ -8,11 +8,13 @@ Planned
 
 Extend Pathogenics so selected vanilla diseases can use the mod's hidden infection and transmission system instead of relying only on random spawn incidents.
 
-The first target should be high-impact diseases that fit the current outbreak model, with plague as the initial candidate.
+In this context, relevant vanilla diseases means diseases that can safely be presumed transmissible within the current Pathogenics model. Diseases that depend on an external vector or transmission route the mod does not simulate are not relevant for this feature.
 
 ## Player-facing behavior
 
 Relevant diseases no longer feel like isolated random events. When enabled, they can enter the colony through Pathogenics-supported infection sources and follow the same broader outbreak logic as the custom disease simulation.
+
+For this feature, relevant should be read narrowly: diseases must be reasonably representable as pawn-to-pawn or otherwise directly colony-transmissible under the existing Pathogenics outbreak model. Diseases that are insect-borne, environment-bound, or otherwise dependent on unsupported transmission routes are excluded.
 
 Players can also control how vanilla disease incidents behave:
 
@@ -25,6 +27,8 @@ This keeps the disease experience more consistent while still letting players ch
 ## Technical approach
 
 Add a disease-integration layer that maps selected vanilla `HediffDef`s to Pathogenics-compatible profiles or handling rules.
+
+Eligibility for integration should be explicit: only vanilla diseases that can be safely treated as transmissible by the routes Pathogenics actually models should be considered. For example, malaria should be excluded because it is insect-borne rather than a direct colony transmission disease.
 
 For each integrated disease:
 
@@ -44,8 +48,8 @@ The implementation should prefer a data-driven registration path so additional d
 
 Included:
 
-- integration framework for relevant vanilla diseases
-- first-pass integration of at least one suitable disease, starting with plague
+- integration framework for relevant transmissible vanilla diseases
+- first-pass integration of at least one suitable disease that clearly fits the supported transmission model
 - settings to disable all vanilla spawn-disease incidents
 - settings to disable only integrated-disease incidents
 - clear player-facing descriptions of how integrated diseases behave
@@ -65,7 +69,7 @@ The main design risk is consistency. If a disease is marked as integrated, playe
 
 Disease selection should stay conservative. Only diseases that make sense for the current Pathogenics model should be integrated. It is better to support a small number of diseases cleanly than to force every vanilla illness into the same system.
 
-Plague is a strong first candidate from a player-value perspective, but the implementation should confirm that it fits the hidden-state and transmission model well enough. If it needs disease-specific handling, that should be documented explicitly.
+The feature should explicitly distinguish transmissible diseases from diseases whose spread depends on unsupported vectors or environmental conditions. Malaria is the clearest exclusion example and should remain outside the integration set unless the mod later gains a matching transmission model.
 
 Documentation should be updated in at least these places when the feature is implemented:
 
@@ -76,7 +80,7 @@ Documentation should be updated in at least these places when the feature is imp
 
 ## Acceptance criteria
 
-- [ ] at least one vanilla disease is integrated into the Pathogenics system
+- [ ] at least one eligible transmissible vanilla disease is integrated into the Pathogenics system
 - [ ] integrated diseases can use Pathogenics-controlled infection flow instead of only vanilla random incidents
 - [ ] players can disable all vanilla spawn-disease incidents in settings
 - [ ] players can disable only incidents for integrated diseases in settings
