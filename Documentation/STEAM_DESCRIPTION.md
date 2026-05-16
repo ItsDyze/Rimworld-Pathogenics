@@ -28,9 +28,9 @@ That changes the shape of the problem. Layout, crowding, isolation, and protecti
 
 [h2]Current state[/h2]
 
-[b]Version:[/b] v0.3.1
+[b]Version:[/b] v0.3.2-dev
 
-[b]Status:[/b] Active development. The core disease loop is working and playable, but the mod is still expanding.
+[b]Status:[/b] Release-hardening pass. The core disease loop is working, and the current work is focused on save/load consistency, cross-map state ownership, and public-release reliability.
 
 [b]Not in yet:[/b] quarantine management tools, more disease types, richer progression variants, world map spread.
 

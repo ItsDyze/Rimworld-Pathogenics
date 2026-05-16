@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using LudeonTK;
 using RimWorld;
 using Verse;
@@ -29,7 +30,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 Messages.Message(
@@ -158,7 +159,6 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             int removedCount = 0;
-
             foreach (Hediff hediff in hediffs.Where(hediff => hediff.def == pathogenicFlu).ToList())
             {
                 pawn.health.RemoveHediff(hediff);
@@ -175,7 +175,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             mapComponent?.ClearDiseaseState(pawn);
 
             Messages.Message(
@@ -203,7 +203,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 Messages.Message(
@@ -216,7 +216,7 @@ namespace Dyze.RimWorld.Pathogenics
 
             mapComponent.AddExposureToPawn(pawn, 0.25f);
 
-            var state = mapComponent.GetDiseaseState(pawn);
+            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
             float currentExposure = state?.Exposure ?? 0f;
 
             Messages.Message(
@@ -244,7 +244,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 Messages.Message(
@@ -267,7 +267,6 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             state.ClearExposure();
-
             if (state.Stage == SimulatedDiseaseStage.Exposed)
             {
                 mapComponent.ClearDiseaseState(pawn);
@@ -298,7 +297,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 Messages.Message(
@@ -332,7 +331,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 DyzeLog.DevAction($"Pawn {pawn.LabelShort} has no map component.");
@@ -354,9 +353,6 @@ namespace Dyze.RimWorld.Pathogenics
             DyzeLog.DevAction(diseaseState.GetDebugInfo(pawn));
         }
 
-        /// <summary>
-        /// v0.2.2: Toggle fast transmission mode (10x) for accelerated testing.
-        /// </summary>
         [DebugAction(
             "Dyze Pathogenics",
             "Toggle Fast Transmission (10x)",
@@ -375,10 +371,6 @@ namespace Dyze.RimWorld.Pathogenics
             );
         }
 
-        /// <summary>
-        /// v0.2.2: Force a transmission pulse from selected pawn to all nearby targets.
-        /// Useful for testing spread without waiting for natural accumulation.
-        /// </summary>
         [DebugAction(
             "Dyze Pathogenics",
             "Force transmission pulse",
@@ -397,7 +389,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 Messages.Message(
@@ -408,7 +400,6 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            // Check if pawn is infectious
             float infectiousness = InfectiousnessUtility.GetInfectiousness(pawn);
             if (infectiousness <= 0f)
             {
@@ -420,7 +411,6 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            // Force transmission pulse with high exposure
             const float PulseExposureAmount = 0.5f;
             int targetsHit = 0;
 
@@ -429,26 +419,27 @@ namespace Dyze.RimWorld.Pathogenics
             {
                 Pawn target = allPawns[i];
                 if (target == null || target == pawn || !target.Spawned || target.Dead)
-                    continue;
-
-                if (!target.RaceProps.Humanlike)
-                    continue;
-
-                // Check distance - use the max radius
-                float distance = pawn.Position.DistanceTo(target.Position);
-                if (distance > RespiratoryTransmissionWorker.MaxTransmissionRadius || distance < 0.1f)
-                    continue;
-
-                // Check if target is valid (not already symptomatic)
-                PathogenicsMapComponent targetMapComponent = target.Map?.GetComponent<PathogenicsMapComponent>();
-                if (targetMapComponent != null)
                 {
-                    PawnDiseaseState targetState = targetMapComponent.GetDiseaseState(target);
-                    if (targetState != null && targetState.Stage >= SimulatedDiseaseStage.Symptomatic)
-                        continue;
+                    continue;
                 }
 
-                // Apply exposure
+                if (!target.RaceProps.Humanlike)
+                {
+                    continue;
+                }
+
+                float distance = pawn.Position.DistanceTo(target.Position);
+                if (distance > RespiratoryTransmissionWorker.MaxTransmissionRadius || distance < 0.1f)
+                {
+                    continue;
+                }
+
+                PawnDiseaseState targetState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(target);
+                if (targetState != null && targetState.Stage >= SimulatedDiseaseStage.Symptomatic)
+                {
+                    continue;
+                }
+
                 mapComponent.AddExposureToPawn(target, PulseExposureAmount);
                 targetsHit++;
             }
@@ -469,7 +460,6 @@ namespace Dyze.RimWorld.Pathogenics
         public static void LogModStatus()
         {
             DyzePathogenicsSettings settings = DyzePathogenicsMod.Settings;
-
             string text =
                 $"Disease Simulation: {settings?.Enabled}\n" +
                 $"Affect Colonists Only: {settings?.AffectColonistsOnly}\n" +
@@ -479,14 +469,11 @@ namespace Dyze.RimWorld.Pathogenics
                 $"Outsider Import Chance: {settings?.OutsiderImportChance:P0}\n" +
                 $"Exposure Multiplier: {settings?.ExposureGainMultiplier:F1}x\n" +
                 $"Show Debug Readout: {settings?.ShowDebugReadout}\n\n" +
-                "v0.3 uses hidden disease state (PawnDiseaseState).";
+                "Release-hardened build: global disease registry + pause-safe toggle.";
 
             Find.WindowStack.Add(new Dialog_MessageBox(text));
         }
 
-        /// <summary>
-        /// v0.3: Print current simulation state for all pawns on the map.
-        /// </summary>
         [DebugAction(
             "Dyze Pathogenics",
             "Print simulation state",
@@ -516,7 +503,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.AppendLine("=== Pathogenics Simulation State ===");
             sb.AppendLine($"Map ID: {map.uniqueID}");
             sb.AppendLine($"Pawns with active disease state: {activeStates.Count}");
@@ -526,22 +513,15 @@ namespace Dyze.RimWorld.Pathogenics
             {
                 Pawn pawn = kvp.Key;
                 PawnDiseaseState state = kvp.Value;
-
                 sb.AppendLine($"--- {pawn.LabelShort} ---");
                 sb.Append(state.GetDebugInfo(pawn));
                 sb.AppendLine();
             }
 
-            // Log to console
             DyzeLog.DevAction(sb.ToString());
-
-            // Also show message
             Messages.Message("Simulation state logged to console (F12).", MessageTypeDefOf.PositiveEvent, false);
         }
 
-        /// <summary>
-        /// v0.3: Show detailed debug info for selected pawn in a message box.
-        /// </summary>
         [DebugAction(
             "Dyze Pathogenics",
             "Show pawn disease details",
@@ -556,7 +536,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 Messages.Message("Could not get map component.", MessageTypeDefOf.RejectInput, false);
@@ -576,12 +556,9 @@ namespace Dyze.RimWorld.Pathogenics
 
             string title = $"Disease State: {pawn.LabelShort}";
             string content = diseaseState.GetDebugInfo(pawn);
-
-            // Add infectiousness info
             float infectiousness = InfectiousnessUtility.GetInfectiousnessForPawn(pawn);
             content += $"\nInfectiousness: {infectiousness:F2}";
 
-            // Add recent exposure events if we had them (for now, just summary)
             if (diseaseState.Stage == SimulatedDiseaseStage.Exposed)
             {
                 content += $"\nExposure: {diseaseState.Exposure:F2} / 1.00";
@@ -590,25 +567,112 @@ namespace Dyze.RimWorld.Pathogenics
             Find.WindowStack.Add(new Dialog_MessageBox(content, title));
         }
 
-        /// <summary>
-        /// Helper to find pawn by ID.
-        /// </summary>
-        private static Pawn FindPawnById(Map map, int pawnId)
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Log registry health",
+            actionType = DebugActionType.Action,
+            allowedGameStates = AllowedGameStates.Playing
+        )]
+        public static void LogRegistryHealth()
         {
-            var pawns = map.mapPawns.AllPawnsSpawned;
-            for (int i = 0; i < pawns.Count; i++)
+            PathogenicsGameComponent gameComponent = PathogenicsGameComponent.Instance;
+            if (gameComponent == null)
             {
-                if (pawns[i].thingIDNumber == pawnId)
+                Messages.Message("No Pathogenics game component found.", MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("=== Pathogenics Registry Health ===");
+            sb.AppendLine($"Tracked disease states: {gameComponent.PawnDiseaseStates.Count}");
+            sb.AppendLine($"Checked outsider cache: {gameComponent.CheckedOutsiderPawnCount}");
+            sb.AppendLine($"Simulation enabled: {DyzePathogenicsMod.Settings?.Enabled}");
+
+            int shown = 0;
+            foreach (var kvp in gameComponent.PawnDiseaseStates.OrderBy(kvp => kvp.Key))
+            {
+                Pawn trackedPawn = PathogenicsPawnLookup.FindAnyPawnById(kvp.Key);
+                string pawnLabel = trackedPawn?.LabelShort ?? $"ID {kvp.Key}";
+                string location = PathogenicsPawnLookup.DescribePawnLocation(trackedPawn);
+                sb.AppendLine($"- {pawnLabel}: {kvp.Value?.GetStageLabel() ?? "<null>"}, {location}");
+                shown++;
+                if (shown >= 20)
                 {
-                    return pawns[i];
+                    sb.AppendLine("- …");
+                    break;
                 }
             }
-            return null;
+
+            DyzeLog.DevAction(sb.ToString());
+            Messages.Message("Registry health logged to console (F12).", MessageTypeDefOf.PositiveEvent, false);
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Reset Pathogenics state on current map",
+            actionType = DebugActionType.Action,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ResetPathogenicsStateOnCurrentMap()
+        {
+            Map map = Find.CurrentMap;
+            if (map == null)
+            {
+                Messages.Message("No map loaded.", MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            PathogenicsMapComponent mapComponent = map.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
+            {
+                Messages.Message("No map component found.", MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            mapComponent.ClearAllDiseaseStates();
+            Messages.Message("Cleared Pathogenics hidden state and visible hediffs for the current map.", MessageTypeDefOf.PositiveEvent, false);
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Log selected pawn cross-map state",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void LogPawnCrossMapState(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                DyzeLog.DevAction("No pawn selected.");
+                return;
+            }
+
+            PawnDiseaseState diseaseState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
+            string mapInfo = pawn.Map != null ? $"map {pawn.Map.uniqueID}" : "off-map/caravan";
+            string visible = PawnHasVisiblePathogenicFlu(pawn) ? "yes" : "no";
+
+            if (diseaseState == null)
+            {
+                DyzeLog.DevAction($"Pawn {pawn.LabelShort}: no registry state, location={mapInfo}, visibleHediff={visible}");
+                return;
+            }
+
+            DyzeLog.DevAction($"Pawn {pawn.LabelShort}: location={mapInfo}, stateMapId={diseaseState.MapId}, stage={diseaseState.GetStageLabel()}, visibleHediff={visible}, preserveAcrossMaps={diseaseState.PreserveAcrossMaps}");
+        }
+
+        private static PathogenicsMapComponent GetMapComponentForPawn(Pawn pawn)
+        {
+            if (pawn?.Map != null)
+            {
+                return pawn.Map.GetComponent<PathogenicsMapComponent>();
+            }
+
+            return Find.CurrentMap?.GetComponent<PathogenicsMapComponent>();
         }
 
         private static PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn)
         {
-            var mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
                 return null;
@@ -616,6 +680,10 @@ namespace Dyze.RimWorld.Pathogenics
 
             int currentTick = Find.TickManager.TicksGame;
             PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn);
+            if (diseaseState == null)
+            {
+                return null;
+            }
 
             if (diseaseState.ExposedTick < 0)
             {
@@ -629,7 +697,9 @@ namespace Dyze.RimWorld.Pathogenics
 
             diseaseState.Stage = SimulatedDiseaseStage.Symptomatic;
             diseaseState.SymptomOnsetTick = currentTick;
-
+            diseaseState.VisibleHediffApplied = true;
+            diseaseState.MapId = pawn.Map?.uniqueID ?? diseaseState.MapId;
+            diseaseState.PreserveAcrossMaps = pawn.IsColonist;
             return diseaseState;
         }
 

@@ -10,7 +10,7 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 
 ## Current Status
 
-**v0.3.1** — Active development. The core disease loop is functional. Focus is on stabilizing the simulation, adding player feedback tools, and expanding configuration options.
+**v0.3.2-dev** — Release-hardening pass. The core disease loop is functional and the current focus is reliability: cross-map state ownership, save/load consistency, pause-safe toggles, and better reset/debug tooling for public release readiness.
 
 ### Implemented Features
 
@@ -25,6 +25,9 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 | Debug readout overlay | v0.3 |
 | Configurable balancing (import chance, exposure multiplier) | v0.3 |
 | Mask protection (face-covering apparel blocks transmission) | v0.3.1 |
+| Global disease registry for cross-map/caravan state continuity | v0.3.2-dev |
+| Persistent outsider import cache across save/load | v0.3.2-dev |
+| Pause-safe master toggle and reset tooling | v0.3.2-dev |
 
 ### Not Yet Implemented
 
@@ -38,6 +41,8 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 ```
 Outsider arrives infected or incubating
         ↓
+Global registry tracks hidden disease state across maps/caravans
+        ↓
 Pawn may become infectious before symptoms appear
         ↓
 Nearby pawns accumulate exposure through shared air
@@ -46,8 +51,28 @@ Exposure threshold triggers incubation
         ↓
 Symptoms appear as visible disease
         ↓
+Hidden state owns symptom end / recovery cleanup
+        ↓
 Isolation and distance reduce spread
 ```
+
+## Release Reliability Notes
+
+This branch hardens the simulation for public-release use:
+
+- **Cross-map continuity:** disease state is now owned by a `GameComponent` registry instead of only a map component, so lookups continue to work when pawns move between maps or travel off-map.
+- **Save/load stability:** outsider import checks are persisted, removing reload-dependent re-rolls for already-seen outsiders.
+- **No hidden/visible drift:** the hidden disease state now owns visible `DP_PathogenicFlu` application and removal, so symptom timing and hediff lifetime stay aligned.
+- **Pause-safe master toggle:** disabling the mod now pauses both hidden progression and visible Pathogenics severity progression. Re-enabling resumes from the preserved state.
+- **Recovery/reset path:** debug actions now include registry health logging, cross-map state logging, and a current-map Pathogenics reset to recover seamlessly from broken prototype-era states if needed.
+
+## Save Compatibility
+
+Existing saves are intended to upgrade forward.
+
+- Older map-owned `pawnDiseaseStates` are imported into the new global registry on load.
+- If a prototype save already contains inconsistent visible/hidden Pathogenics state, the new resync logic repairs many common cases automatically.
+- If a save is still in a broken prototype state, use the debug action **"Reset Pathogenics state on current map"** to clear hidden states and visible Pathogenics hediffs on the current map cleanly.
 
 ## Requirements
 
