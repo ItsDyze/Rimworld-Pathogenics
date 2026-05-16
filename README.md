@@ -10,7 +10,7 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 
 ## Current Status
 
-**v0.3.2-dev** — Release-hardening pass. The core disease loop is functional and the current focus is reliability: cross-map state ownership, save/load consistency, pause-safe toggles, and better reset/debug tooling for public release readiness.
+**v1.0-rc** — Release candidate. The mod is functionally ready for release; the only missing public-release piece is the final illustration from the artist before it goes live.
 
 ### Implemented Features
 
@@ -25,9 +25,9 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 | Debug readout overlay | v0.3 |
 | Configurable balancing (import chance, exposure multiplier) | v0.3 |
 | Mask protection (face-covering apparel blocks transmission) | v0.3.1 |
-| Global disease registry for cross-map/caravan state continuity | v0.3.2-dev |
-| Persistent outsider import cache across save/load | v0.3.2-dev |
-| Pause-safe master toggle and reset tooling | v0.3.2-dev |
+| Global disease registry for cross-map/caravan state continuity | v1.0-rc |
+| Persistent outsider import cache across save/load | v1.0-rc |
+| Pause-safe master toggle and reset tooling | v1.0-rc |
 
 ### Not Yet Implemented
 
@@ -58,7 +58,7 @@ Isolation and distance reduce spread
 
 ## Release Reliability Notes
 
-This branch hardens the simulation for public-release use:
+This release candidate hardens the simulation for public release:
 
 - **Cross-map continuity:** disease state is now owned by a `GameComponent` registry instead of only a map component, so lookups continue to work when pawns move between maps or travel off-map.
 - **Save/load stability:** outsider import checks are persisted, removing reload-dependent re-rolls for already-seen outsiders.
@@ -69,6 +69,8 @@ This branch hardens the simulation for public-release use:
 ## Save Compatibility
 
 Existing saves are intended to upgrade forward.
+
+> That's mostly vibe coded.
 
 - Older map-owned `pawnDiseaseStates` are imported into the new global registry on load.
 - If a prototype save already contains inconsistent visible/hidden Pathogenics state, the new resync logic repairs many common cases automatically.

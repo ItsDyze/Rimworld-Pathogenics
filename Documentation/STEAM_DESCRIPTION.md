@@ -28,11 +28,15 @@ That changes the shape of the problem. Layout, crowding, isolation, and protecti
 
 [h2]Current state[/h2]
 
-[b]Version:[/b] v0.3.2-dev
+[b]Version:[/b] v1.0-rc
 
-[b]Status:[/b] Release-hardening pass. The core disease loop is working, and the current work is focused on save/load consistency, cross-map state ownership, and public-release reliability.
+[b]Status:[/b] Release candidate. This is the version intended to go live once the final illustration from the artist is in.
 
 [b]Not in yet:[/b] quarantine management tools, more disease types, richer progression variants, world map spread.
+
+[b]Having issues with this version?[/b] Use the debug action [i]Reset all Pathogenics state worldwide[/i] to cleanly reset existing Pathogenics disease state across the whole save.
+
+[i]That's mostly vibe coded.[/i]
 
 Requires Harmony.
 Compatible with RimWorld 1.6.
