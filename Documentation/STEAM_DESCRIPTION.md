@@ -21,7 +21,8 @@ That changes the shape of the problem. Layout, crowding, isolation, and protecti
 [*][b]Mask protection[/b] — face-covering gear can reduce or fully block transmission.
 [*][b]Symptom notifications[/b] — you get alerted when colonists become visibly sick.
 [*][b]Debug overlay[/b] — useful for testing and understanding how the simulation is behaving.
-[*][b]Settings[/b] — tune import chance, exposure gain, and feature toggles.
+[*][b]Settings[/b] — tune import chance, exposure gain, vanilla disease incident handling, and feature toggles.
+[*][b]Vanilla flu integration[/b] — flu can use the Pathogenics hidden infection flow instead of only appearing from vanilla random incidents.
 [/list]
 
 [hr][/hr]
@@ -32,7 +33,7 @@ That changes the shape of the problem. Layout, crowding, isolation, and protecti
 
 [b]Status:[/b] Release candidate. This is the version intended to go live once the final illustration from the artist is in.
 
-[b]Not in yet:[/b] quarantine management tools, more disease types, richer progression variants, world map spread.
+[b]Not in yet:[/b] quarantine management tools, richer progression variants, world map spread, broad cross-mod disease support.
 
 [b]Having issues with this version?[/b] Use the debug action [i]Reset all Pathogenics state worldwide[/i] to cleanly reset existing Pathogenics disease state across the whole save.
 

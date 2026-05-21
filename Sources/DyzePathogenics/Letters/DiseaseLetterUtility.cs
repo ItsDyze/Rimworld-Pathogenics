@@ -1,6 +1,7 @@
 using System;
 using RimWorld;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -17,8 +18,10 @@ namespace Dyze.RimWorld.Pathogenics
             if (pawn == null)
                 return;
 
-            string label = "DP_PathogenicFluDetectedLabel".Translate();
-            string text = GetSymptomOnsetText(pawn);
+            PathogenicsDiseaseProfile profile = GetProfileForPawn(pawn);
+            string diseaseLabel = profile?.HediffDef?.label ?? "disease";
+            string label = "DP_DiseaseDetectedLabel".Translate(diseaseLabel.CapitalizeFirst()).ToString();
+            string text = GetSymptomOnsetText(pawn, diseaseLabel);
 
             LetterDef letterDef = LetterDefOf.ThreatSmall;
             LookTargets lookTargets = new LookTargets(pawn);
@@ -29,10 +32,10 @@ namespace Dyze.RimWorld.Pathogenics
         /// <summary>
         /// Get the text for symptom onset notification.
         /// </summary>
-        private static string GetSymptomOnsetText(Pawn pawn)
+        private static string GetSymptomOnsetText(Pawn pawn, string diseaseLabel)
         {
             // Base text
-            string baseText = "DP_PathogenicFluDetectedDesc".Translate(pawn.Named("PAWN")).ToString();
+            string baseText = "DP_DiseaseDetectedDesc".Translate(pawn.Named("PAWN"), diseaseLabel).ToString();
 
             // Add transmission warning if settings allow
             if (DyzePathogenicsMod.Settings?.ShowTransmissionWarning == true)
@@ -52,13 +55,21 @@ namespace Dyze.RimWorld.Pathogenics
             if (pawn == null)
                 return;
 
-            string label = "DP_PathogenicFluRecoveredLabel".Translate();
-            string text = "DP_PathogenicFluRecoveredDesc".Translate(pawn.Named("PAWN")).ToString();
+            PathogenicsDiseaseProfile profile = GetProfileForPawn(pawn);
+            string diseaseLabel = profile?.HediffDef?.label ?? "disease";
+            string label = "DP_DiseaseRecoveredLabel".Translate(diseaseLabel.CapitalizeFirst()).ToString();
+            string text = "DP_DiseaseRecoveredDesc".Translate(pawn.Named("PAWN"), diseaseLabel).ToString();
 
             LetterDef letterDef = LetterDefOf.PositiveEvent;
             LookTargets lookTargets = new LookTargets(pawn);
 
             Find.LetterStack.ReceiveLetter(label, text, letterDef, lookTargets);
+        }
+
+        private static PathogenicsDiseaseProfile GetProfileForPawn(Pawn pawn)
+        {
+            PawnDiseaseState state = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
+            return PathogenicsDiseaseRegistry.GetProfile(state);
         }
 
         /// <summary>

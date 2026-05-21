@@ -4,12 +4,13 @@ using LudeonTK;
 using RimWorld;
 using Verse;
 using Dyze.RimWorld.Pathogenics.Simulation;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics
 {
     public static class DyzeDebugActions
     {
-        private const string PathogenicFluDefName = "DP_PathogenicFlu";
+        private const string PathogenicFluDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
         private const float DefaultPathogenicFluSeverity = 0.15f;
 
         [DebugAction(
@@ -339,9 +340,10 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             PawnDiseaseState diseaseState = mapComponent.GetDiseaseState(pawn);
-            if (diseaseState == null && PawnHasVisiblePathogenicFlu(pawn))
+            string visibleDiseaseDefName = GetVisiblePathogenicsDiseaseDefName(pawn);
+            if (diseaseState == null && !visibleDiseaseDefName.NullOrEmpty())
             {
-                diseaseState = EnsureSymptomaticDiseaseState(pawn);
+                diseaseState = EnsureSymptomaticDiseaseState(pawn, visibleDiseaseDefName);
             }
 
             if (diseaseState == null || !diseaseState.HasDiseaseState())
@@ -440,7 +442,8 @@ namespace Dyze.RimWorld.Pathogenics
                     continue;
                 }
 
-                mapComponent.AddExposureToPawn(target, PulseExposureAmount);
+                string sourceDiseaseDefName = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn)?.DiseaseDefName;
+                mapComponent.AddExposureToPawn(target, PulseExposureAmount, sourceDiseaseDefName);
                 targetsHit++;
             }
 
@@ -466,10 +469,13 @@ namespace Dyze.RimWorld.Pathogenics
                 $"Debug Logging: {settings?.EnableDebugLogging}\n" +
                 $"Outsider Importation: {settings?.EnableOutsiderImportation}\n" +
                 $"Respiratory Spread: {settings?.EnableRespiratorySpread}\n" +
+                $"Suppress Integrated Vanilla Incidents: {settings?.DisableIntegratedVanillaDiseaseIncidents}\n" +
+                $"Suppress All Vanilla Incidents: {settings?.DisableAllVanillaDiseaseIncidents}\n" +
                 $"Outsider Import Chance: {settings?.OutsiderImportChance:P0}\n" +
                 $"Exposure Multiplier: {settings?.ExposureGainMultiplier:F1}x\n" +
-                $"Show Debug Readout: {settings?.ShowDebugReadout}\n\n" +
-                "Release-hardened build: global disease registry + pause-safe toggle.";
+                $"Show Debug Readout: {settings?.ShowDebugReadout}\n" +
+                $"Integrated diseases: {string.Join(", ", PathogenicsDiseaseRegistry.AvailableProfiles().Select(profile => profile.HediffDefName).ToArray())}\n\n" +
+                "Release-hardened build: global disease registry + pause-safe toggle + vanilla disease integration.";
 
             Find.WindowStack.Add(new Dialog_MessageBox(text));
         }
@@ -642,7 +648,8 @@ namespace Dyze.RimWorld.Pathogenics
 
             PawnDiseaseState diseaseState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
             string mapInfo = pawn.Map != null ? $"map {pawn.Map.uniqueID}" : "off-map/caravan";
-            string visible = PawnHasVisiblePathogenicFlu(pawn) ? "yes" : "no";
+            string visibleDiseaseDefName = GetVisiblePathogenicsDiseaseDefName(pawn);
+            string visible = visibleDiseaseDefName.NullOrEmpty() ? "no" : visibleDiseaseDefName;
 
             if (diseaseState == null)
             {
@@ -663,7 +670,7 @@ namespace Dyze.RimWorld.Pathogenics
             return Find.CurrentMap?.GetComponent<PathogenicsMapComponent>();
         }
 
-        private static PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn)
+        private static PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
             PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
@@ -672,7 +679,7 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             int currentTick = Find.TickManager.TicksGame;
-            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn);
+            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn, diseaseDefName);
             if (diseaseState == null)
             {
                 return null;
@@ -696,10 +703,23 @@ namespace Dyze.RimWorld.Pathogenics
             return diseaseState;
         }
 
-        private static bool PawnHasVisiblePathogenicFlu(Pawn pawn)
+        private static string GetVisiblePathogenicsDiseaseDefName(Pawn pawn)
         {
-            HediffDef pathogenicFlu = GetPathogenicFluDef();
-            return pathogenicFlu != null && pawn.health?.hediffSet?.GetFirstHediffOfDef(pathogenicFlu) != null;
+            if (pawn?.health?.hediffSet == null)
+            {
+                return null;
+            }
+
+            foreach (PathogenicsDiseaseProfile profile in PathogenicsDiseaseRegistry.AvailableProfiles())
+            {
+                HediffDef hediffDef = profile.HediffDef;
+                if (hediffDef != null && pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef) != null)
+                {
+                    return hediffDef.defName;
+                }
+            }
+
+            return null;
         }
 
         private static HediffDef GetPathogenicFluDef()

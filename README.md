@@ -28,6 +28,20 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 | Global disease registry for cross-map/caravan state continuity | v1.0-rc |
 | Persistent outsider import cache across save/load | v1.0-rc |
 | Pause-safe master toggle and reset tooling | v1.0-rc |
+| Vanilla flu integration with optional vanilla disease incident suppression | v1.0-rc |
+
+### Integrated Vanilla Diseases
+
+Pathogenics now has a small disease integration registry. The first integrated vanilla disease is **flu** (`Flu`), because it fits the current shared-air respiratory model.
+
+Integrated flu can enter through the existing outsider importation flow, spread through the same hidden exposure/incubation system, and appear as the vanilla flu hediff when symptoms start.
+
+The settings window includes disease event controls:
+
+- **Disable all vanilla disease incidents**: blocks vanilla random disease incidents entirely.
+- **Disable integrated vanilla disease incidents**: blocks only vanilla incidents for Pathogenics-integrated diseases, currently flu. Non-integrated diseases such as malaria remain untouched.
+
+Malaria and other vector/environment-bound illnesses are intentionally not integrated until Pathogenics has matching transmission routes.
 
 ### Not Yet Implemented
 

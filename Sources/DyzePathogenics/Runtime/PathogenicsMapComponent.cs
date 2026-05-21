@@ -4,6 +4,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 using Dyze.RimWorld.Pathogenics.Simulation;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -118,9 +119,9 @@ namespace Dyze.RimWorld.Pathogenics
             }
         }
 
-        public PawnDiseaseState GetOrCreateDiseaseState(Pawn pawn)
+        public PawnDiseaseState GetOrCreateDiseaseState(Pawn pawn, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
-            return GameComponent?.GetOrCreateDiseaseState(pawn);
+            return GameComponent?.GetOrCreateDiseaseState(pawn, diseaseDefName);
         }
 
         public PawnDiseaseState GetDiseaseState(Pawn pawn)
@@ -131,9 +132,13 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             PawnDiseaseState state = GameComponent?.TryGetDiseaseState(pawn);
-            if (state == null && PawnHasVisiblePathogenicFlu(pawn))
+            if (state == null)
             {
-                state = EnsureSymptomaticDiseaseState(pawn);
+                string visibleDiseaseDefName = GetVisiblePathogenicsDiseaseDefName(pawn);
+                if (!visibleDiseaseDefName.NullOrEmpty())
+                {
+                    state = EnsureSymptomaticDiseaseState(pawn, visibleDiseaseDefName);
+                }
             }
 
             if (state != null && pawn.Map != null)
@@ -199,13 +204,32 @@ namespace Dyze.RimWorld.Pathogenics
             return pawn != null && pawn.Spawned && !pawn.Dead;
         }
 
-        private bool PawnHasVisiblePathogenicFlu(Pawn pawn)
+        private string GetVisiblePathogenicsDiseaseDefName(Pawn pawn)
         {
-            HediffDef pathogenicFlu = DefDatabase<HediffDef>.GetNamedSilentFail("DP_PathogenicFlu");
-            return pathogenicFlu != null && pawn.health?.hediffSet?.GetFirstHediffOfDef(pathogenicFlu) != null;
+            if (pawn?.health?.hediffSet == null)
+            {
+                return null;
+            }
+
+            foreach (PathogenicsDiseaseProfile profile in PathogenicsDiseaseRegistry.AvailableProfiles())
+            {
+                HediffDef hediffDef = profile.HediffDef;
+                if (hediffDef != null && pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef) != null)
+                {
+                    return hediffDef.defName;
+                }
+            }
+
+            return null;
         }
 
-        private PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn)
+        private bool PawnHasVisiblePathogenicsDisease(Pawn pawn, PawnDiseaseState state)
+        {
+            HediffDef hediffDef = PathogenicsDiseaseRegistry.GetProfile(state)?.HediffDef;
+            return hediffDef != null && pawn.health?.hediffSet?.GetFirstHediffOfDef(hediffDef) != null;
+        }
+
+        private PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
             if (pawn == null)
             {
@@ -213,7 +237,7 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             int currentTick = Find.TickManager.TicksGame;
-            PawnDiseaseState diseaseState = GetOrCreateDiseaseState(pawn);
+            PawnDiseaseState diseaseState = GetOrCreateDiseaseState(pawn, diseaseDefName);
             if (diseaseState == null)
             {
                 return null;
@@ -362,11 +386,11 @@ namespace Dyze.RimWorld.Pathogenics
                 }
 
                 PawnDiseaseState state = GameComponent?.TryGetDiseaseState(pawn);
-                bool hasVisibleHediff = PawnHasVisiblePathogenicFlu(pawn);
+                string visibleDiseaseDefName = GetVisiblePathogenicsDiseaseDefName(pawn);
 
-                if (hasVisibleHediff && state == null)
+                if (!visibleDiseaseDefName.NullOrEmpty() && state == null)
                 {
-                    EnsureSymptomaticDiseaseState(pawn);
+                    EnsureSymptomaticDiseaseState(pawn, visibleDiseaseDefName);
                     continue;
                 }
 
@@ -374,6 +398,8 @@ namespace Dyze.RimWorld.Pathogenics
                 {
                     continue;
                 }
+
+                bool hasVisibleHediff = PawnHasVisiblePathogenicsDisease(pawn, state);
 
                 if (state.Stage >= SimulatedDiseaseStage.Recovering && hasVisibleHediff)
                 {
@@ -607,7 +633,8 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamedSilentFail("DP_PathogenicFlu");
+            PawnDiseaseState state = GameComponent?.TryGetDiseaseState(pawn);
+            HediffDef hediffDef = PathogenicsDiseaseRegistry.GetProfile(state)?.HediffDef;
             if (hediffDef == null)
             {
                 return;
@@ -617,10 +644,9 @@ namespace Dyze.RimWorld.Pathogenics
             if (existingHediff != null)
             {
                 existingHediff.Severity = 0.001f;
-                PawnDiseaseState existingState = GameComponent?.TryGetDiseaseState(pawn);
-                if (existingState != null)
+                if (state != null)
                 {
-                    existingState.VisibleHediffApplied = true;
+                    state.VisibleHediffApplied = true;
                 }
                 return;
             }
@@ -629,7 +655,6 @@ namespace Dyze.RimWorld.Pathogenics
             newHediff.Severity = 0.001f;
             pawn.health.AddHediff(newHediff);
 
-            PawnDiseaseState state = GameComponent?.TryGetDiseaseState(pawn);
             if (state != null)
             {
                 state.VisibleHediffApplied = true;
@@ -643,7 +668,8 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamedSilentFail("DP_PathogenicFlu");
+            PawnDiseaseState state = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
+            HediffDef hediffDef = PathogenicsDiseaseRegistry.GetProfile(state)?.HediffDef;
             if (hediffDef == null)
             {
                 return;
@@ -666,7 +692,7 @@ namespace Dyze.RimWorld.Pathogenics
             DiseaseLetterUtility.SendSymptomOnsetLetter(pawn);
         }
 
-        public void AddExposureToPawn(Pawn pawn, float amount)
+        public void AddExposureToPawn(Pawn pawn, float amount, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
             if (pawn == null)
             {
@@ -678,7 +704,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            PawnDiseaseState state = GetOrCreateDiseaseState(pawn);
+            PawnDiseaseState state = GetOrCreateDiseaseState(pawn, diseaseDefName);
             if (state == null)
             {
                 return;
@@ -688,6 +714,7 @@ namespace Dyze.RimWorld.Pathogenics
             if (state.Stage == SimulatedDiseaseStage.None || state.Stage == SimulatedDiseaseStage.Recovered)
             {
                 state.Stage = SimulatedDiseaseStage.Exposed;
+                state.DiseaseDefName = diseaseDefName.NullOrEmpty() ? PathogenicsDiseaseRegistry.DefaultDiseaseDefName : diseaseDefName;
                 state.ExposedTick = currentTick;
                 state.ClearExposure();
                 state.VisibleHediffApplied = false;

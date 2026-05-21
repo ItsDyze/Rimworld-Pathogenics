@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -84,7 +85,7 @@ namespace Dyze.RimWorld.Pathogenics
             return state;
         }
 
-        public PawnDiseaseState GetOrCreateDiseaseState(Pawn pawn)
+        public PawnDiseaseState GetOrCreateDiseaseState(Pawn pawn, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
             if (pawn == null)
             {
@@ -94,8 +95,16 @@ namespace Dyze.RimWorld.Pathogenics
             int pawnId = pawn.thingIDNumber;
             if (!pawnDiseaseStates.TryGetValue(pawnId, out PawnDiseaseState state))
             {
-                state = new PawnDiseaseState(pawnId, pawn.Map?.uniqueID ?? -1);
+                state = new PawnDiseaseState(pawnId, pawn.Map?.uniqueID ?? -1, diseaseDefName);
                 pawnDiseaseStates[pawnId] = state;
+            }
+            else if (!diseaseDefName.NullOrEmpty() && !state.HasDiseaseState())
+            {
+                state.DiseaseDefName = diseaseDefName;
+            }
+            else if (state.DiseaseDefName.NullOrEmpty())
+            {
+                state.DiseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
             }
 
             if (pawn.Map != null)
@@ -122,7 +131,7 @@ namespace Dyze.RimWorld.Pathogenics
             foreach (KeyValuePair<int, PawnDiseaseState> kvp in pawnDiseaseStates.ToList())
             {
                 Pawn pawn = PathogenicsPawnLookup.FindAnyPawnById(kvp.Key);
-                RemoveVisiblePathogenicsHediff(pawn);
+                RemoveVisiblePathogenicsHediff(pawn, kvp.Value);
             }
 
             pawnDiseaseStates.Clear();
@@ -214,14 +223,14 @@ namespace Dyze.RimWorld.Pathogenics
             }.Max();
         }
 
-        private static void RemoveVisiblePathogenicsHediff(Pawn pawn)
+        private static void RemoveVisiblePathogenicsHediff(Pawn pawn, PawnDiseaseState state = null)
         {
             if (pawn?.health?.hediffSet == null)
             {
                 return;
             }
 
-            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamedSilentFail("DP_PathogenicFlu");
+            HediffDef hediffDef = PathogenicsDiseaseRegistry.GetProfile(state)?.HediffDef ?? PathogenicsDiseaseRegistry.DefaultProfile?.HediffDef;
             if (hediffDef == null)
             {
                 return;

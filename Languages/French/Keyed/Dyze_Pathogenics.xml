@@ -3,14 +3,45 @@
 
   <PathogenicFluDetected>Grippe pathogène détectée</PathogenicFluDetected>
   <PathogenicFluDetectedDesc>{PAWN_nameDef} a développé des symptômes de la grippe pathogène !\n\nLa maladie a progressé depuis sa phase d'incubation. Assurez-vous que ce colon reçoive des soins médicaux.</PathogenicFluDetectedDesc>
+  <DP_DiseaseDetectedLabel>{0} détectée</DP_DiseaseDetectedLabel>
+  <DP_DiseaseDetectedDesc>{PAWN_nameDef} a développé des symptômes de {0} !\n\nLa maladie a progressé depuis sa phase d'incubation. Assurez-vous que ce colon reçoive des soins médicaux.</DP_DiseaseDetectedDesc>
+  <DP_DiseaseRecoveredLabel>{0} guérie</DP_DiseaseRecoveredLabel>
+  <DP_DiseaseRecoveredDesc>{PAWN_nameDef} a guéri de {0}.</DP_DiseaseRecoveredDesc>
+  <DP_TransmissionWarning>Attention : la maladie est contagieuse ! Toute personne à proximité peut être exposée.</DP_TransmissionWarning>
 
   <Dyze_Pathogenics_SettingsCategory>Dyze's Pathogenics</Dyze_Pathogenics_SettingsCategory>
+
+  <Dyze_Pathogenics_Section_Simulation>Simulation</Dyze_Pathogenics_Section_Simulation>
+  <Dyze_Pathogenics_Section_OutsiderImportation>Importation extérieure</Dyze_Pathogenics_Section_OutsiderImportation>
+  <Dyze_Pathogenics_Section_RespiratorySpread>Transmission respiratoire</Dyze_Pathogenics_Section_RespiratorySpread>
+  <Dyze_Pathogenics_Section_PlayerFeedback>Retour joueur</Dyze_Pathogenics_Section_PlayerFeedback>
+  <Dyze_Pathogenics_Section_DiseaseEvents>Gestion des événements de maladie</Dyze_Pathogenics_Section_DiseaseEvents>
+  <Dyze_Pathogenics_Section_Debug>Débogage</Dyze_Pathogenics_Section_Debug>
 
   <Dyze_Pathogenics_Enable_Label>Activer la simulation de maladie</Dyze_Pathogenics_Enable_Label>
   <Dyze_Pathogenics_Enable_Desc>Active la simulation de maladie respiratoire autonome avec suivi de l'état de maladie caché.</Dyze_Pathogenics_Enable_Desc>
 
   <Dyze_Pathogenics_AffectColonistsOnly_Label>Affecter uniquement les colons</Dyze_Pathogenics_AffectColonistsOnly_Label>
   <Dyze_Pathogenics_AffectColonistsOnly_Desc>Si activé, seuls les colons peuvent être affectés par la simulation de maladie.</Dyze_Pathogenics_AffectColonistsOnly_Desc>
+
+  <Dyze_Pathogenics_EnableOutsiderImportation_Label>Activer l'importation par les extérieurs</Dyze_Pathogenics_EnableOutsiderImportation_Label>
+  <Dyze_Pathogenics_EnableOutsiderImportation_Desc>Si activé, les visiteurs, marchands, pillards, réfugiés, prisonniers et pions de quête peuvent introduire une maladie dans la colonie.</Dyze_Pathogenics_EnableOutsiderImportation_Desc>
+  <Dyze_Pathogenics_OutsiderImportChance_Label>Probabilité d'importation extérieure</Dyze_Pathogenics_OutsiderImportChance_Label>
+
+  <Dyze_Pathogenics_Section_DiseaseEvents>Gestion des événements de maladie</Dyze_Pathogenics_Section_DiseaseEvents>
+  <Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Label>Désactiver tous les incidents de maladie vanilla</Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Label>
+  <Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Desc>Empêche les incidents aléatoires de maladie vanilla. L'importation et la transmission Pathogenics peuvent toujours créer des épidémies.</Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Desc>
+  <Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Label>Désactiver les incidents des maladies intégrées</Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Label>
+  <Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Desc>Empêche seulement les incidents des maladies explicitement intégrées à Pathogenics, actuellement la grippe vanilla. Les maladies non intégrées comme le paludisme restent inchangées.</Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Desc>
+
+  <Dyze_Pathogenics_EnableRespiratorySpread_Label>Activer la transmission respiratoire</Dyze_Pathogenics_EnableRespiratorySpread_Label>
+  <Dyze_Pathogenics_EnableRespiratorySpread_Desc>Si activé, les pions infectieux peuvent transmettre la maladie aux pions proches dans la même pièce.</Dyze_Pathogenics_EnableRespiratorySpread_Desc>
+  <Dyze_Pathogenics_ExposureGainMultiplier_Label>Multiplicateur d'exposition</Dyze_Pathogenics_ExposureGainMultiplier_Label>
+
+  <Dyze_Pathogenics_ShowTransmissionWarning_Label>Afficher l'avertissement de transmission</Dyze_Pathogenics_ShowTransmissionWarning_Label>
+  <Dyze_Pathogenics_ShowTransmissionWarning_Desc>Quand un colon développe des symptômes, affiche un avertissement sur le risque de transmission.</Dyze_Pathogenics_ShowTransmissionWarning_Desc>
+  <Dyze_Pathogenics_ShowDebugReadout_Label>Afficher le panneau de débogage</Dyze_Pathogenics_ShowDebugReadout_Label>
+  <Dyze_Pathogenics_ShowDebugReadout_Desc>Affiche une superposition à l'écran montrant l'état de maladie des pions.</Dyze_Pathogenics_ShowDebugReadout_Desc>
 
   <Dyze_Pathogenics_Reset_Label>Réinitialiser</Dyze_Pathogenics_Reset_Label>
 

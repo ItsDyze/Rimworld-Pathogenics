@@ -67,6 +67,28 @@ vector transmission
 bodily fluids
 ```
 
+## Disease profile integration
+
+The model is now backed by a small disease profile registry. Each integrated disease declares whether it:
+
+- uses the hidden simulation loop
+- can be imported by outsiders
+- uses the current respiratory transmission rules
+- should have its vanilla random disease incident suppressed when integrated-incident suppression is enabled
+
+Current integrated diseases:
+
+| Disease | Def | Reason |
+|---------|-----|--------|
+| Pathogenic flu | `DP_PathogenicFlu` | Original custom Pathogenics disease |
+| Vanilla flu | `Flu` | Fits the existing shared-air respiratory model |
+
+Explicitly excluded for now:
+
+- malaria and other insect/vector-borne diseases
+- environment-bound diseases that need unsupported transmission routes
+- cross-mod diseases pending a compatibility pass
+
 ## Player counterplay
 
 The player should be able to reduce spread by using existing RimWorld behavior:

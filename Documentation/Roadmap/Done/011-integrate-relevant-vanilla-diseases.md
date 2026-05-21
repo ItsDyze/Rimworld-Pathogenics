@@ -2,7 +2,9 @@
 
 ## Status
 
-Planned
+Implemented
+
+A first-pass implementation is in place with vanilla flu (`Flu`) registered as the conservative eligible vanilla disease. Compile verification has passed with the local RimWorld managed assemblies.
 
 ## Goal
 
@@ -80,10 +82,11 @@ Documentation should be updated in at least these places when the feature is imp
 
 ## Acceptance criteria
 
-- [ ] at least one eligible transmissible vanilla disease is integrated into the Pathogenics system
-- [ ] integrated diseases can use Pathogenics-controlled infection flow instead of only vanilla random incidents
-- [ ] players can disable all vanilla spawn-disease incidents in settings
-- [ ] players can disable only incidents for integrated diseases in settings
-- [ ] non-integrated diseases remain unaffected when using the integrated-only option
-- [ ] documentation clearly explains which diseases are integrated and how incident suppression works
-- [ ] README and Steam description are updated to reflect the new behavior
+- [x] at least one eligible transmissible vanilla disease is integrated into the Pathogenics system (`Flu`)
+- [x] integrated diseases can use Pathogenics-controlled infection flow instead of only vanilla random incidents
+- [x] players can disable all vanilla spawn-disease incidents in settings
+- [x] players can disable only incidents for integrated diseases in settings
+- [x] non-integrated diseases remain unaffected when using the integrated-only option
+- [x] documentation clearly explains which diseases are integrated and how incident suppression works
+- [x] README and Steam description are updated to reflect the new behavior
+- [x] compile verification completed with RimWorld managed assemblies

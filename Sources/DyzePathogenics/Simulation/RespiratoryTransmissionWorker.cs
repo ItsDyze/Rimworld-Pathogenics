@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RimWorld;
 using Verse;
 using Dyze.RimWorld.Pathogenics;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics.Simulation
 {
@@ -87,6 +88,13 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             for (int i = 0; i < infectiousPawns.Count; i++)
             {
                 Pawn sourcePawn = infectiousPawns[i];
+                PawnDiseaseState sourceState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(sourcePawn);
+                PathogenicsDiseaseProfile sourceProfile = PathogenicsDiseaseRegistry.GetProfile(sourceState);
+                if (sourceProfile?.UsesRespiratoryTransmission != true)
+                {
+                    continue;
+                }
+
                 float sourceInfectiousness = InfectiousnessUtility.GetInfectiousness(sourcePawn);
                 if (sourceInfectiousness <= 0f)
                 {
@@ -125,7 +133,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 float exposure = CalculateExposure(sourcePawn, targetPawn, distance, sourceInfectiousness);
                 if (exposure > 0f)
                 {
-                    mapComponent.AddExposureToPawn(targetPawn, exposure);
+                    mapComponent.AddExposureToPawn(targetPawn, exposure, PathogenicsGameComponent.Instance?.TryGetDiseaseState(sourcePawn)?.DiseaseDefName);
                 }
 
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true &&

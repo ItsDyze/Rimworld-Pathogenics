@@ -1,6 +1,8 @@
+using System.Linq;
 using RimWorld;
 using Verse;
 using Dyze.RimWorld.Pathogenics;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics.Simulation
 {
@@ -151,7 +153,11 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return;
             }
 
-            PawnDiseaseState state = mapComponent.GetOrCreateDiseaseState(pawn);
+            PathogenicsDiseaseProfile importProfile = ChooseImportProfile();
+            PawnDiseaseState state = mapComponent.GetOrCreateDiseaseState(
+                pawn,
+                importProfile?.HediffDefName ?? PathogenicsDiseaseRegistry.DefaultDiseaseDefName
+            );
             if (state == null)
             {
                 return;
@@ -174,7 +180,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
                 {
-                    DyzeLog.Message($"Outsider {pawn.LabelShort} imported disease (incubating).");
+                    DyzeLog.Message($"Outsider {pawn.LabelShort} imported {state.DiseaseDefName} (incubating).");
                 }
             }
             else if (roll < IncubatingDistribution + PreSymptomaticInfectiousDistribution)
@@ -185,7 +191,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
                 {
-                    DyzeLog.Message($"Outsider {pawn.LabelShort} imported disease (pre-symptomatic infectious).");
+                    DyzeLog.Message($"Outsider {pawn.LabelShort} imported {state.DiseaseDefName} (pre-symptomatic infectious).");
                 }
             }
             else
@@ -198,9 +204,20 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
                 {
-                    DyzeLog.Message($"Outsider {pawn.LabelShort} imported disease (symptomatic - visible!).");
+                    DyzeLog.Message($"Outsider {pawn.LabelShort} imported {state.DiseaseDefName} (symptomatic - visible!).");
                 }
             }
+        }
+
+        private static PathogenicsDiseaseProfile ChooseImportProfile()
+        {
+            System.Collections.Generic.List<PathogenicsDiseaseProfile> profiles = PathogenicsDiseaseRegistry.ImportableProfiles().ToList();
+            if (profiles.Count == 0)
+            {
+                return PathogenicsDiseaseRegistry.DefaultProfile;
+            }
+
+            return profiles.RandomElement();
         }
 
         private static void ApplyVisibleHediff(Pawn pawn, PawnDiseaseState state)
@@ -210,7 +227,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return;
             }
 
-            HediffDef hediffDef = DefDatabase<HediffDef>.GetNamedSilentFail("DP_PathogenicFlu");
+            HediffDef hediffDef = PathogenicsDiseaseRegistry.GetProfile(state)?.HediffDef;
             if (hediffDef == null)
             {
                 return;
