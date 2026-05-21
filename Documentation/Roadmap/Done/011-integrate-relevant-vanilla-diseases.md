@@ -4,7 +4,7 @@
 
 Implemented
 
-A first-pass implementation is in place with vanilla flu (`Flu`) registered as the conservative eligible vanilla disease. Compile verification is still blocked in this environment because RimWorld managed assemblies are not installed/discoverable; build with `RimWorldManagedDir` configured before release.
+A first-pass implementation is in place with vanilla flu (`Flu`) registered as the conservative eligible vanilla disease. Compile verification passed using the local RimWorld managed assemblies at `/home/dyze/.local/share/rimworld-managed`.
 
 ## Goal
 
@@ -89,4 +89,4 @@ Documentation should be updated in at least these places when the feature is imp
 - [x] non-integrated diseases remain unaffected when using the integrated-only option
 - [x] documentation clearly explains which diseases are integrated and how incident suppression works
 - [x] README and Steam description are updated to reflect the new behavior
-- [ ] compile verification completed with RimWorld managed assemblies
+- [x] compile verification completed with RimWorld managed assemblies
