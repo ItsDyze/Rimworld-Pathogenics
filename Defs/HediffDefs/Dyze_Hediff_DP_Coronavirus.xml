@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
   <HediffDef>
-    <defName>DP_PathogenicFlu</defName>
+    <defName>DP_Coronavirus</defName>
     <hediffClass>HediffWithComps</hediffClass>
     <makesSickThought>true</makesSickThought>
-    <!-- Deprecated legacy def kept so old Workshop saves load safely. New gameplay paths use DP_Coronavirus. -->
-    <scenarioCanAdd>false</scenarioCanAdd>
+    <scenarioCanAdd>true</scenarioCanAdd>
     <isBad>true</isBad>
     <initialSeverity>0.001</initialSeverity>
     <tendable>false</tendable>
@@ -37,7 +36,7 @@
         </capMods>
       </li>
     </stages>
-    <label>deprecated pathogenic flu</label>
-    <description>Deprecated legacy Pathogenics disease kept only so old saves can load safely. New Pathogenics outbreaks use coronavirus instead.</description>
+    <label>coronavirus</label>
+    <description>A Pathogenics respiratory illness that uses hidden incubation, pre-symptomatic infectiousness, and proximity exposure before visible symptoms appear.</description>
   </HediffDef>
 </Defs>

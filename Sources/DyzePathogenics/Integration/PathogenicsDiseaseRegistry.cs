@@ -11,7 +11,8 @@ namespace Dyze.RimWorld.Pathogenics.Integration
     /// </summary>
     public static class PathogenicsDiseaseRegistry
     {
-        public const string DefaultDiseaseDefName = "DP_PathogenicFlu";
+        public const string DefaultDiseaseDefName = "DP_Coronavirus";
+        public const string LegacyPathogenicFluDefName = "DP_PathogenicFlu";
         public const string IntegratedVanillaFluDefName = "Flu";
 
         private static readonly List<PathogenicsDiseaseProfile> Profiles = new List<PathogenicsDiseaseProfile>
@@ -22,6 +23,17 @@ namespace Dyze.RimWorld.Pathogenics.Integration
                 supportsHiddenSimulation: true,
                 canImportFromOutsiders: true,
                 usesRespiratoryTransmission: true,
+                suppressVanillaIncidentWhenIntegratedSuppressionEnabled: false),
+
+            // Deprecated compatibility profile. Kept so old saves with DP_PathogenicFlu visible hediffs
+            // or hidden states still load and can be inspected/resynchronized, but it is never imported,
+            // transmitted, or selected by new debug/gameplay paths.
+            new PathogenicsDiseaseProfile(
+                LegacyPathogenicFluDefName,
+                isVanillaDisease: false,
+                supportsHiddenSimulation: true,
+                canImportFromOutsiders: false,
+                usesRespiratoryTransmission: false,
                 suppressVanillaIncidentWhenIntegratedSuppressionEnabled: false),
 
             // Conservative first-pass vanilla integration. Flu is directly representable by the

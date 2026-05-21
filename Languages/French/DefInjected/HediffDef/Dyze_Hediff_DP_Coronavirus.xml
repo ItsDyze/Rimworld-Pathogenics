@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <DP_Coronavirus.label>coronavirus</DP_Coronavirus.label>
+  <DP_Coronavirus.description>Une maladie respiratoire de Pathogenics qui utilise une incubation cachée, une contagiosité présymptomatique et une exposition de proximité avant l'apparition des symptômes visibles.</DP_Coronavirus.description>
+  <DP_Coronavirus.stages.0.label>symptomatique précoce</DP_Coronavirus.stages.0.label>
+  <DP_Coronavirus.stages.1.label>symptomatique avancé</DP_Coronavirus.stages.1.label>
+</LanguageData>

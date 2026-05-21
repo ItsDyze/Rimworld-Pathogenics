@@ -52,7 +52,7 @@ Responsibilities:
 - choose importable diseases for outsider importation
 - suppress vanilla disease incidents according to player settings
 
-Current profiles are the custom coronavirus disease (`DP_PathogenicFlu`, defName retained for save compatibility) and vanilla `Flu`. The vanilla flu profile is intentionally conservative: it uses the current respiratory model and can have its vanilla incident suppressed. Malaria is intentionally excluded because the mod does not model insect/vector transmission.
+Current profiles are the custom coronavirus disease (`DP_Coronavirus`), vanilla `Flu`, and a deprecated `DP_PathogenicFlu` compatibility profile. `DP_PathogenicFlu` is retained for old saves only: it is not scenario-addable, not importable, not transmissible, and new debug/gameplay paths use `DP_Coronavirus`. The vanilla flu profile is intentionally conservative: it uses the current respiratory model and can have its vanilla incident suppressed. Malaria is intentionally excluded because the mod does not model insect/vector transmission.
 
 ### Global registry
 
@@ -140,7 +140,7 @@ That removes the previous risk where the visible disease could self-remove while
 
 ## Key design: Separate visible and hidden state, with one owner
 
-The visible disease (`DP_PathogenicFlu` HediffDef) and the hidden disease state (`PawnDiseaseState`) are still separate concepts, but they no longer progress independently.
+The visible disease selected by the active disease profile and the hidden disease state (`PawnDiseaseState`) are still separate concepts, but they no longer progress independently.
 
 - **Visible:** what the player sees in the health tab
 - **Hidden:** progression, infectiousness, and stage scheduling

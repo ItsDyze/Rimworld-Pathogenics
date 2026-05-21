@@ -80,10 +80,11 @@ Current integrated diseases:
 
 | Disease | Def | Reason |
 |---------|-----|--------|
-| Coronavirus | `DP_PathogenicFlu` | Original custom Pathogenics disease; defName retained for save compatibility |
+| Coronavirus | `DP_Coronavirus` | New default custom Pathogenics respiratory disease |
 | Vanilla flu | `Flu` | Fits the existing shared-air respiratory model |
+| Deprecated pathogenic flu | `DP_PathogenicFlu` | Legacy compatibility def retained for old saves; not scenario-addable, not importable, not transmissible, and not used by new debug/gameplay paths |
 
-The custom disease is player-facing as coronavirus, but keeps the existing `DP_PathogenicFlu` defName so workshop saves keep loading.
+The original `DP_PathogenicFlu` def remains present so existing Workshop saves can load safely, but it is marked deprecated and `scenarioCanAdd` is disabled. New custom Pathogenics outbreaks use `DP_Coronavirus`.
 
 Explicitly excluded for now:
 

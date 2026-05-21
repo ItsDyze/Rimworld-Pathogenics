@@ -23,6 +23,7 @@ That changes the shape of the problem. Layout, crowding, isolation, and protecti
 [*][b]Debug overlay[/b] — useful for testing and understanding how the simulation is behaving.
 [*][b]Settings[/b] — tune import chance, exposure gain, vanilla disease incident handling, and feature toggles.
 [*][b]Vanilla flu integration[/b] — flu can use the Pathogenics hidden infection flow instead of only appearing from vanilla random incidents.
+[*][b]Save-safe disease transition[/b] — coronavirus is the new default custom disease, while the old Pathogenic Flu def remains only as deprecated save compatibility.
 [/list]
 
 [hr][/hr]

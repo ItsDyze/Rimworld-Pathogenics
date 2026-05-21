@@ -10,8 +10,8 @@ namespace Dyze.RimWorld.Pathogenics
 {
     public static class DyzeDebugActions
     {
-        private const string PathogenicFluDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
-        private const float DefaultPathogenicFluSeverity = 0.15f;
+        private const string CoronavirusDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
+        private const float DefaultCoronavirusSeverity = 0.15f;
 
         [DebugAction(
             "Dyze Pathogenics",
@@ -19,7 +19,7 @@ namespace Dyze.RimWorld.Pathogenics
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
         )]
-        public static void ExposePawnToPathogenicFlu(Pawn pawn)
+        public static void ExposePawnToCoronavirus(Pawn pawn)
         {
             if (pawn == null)
             {
@@ -43,7 +43,7 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             int currentTick = Find.TickManager.TicksGame;
-            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn);
+            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn, CoronavirusDefName);
             diseaseState.Stage = SimulatedDiseaseStage.Exposed;
             diseaseState.ExposedTick = currentTick;
             diseaseState.InfectiousStartTick = -1;
@@ -65,7 +65,7 @@ namespace Dyze.RimWorld.Pathogenics
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
         )]
-        public static void ApplyPathogenicFluToPawn(Pawn pawn)
+        public static void ApplyCoronavirusToPawn(Pawn pawn)
         {
             if (pawn == null)
             {
@@ -77,43 +77,42 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            HediffDef pathogenicFlu = GetPathogenicFluDef();
-            if (pathogenicFlu == null)
+            HediffDef coronavirus = GetCoronavirusDef();
+            if (coronavirus == null)
             {
                 Messages.Message(
-                    $"Could not find HediffDef '{PathogenicFluDefName}'.",
+                    $"Could not find HediffDef '{CoronavirusDefName}'.",
                     MessageTypeDefOf.RejectInput,
                     false
                 );
                 return;
             }
 
-            Hediff existing = pawn.health?.hediffSet?.GetFirstHediffOfDef(pathogenicFlu);
+            Hediff existing = pawn.health?.hediffSet?.GetFirstHediffOfDef(coronavirus);
             if (existing != null)
             {
-                if (existing.Severity < DefaultPathogenicFluSeverity)
+                if (existing.Severity < DefaultCoronavirusSeverity)
                 {
-                    existing.Severity = DefaultPathogenicFluSeverity;
+                    existing.Severity = DefaultCoronavirusSeverity;
                 }
 
-                EnsureSymptomaticDiseaseState(pawn);
+                EnsureSymptomaticDiseaseState(pawn, CoronavirusDefName);
 
                 Messages.Message(
-                    $"{pawn.LabelShort} already has {pathogenicFlu.label}. Severity refreshed and disease state synchronized.",
+                    $"{pawn.LabelShort} already has {coronavirus.label}. Severity refreshed and disease state synchronized.",
                     MessageTypeDefOf.NeutralEvent,
                     false
                 );
                 return;
             }
-
-            Hediff hediff = HediffMaker.MakeHediff(pathogenicFlu, pawn);
-            hediff.Severity = DefaultPathogenicFluSeverity;
+            Hediff hediff = HediffMaker.MakeHediff(coronavirus, pawn);
+            hediff.Severity = DefaultCoronavirusSeverity;
             pawn.health.AddHediff(hediff);
 
-            EnsureSymptomaticDiseaseState(pawn);
+            EnsureSymptomaticDiseaseState(pawn, CoronavirusDefName);
 
             Messages.Message(
-                $"Applied {pathogenicFlu.label} to {pawn.LabelShort} and synchronized hidden disease state.",
+                $"Applied {coronavirus.label} to {pawn.LabelShort} and synchronized hidden disease state.",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -125,7 +124,7 @@ namespace Dyze.RimWorld.Pathogenics
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
         )]
-        public static void RemovePathogenicFluFromPawn(Pawn pawn)
+        public static void RemoveCoronavirusFromPawn(Pawn pawn)
         {
             if (pawn == null)
             {
@@ -137,11 +136,11 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            HediffDef pathogenicFlu = GetPathogenicFluDef();
-            if (pathogenicFlu == null)
+            HediffDef coronavirus = GetCoronavirusDef();
+            if (coronavirus == null)
             {
                 Messages.Message(
-                    $"Could not find HediffDef '{PathogenicFluDefName}'.",
+                    $"Could not find HediffDef '{CoronavirusDefName}'.",
                     MessageTypeDefOf.RejectInput,
                     false
                 );
@@ -160,7 +159,7 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             int removedCount = 0;
-            foreach (Hediff hediff in hediffs.Where(hediff => hediff.def == pathogenicFlu).ToList())
+            foreach (Hediff hediff in hediffs.Where(hediff => hediff.def == coronavirus).ToList())
             {
                 pawn.health.RemoveHediff(hediff);
                 removedCount++;
@@ -169,7 +168,7 @@ namespace Dyze.RimWorld.Pathogenics
             if (removedCount <= 0)
             {
                 Messages.Message(
-                    $"{pawn.LabelShort} does not have {pathogenicFlu.label}.",
+                    $"{pawn.LabelShort} does not have {coronavirus.label}.",
                     MessageTypeDefOf.NeutralEvent,
                     false
                 );
@@ -180,7 +179,7 @@ namespace Dyze.RimWorld.Pathogenics
             mapComponent?.ClearDiseaseState(pawn);
 
             Messages.Message(
-                $"Removed {pathogenicFlu.label} from {pawn.LabelShort} and cleared hidden disease state.",
+                $"Removed {coronavirus.label} from {pawn.LabelShort} and cleared hidden disease state.",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -722,9 +721,9 @@ namespace Dyze.RimWorld.Pathogenics
             return null;
         }
 
-        private static HediffDef GetPathogenicFluDef()
+        private static HediffDef GetCoronavirusDef()
         {
-            return DefDatabase<HediffDef>.GetNamedSilentFail(PathogenicFluDefName);
+            return DefDatabase<HediffDef>.GetNamedSilentFail(CoronavirusDefName);
         }
     }
 }
