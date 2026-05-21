@@ -52,7 +52,7 @@ Responsibilities:
 - choose importable diseases for outsider importation
 - suppress vanilla disease incidents according to player settings
 
-Current profiles are `DP_PathogenicFlu` and vanilla `Flu`. The vanilla flu profile is intentionally conservative: it uses the current respiratory model and can have its vanilla incident suppressed. Malaria is intentionally excluded because the mod does not model insect/vector transmission.
+Current profiles are the custom coronavirus disease (`DP_PathogenicFlu`, defName retained for save compatibility) and vanilla `Flu`. The vanilla flu profile is intentionally conservative: it uses the current respiratory model and can have its vanilla incident suppressed. Malaria is intentionally excluded because the mod does not model insect/vector transmission.
 
 ### Global registry
 
@@ -179,8 +179,8 @@ File: `Sources/DyzePathogenics/Debug/DyzeDebugAction.cs`
 Useful release-validation actions:
 
 - `Expose selected pawn (hidden infection)`
-- `Apply pathogenic flu to selected pawn`
-- `Remove pathogenic flu from selected pawn`
+- `Apply coronavirus to selected pawn`
+- `Remove coronavirus from selected pawn`
 - `Force transmission pulse`
 - `Print simulation state`
 - `Log registry health`

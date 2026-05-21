@@ -80,8 +80,10 @@ Current integrated diseases:
 
 | Disease | Def | Reason |
 |---------|-----|--------|
-| Pathogenic flu | `DP_PathogenicFlu` | Original custom Pathogenics disease |
+| Coronavirus | `DP_PathogenicFlu` | Original custom Pathogenics disease; defName retained for save compatibility |
 | Vanilla flu | `Flu` | Fits the existing shared-air respiratory model |
+
+The custom disease is player-facing as coronavirus, but keeps the existing `DP_PathogenicFlu` defName so workshop saves keep loading.
 
 Explicitly excluded for now:
 

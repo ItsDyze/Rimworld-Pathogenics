@@ -61,7 +61,7 @@ namespace Dyze.RimWorld.Pathogenics
 
         [DebugAction(
             "Dyze Pathogenics",
-            "Apply pathogenic flu to selected pawn",
+            "Apply coronavirus to selected pawn",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
         )]
@@ -121,7 +121,7 @@ namespace Dyze.RimWorld.Pathogenics
 
         [DebugAction(
             "Dyze Pathogenics",
-            "Remove pathogenic flu from selected pawn",
+            "Remove coronavirus from selected pawn",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
         )]

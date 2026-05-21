@@ -2,17 +2,17 @@
 <LanguageData>
 
   <!-- Disease Detection -->
-  <PathogenicFluDetected>Pathogenic Flu Detected</PathogenicFluDetected>
-  <PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the pathogenic flu!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</PathogenicFluDetectedDesc>
+  <PathogenicFluDetected>Coronavirus Detected</PathogenicFluDetected>
+  <PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the coronavirus!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</PathogenicFluDetectedDesc>
 
-  <DP_PathogenicFluDetectedLabel>Pathogenic Flu Detected</DP_PathogenicFluDetectedLabel>
-  <DP_PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the pathogenic flu!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</DP_PathogenicFluDetectedDesc>
+  <DP_PathogenicFluDetectedLabel>Coronavirus Detected</DP_PathogenicFluDetectedLabel>
+  <DP_PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the coronavirus!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</DP_PathogenicFluDetectedDesc>
   <DP_DiseaseDetectedLabel>{0} Detected</DP_DiseaseDetectedLabel>
   <DP_DiseaseDetectedDesc>{PAWN_nameDef} has developed symptoms of {0}!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</DP_DiseaseDetectedDesc>
   <DP_TransmissionWarning>Warning: The disease is contagious! Anyone in close proximity may be exposed.</DP_TransmissionWarning>
 
-  <DP_PathogenicFluRecoveredLabel>Pathogenic Flu Recovered</DP_PathogenicFluRecoveredLabel>
-  <DP_PathogenicFluRecoveredDesc>{PAWN_nameDef} has recovered from the pathogenic flu.</DP_PathogenicFluRecoveredDesc>
+  <DP_PathogenicFluRecoveredLabel>Coronavirus Recovered</DP_PathogenicFluRecoveredLabel>
+  <DP_PathogenicFluRecoveredDesc>{PAWN_nameDef} has recovered from the coronavirus.</DP_PathogenicFluRecoveredDesc>
   <DP_DiseaseRecoveredLabel>{0} Recovered</DP_DiseaseRecoveredLabel>
   <DP_DiseaseRecoveredDesc>{PAWN_nameDef} has recovered from {0}.</DP_DiseaseRecoveredDesc>
 
