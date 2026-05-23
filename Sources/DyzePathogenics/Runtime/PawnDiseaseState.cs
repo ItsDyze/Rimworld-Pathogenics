@@ -20,8 +20,9 @@ namespace Dyze.RimWorld.Pathogenics
     }
 
     /// <summary>
-    /// Tracks hidden disease state for a single pawn.
-    /// Hidden state for one pawn's current Pathogenics-controlled disease.
+    /// Tracks hidden simulation state for one pawn/disease pair.
+    /// A pawn can have several PawnDiseaseState entries in the game component registry,
+    /// one per Pathogenics-controlled disease defName.
     /// This state controls when the registered visible HediffDef should be applied.
     /// </summary>
     public class PawnDiseaseState : IExposable

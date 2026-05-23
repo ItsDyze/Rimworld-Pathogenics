@@ -136,12 +136,6 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return;
             }
 
-            PawnDiseaseState existingState = mapComponent.GetDiseaseState(pawn);
-            if (existingState != null && existingState.HasDiseaseState())
-            {
-                return;
-            }
-
             float importChance = DyzePathogenicsMod.Settings?.OutsiderImportChance ?? DefaultImportChance;
             if (Rand.Value > importChance)
             {
@@ -154,9 +148,16 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             }
 
             PathogenicsDiseaseProfile importProfile = ChooseImportProfile();
+            string importDiseaseDefName = importProfile?.HediffDefName ?? PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
+            PawnDiseaseState existingState = mapComponent.GetDiseaseState(pawn, importDiseaseDefName);
+            if (existingState != null && existingState.HasDiseaseState())
+            {
+                return;
+            }
+
             PawnDiseaseState state = mapComponent.GetOrCreateDiseaseState(
                 pawn,
-                importProfile?.HediffDefName ?? PathogenicsDiseaseRegistry.DefaultDiseaseDefName
+                importDiseaseDefName
             );
             if (state == null)
             {

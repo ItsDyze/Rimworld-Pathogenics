@@ -15,10 +15,15 @@ namespace Dyze.RimWorld.Pathogenics
         /// </summary>
         public static void SendSymptomOnsetLetter(Pawn pawn)
         {
+            SendSymptomOnsetLetter(pawn, PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn));
+        }
+
+        public static void SendSymptomOnsetLetter(Pawn pawn, PawnDiseaseState state)
+        {
             if (pawn == null)
                 return;
 
-            PathogenicsDiseaseProfile profile = GetProfileForPawn(pawn);
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(state);
             string diseaseLabel = profile?.HediffDef?.label ?? "disease";
             string label = "DP_DiseaseDetectedLabel".Translate(diseaseLabel.CapitalizeFirst()).ToString();
             string text = GetSymptomOnsetText(pawn, diseaseLabel);
@@ -54,10 +59,15 @@ namespace Dyze.RimWorld.Pathogenics
         /// </summary>
         public static void SendRecoveryLetter(Pawn pawn)
         {
+            SendRecoveryLetter(pawn, PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn));
+        }
+
+        public static void SendRecoveryLetter(Pawn pawn, PawnDiseaseState state)
+        {
             if (pawn == null)
                 return;
 
-            PathogenicsDiseaseProfile profile = GetProfileForPawn(pawn);
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(state);
             string diseaseLabel = profile?.HediffDef?.label ?? "disease";
             string label = "DP_DiseaseRecoveredLabel".Translate(diseaseLabel.CapitalizeFirst()).ToString();
             string text = "DP_DiseaseRecoveredDesc".Translate(diseaseLabel, pawn.Named("PAWN")).ToString();
@@ -68,11 +78,6 @@ namespace Dyze.RimWorld.Pathogenics
             Find.LetterStack.ReceiveLetter(label, text, letterDef, lookTargets);
         }
 
-        private static PathogenicsDiseaseProfile GetProfileForPawn(Pawn pawn)
-        {
-            PawnDiseaseState state = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
-            return PathogenicsDiseaseRegistry.GetProfile(state);
-        }
 
         /// <summary>
         /// Send a message (non-letter notification) for less critical events.

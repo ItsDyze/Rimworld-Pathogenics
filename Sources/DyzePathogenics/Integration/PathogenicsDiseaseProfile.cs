@@ -6,7 +6,7 @@ namespace Dyze.RimWorld.Pathogenics.Integration
     /// <summary>
     /// Data-driven description of a disease that can be handled by the Pathogenics hidden simulation.
     ///
-    /// The current implementation keeps one active simulated disease per pawn, but the visible hediff,
+    /// The hidden registry tracks disease state per pawn and per disease defName. The visible hediff,
     /// import eligibility, and incident suppression behavior are defined here so additional diseases can
     /// be registered without reworking the core loop.
     /// </summary>

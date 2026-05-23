@@ -57,16 +57,11 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return;
             }
 
-            List<Pawn> infectiousPawns = null;
+            List<KeyValuePair<Pawn, PawnDiseaseState>> infectiousSources = null;
             for (int i = 0; i < allPawns.Count; i++)
             {
                 Pawn pawn = allPawns[i];
                 if (pawn == null || !pawn.Spawned || pawn.Dead)
-                {
-                    continue;
-                }
-
-                if (!InfectiousnessUtility.IsInfectious(pawn))
                 {
                     continue;
                 }
@@ -76,26 +71,30 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                     continue;
                 }
 
-                infectiousPawns ??= new List<Pawn>();
-                infectiousPawns.Add(pawn);
+                foreach (PawnDiseaseState state in InfectiousnessUtility.GetInfectiousDiseaseStates(pawn))
+                {
+                    PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(state);
+                    if (profile?.UsesRespiratoryTransmission != true)
+                    {
+                        continue;
+                    }
+
+                    infectiousSources ??= new List<KeyValuePair<Pawn, PawnDiseaseState>>();
+                    infectiousSources.Add(new KeyValuePair<Pawn, PawnDiseaseState>(pawn, state));
+                }
             }
 
-            if (infectiousPawns == null || infectiousPawns.Count == 0)
+            if (infectiousSources == null || infectiousSources.Count == 0)
             {
                 return;
             }
 
-            for (int i = 0; i < infectiousPawns.Count; i++)
+            for (int i = 0; i < infectiousSources.Count; i++)
             {
-                Pawn sourcePawn = infectiousPawns[i];
-                PawnDiseaseState sourceState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(sourcePawn);
-                PathogenicsDiseaseProfile sourceProfile = PathogenicsDiseaseRegistry.GetProfile(sourceState);
-                if (sourceProfile?.UsesRespiratoryTransmission != true)
-                {
-                    continue;
-                }
+                Pawn sourcePawn = infectiousSources[i].Key;
+                PawnDiseaseState sourceState = infectiousSources[i].Value;
 
-                float sourceInfectiousness = InfectiousnessUtility.GetInfectiousness(sourcePawn);
+                float sourceInfectiousness = InfectiousnessUtility.GetInfectiousness(sourcePawn, sourceState);
                 if (sourceInfectiousness <= 0f)
                 {
                     continue;
@@ -119,7 +118,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             for (int i = 0; i < allPawns.Count; i++)
             {
                 Pawn targetPawn = allPawns[i];
-                if (!IsValidTarget(sourcePawn, targetPawn))
+                if (!IsValidTarget(sourcePawn, targetPawn, sourceState?.DiseaseDefName))
                 {
                     continue;
                 }
@@ -139,7 +138,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true &&
                     currentTick % DebugLogIntervalTicks < TransmissionIntervalTicks)
                 {
-                    PawnDiseaseState targetState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(targetPawn);
+                    PawnDiseaseState targetState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(targetPawn, sourceState?.DiseaseDefName);
                     string roomStatus = GetRoomStatus(sourcePawn, targetPawn);
                     bool sourceMasked = MaskUtility.IsWearingMask(sourcePawn);
                     bool targetMasked = MaskUtility.IsWearingMask(targetPawn);
@@ -154,7 +153,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                     {
                         DyzeLog.Message(sourcePawn.LabelShort + " -> " + targetPawn.LabelShort + ": " +
                             "+" + exposure.ToString("F4") + " " + sourceState?.DiseaseDefName + " exposure (dist=" + distance.ToString("F1") + ", inf=" + sourceInfectiousness.ToString("F2") + ", " + roomStatus + ", " + maskStatus + ") " +
-                            "(target " + targetState?.DiseaseDefName + " exposure: " + targetState?.Exposure.ToString("F2") + ")");
+                            "(target same-disease exposure: " + (targetState?.Exposure.ToString("F2") ?? "0.00") + ")");
                     }
                 }
             }
@@ -180,7 +179,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             return "no-masks";
         }
 
-        private static bool IsValidTarget(Pawn source, Pawn target)
+        private static bool IsValidTarget(Pawn source, Pawn target, string diseaseDefName)
         {
             if (source == target)
             {
@@ -207,7 +206,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return false;
             }
 
-            PawnDiseaseState targetState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(target);
+            PawnDiseaseState targetState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(target, diseaseDefName);
             if (targetState != null && targetState.Stage >= SimulatedDiseaseStage.Symptomatic)
             {
                 return false;

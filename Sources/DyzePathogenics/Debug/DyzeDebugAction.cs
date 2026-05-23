@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using LudeonTK;
@@ -12,568 +13,137 @@ namespace Dyze.RimWorld.Pathogenics
     {
         private const string CoronavirusDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
         private const string VanillaFluDefName = PathogenicsDiseaseRegistry.IntegratedVanillaFluDefName;
-        private const float DefaultCoronavirusSeverity = 0.15f;
+        private const float DefaultSeverity = 0.15f;
+        private const float DebugExposureAmount = 0.25f;
+        private const float PulseExposureAmount = 0.5f;
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Expose selected pawn to Coronavirus (hidden infection)",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void ExposePawnToCoronavirus(Pawn pawn)
+        [DebugAction("Dyze Pathogenics", "Expose selected pawn to Coronavirus (hidden)", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void ExposePawnToCoronavirus(Pawn pawn) => SetHiddenExposure(pawn, CoronavirusDefName, 0f);
+
+        [DebugAction("Dyze Pathogenics", "Expose selected pawn to Flu (hidden)", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void ExposePawnToVanillaFlu(Pawn pawn) => SetHiddenExposure(pawn, VanillaFluDefName, 0f);
+
+        [DebugAction("Dyze Pathogenics", "Add Coronavirus exposure (0.25)", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void AddCoronavirusExposureToPawn(Pawn pawn) => AddExposure(pawn, CoronavirusDefName, DebugExposureAmount);
+
+        [DebugAction("Dyze Pathogenics", "Add Flu exposure (0.25)", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void AddVanillaFluExposureToPawn(Pawn pawn) => AddExposure(pawn, VanillaFluDefName, DebugExposureAmount);
+
+        [DebugAction("Dyze Pathogenics", "Apply Coronavirus visible + hidden symptomatic", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void ApplyCoronavirusToPawn(Pawn pawn) => ApplyVisibleDisease(pawn, CoronavirusDefName, DefaultSeverity);
+
+        [DebugAction("Dyze Pathogenics", "Apply Flu visible + hidden symptomatic", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void ApplyVanillaFluToPawn(Pawn pawn) => ApplyVisibleDisease(pawn, VanillaFluDefName, DefaultSeverity);
+
+        [DebugAction("Dyze Pathogenics", "Remove Coronavirus only", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void RemoveCoronavirusFromPawn(Pawn pawn) => RemoveDisease(pawn, CoronavirusDefName);
+
+        [DebugAction("Dyze Pathogenics", "Remove Flu only", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void RemoveVanillaFluFromPawn(Pawn pawn) => RemoveDisease(pawn, VanillaFluDefName);
+
+        [DebugAction("Dyze Pathogenics", "Clear all hidden states for selected pawn", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void ClearHiddenDiseaseStates(Pawn pawn)
         {
-            ExposePawnToDisease(pawn, CoronavirusDefName);
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Expose selected pawn to Flu (hidden infection)",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void ExposePawnToVanillaFlu(Pawn pawn)
-        {
-            ExposePawnToDisease(pawn, VanillaFluDefName);
-        }
-
-        private static void ExposePawnToDisease(Pawn pawn, string diseaseDefName)
-        {
-            if (pawn == null)
-            {
-                Messages.Message(
-                    "No pawn selected.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
-            {
-                Messages.Message(
-                    "Could not get map component.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
-            if (!IsUsableDiseaseProfile(profile, out string rejectReason))
-            {
-                Messages.Message(rejectReason, MessageTypeDefOf.RejectInput, false);
-                return;
-            }
-
-            if (RejectConflictingActiveDiseaseState(pawn, mapComponent, profile, "exposing to"))
-            {
-                return;
-            }
-
-            int currentTick = Find.TickManager.TicksGame;
-            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn, profile.HediffDefName);
-            diseaseState.Stage = SimulatedDiseaseStage.Exposed;
-            diseaseState.DiseaseDefName = profile.HediffDefName;
-            diseaseState.ExposedTick = currentTick;
-            diseaseState.InfectiousStartTick = -1;
-            diseaseState.SymptomOnsetTick = -1;
-            diseaseState.RecoveringTick = -1;
-            diseaseState.RecoveredTick = -1;
-            diseaseState.VisibleHediffApplied = false;
-            diseaseState.ClearExposure();
-
-            Messages.Message(
-                $"{pawn.LabelShort} now has hidden exposed state for {DescribeDisease(profile)}.",
-                MessageTypeDefOf.PositiveEvent,
-                false
-            );
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Apply coronavirus to selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void ApplyCoronavirusToPawn(Pawn pawn)
-        {
-            ApplyDiseaseToPawn(pawn, CoronavirusDefName, DefaultCoronavirusSeverity);
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Apply Flu to selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void ApplyVanillaFluToPawn(Pawn pawn)
-        {
-            ApplyDiseaseToPawn(pawn, VanillaFluDefName, DefaultCoronavirusSeverity);
-        }
-
-        private static void ApplyDiseaseToPawn(Pawn pawn, string diseaseDefName, float severity)
-        {
-            if (pawn == null)
-            {
-                Messages.Message(
-                    "No pawn selected.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
-            if (!IsUsableDiseaseProfile(profile, out string rejectReason))
-            {
-                Messages.Message(
-                    rejectReason,
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (RejectConflictingActiveDiseaseState(pawn, mapComponent, profile, "applying"))
-            {
-                return;
-            }
-
-            HediffDef diseaseDef = profile.HediffDef;
-            Hediff existing = pawn.health?.hediffSet?.GetFirstHediffOfDef(diseaseDef);
-            if (existing != null)
-            {
-                if (existing.Severity < severity)
-                {
-                    existing.Severity = severity;
-                }
-
-                EnsureSymptomaticDiseaseState(pawn, profile.HediffDefName);
-
-                Messages.Message(
-                    $"{pawn.LabelShort} already has {DescribeDisease(profile)}. Severity refreshed and hidden disease state synchronized for {profile.HediffDefName}.",
-                    MessageTypeDefOf.NeutralEvent,
-                    false
-                );
-                return;
-            }
-            Hediff hediff = HediffMaker.MakeHediff(diseaseDef, pawn);
-            hediff.Severity = severity;
-            pawn.health.AddHediff(hediff);
-
-            EnsureSymptomaticDiseaseState(pawn, profile.HediffDefName);
-
-            Messages.Message(
-                $"Applied {DescribeDisease(profile)} to {pawn.LabelShort} and synchronized hidden disease state for {profile.HediffDefName}.",
-                MessageTypeDefOf.PositiveEvent,
-                false
-            );
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Remove coronavirus from selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void RemoveCoronavirusFromPawn(Pawn pawn)
-        {
-            RemoveDiseaseFromPawn(pawn, CoronavirusDefName);
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Remove Flu from selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void RemoveVanillaFluFromPawn(Pawn pawn)
-        {
-            RemoveDiseaseFromPawn(pawn, VanillaFluDefName);
-        }
-
-        private static void RemoveDiseaseFromPawn(Pawn pawn, string diseaseDefName)
-        {
-            if (pawn == null)
-            {
-                Messages.Message(
-                    "No pawn selected.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
-            if (profile?.HediffDef == null)
-            {
-                Messages.Message(
-                    $"Could not find HediffDef '{diseaseDefName}'.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            var hediffs = pawn.health?.hediffSet?.hediffs;
-            if (hediffs == null)
-            {
-                Messages.Message(
-                    $"{pawn.LabelShort} has no health conditions to inspect.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            int removedCount = 0;
-            foreach (Hediff hediff in hediffs.Where(hediff => hediff.def == profile.HediffDef).ToList())
-            {
-                pawn.health.RemoveHediff(hediff);
-                removedCount++;
-            }
-
-            if (removedCount <= 0)
-            {
-                Messages.Message(
-                    $"{pawn.LabelShort} does not have {DescribeDisease(profile)}.",
-                    MessageTypeDefOf.NeutralEvent,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            PawnDiseaseState state = mapComponent?.GetDiseaseState(pawn);
-            bool clearedHiddenState = state != null && state.DiseaseDefName == profile.HediffDefName;
-            if (clearedHiddenState)
-            {
-                mapComponent.ClearDiseaseState(pawn);
-            }
-
-            Messages.Message(
-                $"Removed {DescribeDisease(profile)} from {pawn.LabelShort}" +
-                (clearedHiddenState ? $" and cleared matching hidden disease state ({profile.HediffDefName})." : "; hidden state was for another disease and was left intact."),
-                MessageTypeDefOf.PositiveEvent,
-                false
-            );
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Add exposure (0.25) to selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void AddExposureToPawn(Pawn pawn)
-        {
-            AddExposureToPawn(pawn, CoronavirusDefName);
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Add Flu exposure (0.25) to selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void AddVanillaFluExposureToPawn(Pawn pawn)
-        {
-            AddExposureToPawn(pawn, VanillaFluDefName);
-        }
-
-        private static void AddExposureToPawn(Pawn pawn, string diseaseDefName)
-        {
-            if (pawn == null)
-            {
-                Messages.Message(
-                    "No pawn selected.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
-            {
-                Messages.Message(
-                    "Could not get map component.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
-            if (!IsUsableDiseaseProfile(profile, out string rejectReason))
-            {
-                Messages.Message(rejectReason, MessageTypeDefOf.RejectInput, false);
-                return;
-            }
-
-            PawnDiseaseState existingState = mapComponent.GetDiseaseState(pawn);
-            if (existingState != null && existingState.HasDiseaseState() && existingState.DiseaseDefName != profile.HediffDefName)
-            {
-                Messages.Message(
-                    $"{pawn.LabelShort} already has active {DescribeDisease(existingState)}; not adding {DescribeDisease(profile)} exposure because only one active Pathogenics disease state is tracked per pawn.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            mapComponent.AddExposureToPawn(pawn, 0.25f, profile.HediffDefName);
-
-            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
-            float currentExposure = state?.Exposure ?? 0f;
-
-            Messages.Message(
-                $"{pawn.LabelShort} gained {DescribeDisease(profile)} exposure. Current {state?.DiseaseDefName ?? profile.HediffDefName}: {currentExposure:F2} / 1.00",
-                MessageTypeDefOf.PositiveEvent,
-                false
-            );
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Clear exposure for selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void ClearExposureForPawn(Pawn pawn)
-        {
-            if (pawn == null)
-            {
-                Messages.Message(
-                    "No pawn selected.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
-            {
-                Messages.Message(
-                    "Could not get map component.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
-            if (state == null)
-            {
-                Messages.Message(
-                    $"{pawn.LabelShort} has no exposure to clear.",
-                    MessageTypeDefOf.NeutralEvent,
-                    false
-                );
-                return;
-            }
-
-            string diseaseDescription = DescribeDisease(state);
-            state.ClearExposure();
-            if (state.Stage == SimulatedDiseaseStage.Exposed)
-            {
-                mapComponent.ClearDiseaseState(pawn);
-            }
-
-            Messages.Message(
-                $"Cleared exposure for {pawn.LabelShort} ({diseaseDescription}).",
-                MessageTypeDefOf.PositiveEvent,
-                false
-            );
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Clear hidden disease state for selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void ClearHiddenDiseaseState(Pawn pawn)
-        {
-            if (pawn == null)
-            {
-                Messages.Message(
-                    "No pawn selected.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
-            {
-                Messages.Message(
-                    "Could not get map component.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
-            string diseaseDescription = state != null ? DescribeDisease(state) : "no tracked disease";
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            int count = mapComponent.GetDiseaseStates(pawn).Count;
             mapComponent.ClearDiseaseState(pawn);
-
-            Messages.Message(
-                $"Cleared hidden disease state for {pawn.LabelShort} ({diseaseDescription}).",
-                MessageTypeDefOf.PositiveEvent,
-                false
-            );
+            Messages.Message($"Cleared {count} hidden disease state(s) for {pawn.LabelShort}.", MessageTypeDefOf.PositiveEvent, false);
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Log disease state for selected pawn",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
+        [DebugAction("Dyze Pathogenics", "Log selected pawn disease details", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
         public static void LogPawnDiseaseState(Pawn pawn)
         {
-            if (pawn == null)
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            List<PawnDiseaseState> states = mapComponent.GetDiseaseStates(pawn).Where(state => state.HasDiseaseState()).ToList();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"=== Pathogenics states for {pawn.LabelShort} ===");
+            sb.AppendLine($"Visible Pathogenics hediffs: {DescribeVisibleDiseaseDefs(pawn)}");
+            if (states.Count == 0)
             {
-                DyzeLog.DevAction("No pawn selected.");
-                return;
+                sb.AppendLine("No active hidden disease states.");
+            }
+            else
+            {
+                foreach (PawnDiseaseState state in states)
+                {
+                    sb.Append(state.GetDebugInfo(pawn));
+                    sb.AppendLine($"Infectiousness: {InfectiousnessUtility.GetInfectiousness(pawn, state):F2}");
+                    sb.AppendLine();
+                }
             }
 
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
-            {
-                DyzeLog.DevAction($"Pawn {pawn.LabelShort} has no map component.");
-                return;
-            }
-
-            PawnDiseaseState diseaseState = mapComponent.GetDiseaseState(pawn);
-            string visibleDiseaseDefName = GetVisiblePathogenicsDiseaseDefName(pawn);
-            if (diseaseState == null && !visibleDiseaseDefName.NullOrEmpty())
-            {
-                diseaseState = EnsureSymptomaticDiseaseState(pawn, visibleDiseaseDefName);
-            }
-
-            if (diseaseState == null || !diseaseState.HasDiseaseState())
-            {
-                DyzeLog.DevAction($"Pawn {pawn.LabelShort} has no active disease state.");
-                return;
-            }
-
-            DyzeLog.DevAction(diseaseState.GetDebugInfo(pawn));
+            DyzeLog.DevAction(sb.ToString());
+            Messages.Message($"Logged {states.Count} disease state(s) for {pawn.LabelShort}.", MessageTypeDefOf.PositiveEvent, false);
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Toggle Fast Transmission (10x)",
-            actionType = DebugActionType.Action,
-            allowedGameStates = AllowedGameStates.Playing
-        )]
+        [DebugAction("Dyze Pathogenics", "Show selected pawn disease details", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        public static void ShowPawnDiseaseDetails(Pawn pawn)
+        {
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            List<PawnDiseaseState> states = mapComponent.GetDiseaseStates(pawn).Where(state => state.HasDiseaseState()).ToList();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Visible Pathogenics hediffs: {DescribeVisibleDiseaseDefs(pawn)}");
+            sb.AppendLine();
+            if (states.Count == 0)
+            {
+                sb.AppendLine("No active hidden disease states.");
+            }
+            else
+            {
+                foreach (PawnDiseaseState state in states)
+                {
+                    sb.Append(state.GetDebugInfo(pawn));
+                    sb.AppendLine($"Infectiousness: {InfectiousnessUtility.GetInfectiousness(pawn, state):F2}");
+                    sb.AppendLine();
+                }
+            }
+
+            Find.WindowStack.Add(new Dialog_MessageBox(sb.ToString(), $"Pathogenics: {pawn.LabelShort}"));
+        }
+
+        [DebugAction("Dyze Pathogenics", "Toggle Fast Transmission (10x)", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void ToggleFastTransmission()
         {
-            bool newValue = RespiratoryTransmissionWorker.DebugTransmissionMultiplier != 10f;
-            RespiratoryTransmissionWorker.DebugTransmissionMultiplier = newValue ? 10f : 1f;
-
-            Messages.Message(
-                $"Fast transmission {(newValue ? "ENABLED" : "DISABLED")} (10x multiplier)",
-                newValue ? MessageTypeDefOf.PositiveEvent : MessageTypeDefOf.NeutralEvent,
-                false
-            );
+            bool enabled = RespiratoryTransmissionWorker.DebugTransmissionMultiplier != 10f;
+            RespiratoryTransmissionWorker.DebugTransmissionMultiplier = enabled ? 10f : 1f;
+            Messages.Message($"Fast transmission {(enabled ? "ENABLED" : "DISABLED")} ({RespiratoryTransmissionWorker.DebugTransmissionMultiplier:F0}x).", enabled ? MessageTypeDefOf.PositiveEvent : MessageTypeDefOf.NeutralEvent, false);
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Force transmission pulse",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
+        [DebugAction("Dyze Pathogenics", "Force transmission pulse from selected pawn", actionType = DebugActionType.ToolMapForPawns, allowedGameStates = AllowedGameStates.PlayingOnMap)]
         public static void ForceTransmissionPulse(Pawn pawn)
         {
-            if (pawn == null)
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            List<PawnDiseaseState> infectiousStates = InfectiousnessUtility.GetInfectiousDiseaseStates(pawn)
+                .Where(state => PathogenicsDiseaseRegistry.GetProfile(state)?.UsesRespiratoryTransmission == true)
+                .ToList();
+            if (infectiousStates.Count == 0)
             {
-                Messages.Message(
-                    "No pawn selected.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
+                Messages.Message($"{pawn.LabelShort} has no infectious respiratory disease states.", MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
+            int applications = 0;
+            Dictionary<string, int> hitsByDisease = new Dictionary<string, int>();
+            foreach (PawnDiseaseState sourceState in infectiousStates)
             {
-                Messages.Message(
-                    "Could not get map component.",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
+                int targetsHit = 0;
+                foreach (Pawn target in pawn.Map.mapPawns.AllPawnsSpawned)
+                {
+                    if (!IsValidPulseTarget(pawn, target, sourceState.DiseaseDefName)) continue;
+                    float distance = pawn.Position.DistanceTo(target.Position);
+                    if (distance > RespiratoryTransmissionWorker.MaxTransmissionRadius || distance < 0.1f) continue;
+                    mapComponent.AddExposureToPawn(target, PulseExposureAmount, sourceState.DiseaseDefName);
+                    targetsHit++;
+                    applications++;
+                }
+
+                hitsByDisease[sourceState.DiseaseDefName] = targetsHit;
             }
 
-            float infectiousness = InfectiousnessUtility.GetInfectiousness(pawn);
-            if (infectiousness <= 0f)
-            {
-                PawnDiseaseState nonInfectiousState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
-                Messages.Message(
-                    $"{pawn.LabelShort} is not infectious for {DescribeDisease(nonInfectiousState)} (no disease state or not contagious yet).",
-                    MessageTypeDefOf.RejectInput,
-                    false
-                );
-                return;
-            }
-
-            const float PulseExposureAmount = 0.5f;
-            int targetsHit = 0;
-
-            PawnDiseaseState sourceState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
-            string sourceDiseaseDefName = sourceState?.DiseaseDefName;
-            var allPawns = pawn.Map.mapPawns.AllPawnsSpawned;
-            for (int i = 0; i < allPawns.Count; i++)
-            {
-                Pawn target = allPawns[i];
-                if (target == null || target == pawn || !target.Spawned || target.Dead)
-                {
-                    continue;
-                }
-
-                if (!target.RaceProps.Humanlike)
-                {
-                    continue;
-                }
-
-                float distance = pawn.Position.DistanceTo(target.Position);
-                if (distance > RespiratoryTransmissionWorker.MaxTransmissionRadius || distance < 0.1f)
-                {
-                    continue;
-                }
-
-                PawnDiseaseState targetState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(target);
-                if (targetState != null && targetState.Stage >= SimulatedDiseaseStage.Symptomatic)
-                {
-                    continue;
-                }
-
-                mapComponent.AddExposureToPawn(target, PulseExposureAmount, sourceDiseaseDefName);
-                targetsHit++;
-            }
-
-            Messages.Message(
-                $"Transmission pulse from {pawn.LabelShort} ({DescribeDisease(sourceState)}): hit {targetsHit} targets (+{PulseExposureAmount:F2} exposure each)",
-                MessageTypeDefOf.PositiveEvent,
-                false
-            );
+            Messages.Message($"Transmission pulse from {pawn.LabelShort}: {applications} exposure applications ({string.Join(", ", hitsByDisease.Select(kvp => kvp.Key + "=" + kvp.Value).ToArray())}).", MessageTypeDefOf.PositiveEvent, false);
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Log mod status",
-            actionType = DebugActionType.Action,
-            allowedGameStates = AllowedGameStates.Playing
-        )]
+        [DebugAction("Dyze Pathogenics", "Log mod status", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void LogModStatus()
         {
             DyzePathogenicsSettings settings = DyzePathogenicsMod.Settings;
@@ -588,111 +158,38 @@ namespace Dyze.RimWorld.Pathogenics
                 $"Outsider Import Chance: {settings?.OutsiderImportChance:P0}\n" +
                 $"Exposure Multiplier: {settings?.ExposureGainMultiplier:F1}x\n" +
                 $"Show Debug Readout: {settings?.ShowDebugReadout}\n" +
-                $"Integrated diseases: {string.Join(", ", PathogenicsDiseaseRegistry.AvailableProfiles().Select(profile => profile.HediffDefName).ToArray())}\n\n" +
-                "Release-hardened build: global disease registry + pause-safe toggle + vanilla disease integration.";
-
+                $"Integrated diseases: {string.Join(", ", PathogenicsDiseaseRegistry.AvailableProfiles().Select(profile => profile.HediffDefName).ToArray())}\n" +
+                $"Tracked hidden disease states: {PathogenicsGameComponent.Instance?.PawnDiseaseStates.Count ?? 0}";
             Find.WindowStack.Add(new Dialog_MessageBox(text));
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Print simulation state",
-            actionType = DebugActionType.Action,
-            allowedGameStates = AllowedGameStates.Playing
-        )]
+        [DebugAction("Dyze Pathogenics", "Print simulation state", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void PrintSimulationState()
         {
             Map map = Find.CurrentMap;
-            if (map == null)
-            {
-                Messages.Message("No map loaded.", MessageTypeDefOf.RejectInput, false);
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = map.GetComponent<PathogenicsMapComponent>();
+            PathogenicsMapComponent mapComponent = map?.GetComponent<PathogenicsMapComponent>();
             if (mapComponent == null)
             {
                 Messages.Message("No map component found.", MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
-            var activeStates = mapComponent.GetActiveDiseaseStates();
-            if (activeStates.Count == 0)
-            {
-                Messages.Message("No pawns with active disease state on this map.", MessageTypeDefOf.NeutralEvent, false);
-                return;
-            }
-
+            List<KeyValuePair<Pawn, PawnDiseaseState>> activeStates = mapComponent.GetActiveDiseaseStates();
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("=== Pathogenics Simulation State ===");
             sb.AppendLine($"Map ID: {map.uniqueID}");
-            sb.AppendLine($"Pawns with active disease state: {activeStates.Count}");
-            sb.AppendLine();
-
-            foreach (var kvp in activeStates)
+            sb.AppendLine($"Active disease states on/near this map: {activeStates.Count}");
+            foreach (KeyValuePair<Pawn, PawnDiseaseState> kvp in activeStates)
             {
-                Pawn pawn = kvp.Key;
-                PawnDiseaseState state = kvp.Value;
-                sb.AppendLine($"--- {pawn.LabelShort} ---");
-                sb.Append(state.GetDebugInfo(pawn));
-                sb.AppendLine();
+                sb.AppendLine($"--- {kvp.Key.LabelShort} / {kvp.Value.DiseaseDefName} ---");
+                sb.Append(kvp.Value.GetDebugInfo(kvp.Key));
             }
 
             DyzeLog.DevAction(sb.ToString());
-            Messages.Message("Simulation state logged to console (F12).", MessageTypeDefOf.PositiveEvent, false);
+            Messages.Message($"Simulation state logged ({activeStates.Count} active disease state(s)).", MessageTypeDefOf.PositiveEvent, false);
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Show pawn disease details",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void ShowPawnDiseaseDetails(Pawn pawn)
-        {
-            if (pawn == null)
-            {
-                Messages.Message("No pawn selected.", MessageTypeDefOf.RejectInput, false);
-                return;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
-            {
-                Messages.Message("Could not get map component.", MessageTypeDefOf.RejectInput, false);
-                return;
-            }
-
-            PawnDiseaseState diseaseState = mapComponent.GetDiseaseState(pawn);
-            if (diseaseState == null || !diseaseState.HasDiseaseState())
-            {
-                Messages.Message(
-                    $"{pawn.LabelShort} has no active disease state.",
-                    MessageTypeDefOf.NeutralEvent,
-                    false
-                );
-                return;
-            }
-
-            string title = $"Disease State: {pawn.LabelShort}";
-            string content = diseaseState.GetDebugInfo(pawn);
-            float infectiousness = InfectiousnessUtility.GetInfectiousnessForPawn(pawn);
-            content += $"\nInfectiousness: {infectiousness:F2}";
-
-            if (diseaseState.Stage == SimulatedDiseaseStage.Exposed)
-            {
-                content += $"\nExposure: {diseaseState.Exposure:F2} / 1.00";
-            }
-
-            Find.WindowStack.Add(new Dialog_MessageBox(content, title));
-        }
-
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Log registry health",
-            actionType = DebugActionType.Action,
-            allowedGameStates = AllowedGameStates.Playing
-        )]
+        [DebugAction("Dyze Pathogenics", "Log registry health", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void LogRegistryHealth()
         {
             PathogenicsGameComponent gameComponent = PathogenicsGameComponent.Instance;
@@ -704,36 +201,21 @@ namespace Dyze.RimWorld.Pathogenics
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("=== Pathogenics Registry Health ===");
-            sb.AppendLine($"Tracked disease states: {gameComponent.PawnDiseaseStates.Count}");
+            sb.AppendLine($"Tracked hidden disease states: {gameComponent.PawnDiseaseStates.Count}");
+            sb.AppendLine($"Distinct tracked pawns: {gameComponent.PawnDiseaseStates.Values.Select(state => state.PawnId).Distinct().Count()}");
             sb.AppendLine($"Checked outsider cache: {gameComponent.CheckedOutsiderPawnCount}");
-            sb.AppendLine($"Simulation enabled: {DyzePathogenicsMod.Settings?.Enabled}");
-
-            int shown = 0;
-            foreach (var kvp in gameComponent.PawnDiseaseStates.OrderBy(kvp => kvp.Key))
+            foreach (KeyValuePair<string, PawnDiseaseState> kvp in gameComponent.PawnDiseaseStates.OrderBy(kvp => kvp.Value.PawnId).ThenBy(kvp => kvp.Value.DiseaseDefName).Take(40))
             {
-                Pawn trackedPawn = PathogenicsPawnLookup.FindAnyPawnById(kvp.Key);
-                string pawnLabel = trackedPawn?.LabelShort ?? $"ID {kvp.Key}";
-                string location = PathogenicsPawnLookup.DescribePawnLocation(trackedPawn);
-                string disease = kvp.Value?.DiseaseDefName ?? "<null>";
-                sb.AppendLine($"- {pawnLabel}: {disease}, {kvp.Value?.GetStageLabel() ?? "<null>"}, {location}");
-                shown++;
-                if (shown >= 20)
-                {
-                    sb.AppendLine("- …");
-                    break;
-                }
+                Pawn trackedPawn = PathogenicsPawnLookup.FindAnyPawnById(kvp.Value.PawnId);
+                string pawnLabel = trackedPawn?.LabelShort ?? $"ID {kvp.Value.PawnId}";
+                sb.AppendLine($"- {kvp.Key}: {pawnLabel}, {kvp.Value.DiseaseDefName}, {kvp.Value.GetStageLabel()}, {PathogenicsPawnLookup.DescribePawnLocation(trackedPawn)}");
             }
 
             DyzeLog.DevAction(sb.ToString());
             Messages.Message("Registry health logged to console (F12).", MessageTypeDefOf.PositiveEvent, false);
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Reset all Pathogenics state worldwide",
-            actionType = DebugActionType.Action,
-            allowedGameStates = AllowedGameStates.Playing
-        )]
+        [DebugAction("Dyze Pathogenics", "Reset all Pathogenics state worldwide", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void ResetAllPathogenicsStateWorldwide()
         {
             PathogenicsGameComponent gameComponent = PathogenicsGameComponent.Instance;
@@ -743,171 +225,150 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
+            int count = gameComponent.PawnDiseaseStates.Count;
             gameComponent.ClearAllDiseaseStates();
-            Messages.Message("Cleared all Pathogenics hidden state, visible hediffs, and outsider import cache worldwide.", MessageTypeDefOf.PositiveEvent, false);
+            Messages.Message($"Cleared {count} hidden disease state(s), matching visible hediffs, and outsider import cache worldwide.", MessageTypeDefOf.PositiveEvent, false);
         }
 
-        [DebugAction(
-            "Dyze Pathogenics",
-            "Log selected pawn cross-map state",
-            actionType = DebugActionType.ToolMapForPawns,
-            allowedGameStates = AllowedGameStates.PlayingOnMap
-        )]
-        public static void LogPawnCrossMapState(Pawn pawn)
+        private static void SetHiddenExposure(Pawn pawn, string diseaseDefName, float exposure)
         {
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            if (!TryGetProfile(diseaseDefName, out PathogenicsDiseaseProfile profile)) return;
+
+            int currentTick = Find.TickManager.TicksGame;
+            PawnDiseaseState state = mapComponent.GetOrCreateDiseaseState(pawn, profile.HediffDefName);
+            state.Stage = SimulatedDiseaseStage.Exposed;
+            state.DiseaseDefName = profile.HediffDefName;
+            state.ExposedTick = currentTick;
+            state.InfectiousStartTick = -1;
+            state.SymptomOnsetTick = -1;
+            state.RecoveringTick = -1;
+            state.RecoveredTick = -1;
+            state.VisibleHediffApplied = false;
+            state.Exposure = exposure;
+            Messages.Message($"{pawn.LabelShort}: set hidden {DescribeDisease(profile)} exposure state (exposure={state.Exposure:F2}). Pawn now has {mapComponent.GetDiseaseStates(pawn).Count} tracked state(s).", MessageTypeDefOf.PositiveEvent, false);
+        }
+
+        private static void AddExposure(Pawn pawn, string diseaseDefName, float amount)
+        {
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            if (!TryGetProfile(diseaseDefName, out PathogenicsDiseaseProfile profile)) return;
+            mapComponent.AddExposureToPawn(pawn, amount, profile.HediffDefName);
+            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn, profile.HediffDefName);
+            Messages.Message($"{pawn.LabelShort}: added {amount:F2} {DescribeDisease(profile)} exposure; current same-disease exposure={state?.Exposure ?? 0f:F2}/1.00, stage={state?.GetStageLabel() ?? "<none>"}.", MessageTypeDefOf.PositiveEvent, false);
+        }
+
+        private static void ApplyVisibleDisease(Pawn pawn, string diseaseDefName, float severity)
+        {
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            if (!TryGetProfile(diseaseDefName, out PathogenicsDiseaseProfile profile)) return;
+
+            Hediff existing = pawn.health?.hediffSet?.GetFirstHediffOfDef(profile.HediffDef);
+            if (existing == null)
+            {
+                Hediff hediff = HediffMaker.MakeHediff(profile.HediffDef, pawn);
+                hediff.Severity = severity;
+                pawn.health.AddHediff(hediff);
+            }
+            else if (existing.Severity < severity)
+            {
+                existing.Severity = severity;
+            }
+
+            EnsureSymptomaticState(pawn, mapComponent, profile.HediffDefName);
+            Messages.Message($"{pawn.LabelShort}: applied/refreshed visible {DescribeDisease(profile)} and matching hidden symptomatic state. Total tracked states={mapComponent.GetDiseaseStates(pawn).Count}.", MessageTypeDefOf.PositiveEvent, false);
+        }
+
+        private static void RemoveDisease(Pawn pawn, string diseaseDefName)
+        {
+            if (!TryGetPawnAndMap(pawn, out PathogenicsMapComponent mapComponent)) return;
+            if (!TryGetProfile(diseaseDefName, out PathogenicsDiseaseProfile profile)) return;
+
+            int visibleRemoved = 0;
+            foreach (Hediff hediff in (pawn.health?.hediffSet?.hediffs ?? new List<Hediff>()).Where(hediff => hediff.def == profile.HediffDef).ToList())
+            {
+                pawn.health.RemoveHediff(hediff);
+                visibleRemoved++;
+            }
+
+            bool hadHidden = mapComponent.GetDiseaseState(pawn, profile.HediffDefName) != null;
+            mapComponent.ClearDiseaseState(pawn, profile.HediffDefName);
+            Messages.Message($"{pawn.LabelShort}: removed {DescribeDisease(profile)} only (visible removed={visibleRemoved}, hidden removed={hadHidden}). Other disease states left intact: {mapComponent.GetDiseaseStates(pawn).Count}.", MessageTypeDefOf.PositiveEvent, false);
+        }
+
+        private static void EnsureSymptomaticState(Pawn pawn, PathogenicsMapComponent mapComponent, string diseaseDefName)
+        {
+            int currentTick = Find.TickManager.TicksGame;
+            PawnDiseaseState state = mapComponent.GetOrCreateDiseaseState(pawn, diseaseDefName);
+            if (state.ExposedTick < 0) state.ExposedTick = currentTick;
+            if (state.InfectiousStartTick < 0) state.InfectiousStartTick = currentTick;
+            state.Stage = SimulatedDiseaseStage.Symptomatic;
+            state.SymptomOnsetTick = currentTick;
+            if (state.RecoveringTick < 0) state.RecoveringTick = currentTick + 60000;
+            state.VisibleHediffApplied = true;
+            state.MapId = pawn.Map?.uniqueID ?? state.MapId;
+            state.PreserveAcrossMaps = pawn.IsColonist;
+        }
+
+        private static bool TryGetPawnAndMap(Pawn pawn, out PathogenicsMapComponent mapComponent)
+        {
+            mapComponent = null;
             if (pawn == null)
             {
-                DyzeLog.DevAction("No pawn selected.");
-                return;
-            }
-
-            PawnDiseaseState diseaseState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
-            string mapInfo = pawn.Map != null ? $"map {pawn.Map.uniqueID}" : "off-map/caravan";
-            string visibleDiseaseDefName = GetVisiblePathogenicsDiseaseDefName(pawn);
-            string visible = visibleDiseaseDefName.NullOrEmpty() ? "no" : visibleDiseaseDefName;
-
-            if (diseaseState == null)
-            {
-                DyzeLog.DevAction($"Pawn {pawn.LabelShort}: no registry state, location={mapInfo}, visibleHediff={visible}");
-                return;
-            }
-
-            DyzeLog.DevAction($"Pawn {pawn.LabelShort}: location={mapInfo}, disease={DescribeDisease(diseaseState)}, stateMapId={diseaseState.MapId}, stage={diseaseState.GetStageLabel()}, exposure={diseaseState.Exposure:F2}, visibleHediff={visible}, preserveAcrossMaps={diseaseState.PreserveAcrossMaps}");
-        }
-
-        private static bool IsUsableDiseaseProfile(PathogenicsDiseaseProfile profile, out string rejectReason)
-        {
-            if (profile == null)
-            {
-                rejectReason = "Unknown Pathogenics disease profile.";
+                Messages.Message("No pawn selected.", MessageTypeDefOf.RejectInput, false);
                 return false;
             }
 
-            if (PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(profile.HediffDefName))
+            mapComponent = pawn.Map?.GetComponent<PathogenicsMapComponent>() ?? Find.CurrentMap?.GetComponent<PathogenicsMapComponent>();
+            if (mapComponent == null)
             {
-                rejectReason = $"'{profile.HediffDefName}' is a deprecated compatibility disease and cannot be used by debug actions.";
+                Messages.Message("Could not get Pathogenics map component.", MessageTypeDefOf.RejectInput, false);
                 return false;
             }
 
-            if (!profile.SupportsHiddenSimulation)
-            {
-                rejectReason = $"'{profile.HediffDefName}' does not support hidden Pathogenics simulation.";
-                return false;
-            }
-
-            if (profile.HediffDef == null)
-            {
-                rejectReason = $"Could not find HediffDef '{profile.HediffDefName}'.";
-                return false;
-            }
-
-            rejectReason = null;
             return true;
         }
 
-        private static bool RejectConflictingActiveDiseaseState(
-            Pawn pawn,
-            PathogenicsMapComponent mapComponent,
-            PathogenicsDiseaseProfile profile,
-            string actionDescription
-        )
+        private static bool TryGetProfile(string diseaseDefName, out PathogenicsDiseaseProfile profile)
         {
-            PawnDiseaseState existingState = mapComponent?.GetDiseaseState(pawn);
-            if (existingState == null || !existingState.HasDiseaseState() || existingState.DiseaseDefName == profile.HediffDefName)
+            profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
+            if (profile == null || profile.HediffDef == null || !profile.SupportsHiddenSimulation || PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(profile.HediffDefName))
             {
+                Messages.Message($"Disease '{diseaseDefName}' is not a usable Pathogenics hidden-simulation disease.", MessageTypeDefOf.RejectInput, false);
                 return false;
             }
 
-            Messages.Message(
-                $"{pawn.LabelShort} already has active {DescribeDisease(existingState)}; not {actionDescription} {DescribeDisease(profile)} because only one active Pathogenics disease state is tracked per pawn.",
-                MessageTypeDefOf.RejectInput,
-                false
-            );
             return true;
         }
 
-        private static string DescribeDisease(PawnDiseaseState state)
+        private static bool IsValidPulseTarget(Pawn source, Pawn target, string diseaseDefName)
         {
-            if (state == null)
-            {
-                return "no tracked disease";
-            }
-
-            return DescribeDisease(PathogenicsDiseaseRegistry.GetProfile(state), state.DiseaseDefName);
+            if (target == null || target == source || !target.Spawned || target.Dead || !target.RaceProps.Humanlike) return false;
+            if (DyzePathogenicsMod.Settings?.AffectColonistsOnly == true && !target.IsColonist) return false;
+            PawnDiseaseState targetState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(target, diseaseDefName);
+            return targetState == null || targetState.Stage < SimulatedDiseaseStage.Symptomatic;
         }
 
-        private static string DescribeDisease(PathogenicsDiseaseProfile profile, string fallbackDefName = null)
+        private static string DescribeDisease(PathogenicsDiseaseProfile profile)
         {
-            string defName = profile?.HediffDefName ?? fallbackDefName ?? "<unknown>";
+            string defName = profile?.HediffDefName ?? "<unknown>";
             string label = profile?.HediffDef?.label?.CapitalizeFirst();
             return label.NullOrEmpty() ? defName : $"{label} ({defName})";
         }
 
-        private static PathogenicsMapComponent GetMapComponentForPawn(Pawn pawn)
+        private static string DescribeVisibleDiseaseDefs(Pawn pawn)
         {
-            if (pawn?.Map != null)
-            {
-                return pawn.Map.GetComponent<PathogenicsMapComponent>();
-            }
-
-            return Find.CurrentMap?.GetComponent<PathogenicsMapComponent>();
-        }
-
-        private static PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
-        {
-            if (PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(diseaseDefName))
-            {
-                return null;
-            }
-
-            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            if (mapComponent == null)
-            {
-                return null;
-            }
-
-            int currentTick = Find.TickManager.TicksGame;
-            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn, diseaseDefName);
-            if (diseaseState == null)
-            {
-                return null;
-            }
-
-            if (diseaseState.ExposedTick < 0)
-            {
-                diseaseState.ExposedTick = currentTick;
-            }
-
-            if (diseaseState.InfectiousStartTick < 0)
-            {
-                diseaseState.InfectiousStartTick = currentTick;
-            }
-
-            diseaseState.Stage = SimulatedDiseaseStage.Symptomatic;
-            diseaseState.SymptomOnsetTick = currentTick;
-            diseaseState.VisibleHediffApplied = true;
-            diseaseState.MapId = pawn.Map?.uniqueID ?? diseaseState.MapId;
-            diseaseState.PreserveAcrossMaps = pawn.IsColonist;
-            return diseaseState;
-        }
-
-        private static string GetVisiblePathogenicsDiseaseDefName(Pawn pawn)
-        {
-            if (pawn?.health?.hediffSet == null)
-            {
-                return null;
-            }
-
+            if (pawn?.health?.hediffSet == null) return "none";
+            List<string> visible = new List<string>();
             foreach (PathogenicsDiseaseProfile profile in PathogenicsDiseaseRegistry.AvailableProfiles())
             {
-                HediffDef hediffDef = profile.HediffDef;
-                if (hediffDef != null && pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef) != null)
+                if (profile.HediffDef != null && pawn.health.hediffSet.GetFirstHediffOfDef(profile.HediffDef) != null)
                 {
-                    return hediffDef.defName;
+                    visible.Add(profile.HediffDefName);
                 }
             }
 
-            return null;
+            return visible.Count == 0 ? "none" : string.Join(", ", visible.ToArray());
         }
     }
 }
