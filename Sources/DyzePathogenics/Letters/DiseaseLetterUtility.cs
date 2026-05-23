@@ -35,7 +35,9 @@ namespace Dyze.RimWorld.Pathogenics
         private static string GetSymptomOnsetText(Pawn pawn, string diseaseLabel)
         {
             // Base text
-            string baseText = "DP_DiseaseDetectedDesc".Translate(pawn.Named("PAWN"), diseaseLabel).ToString();
+            // Positional disease label must be supplied before the named pawn argument;
+            // otherwise {0} resolves to the pawn and produces "symptoms of PawnName".
+            string baseText = "DP_DiseaseDetectedDesc".Translate(diseaseLabel, pawn.Named("PAWN")).ToString();
 
             // Add transmission warning if settings allow
             if (DyzePathogenicsMod.Settings?.ShowTransmissionWarning == true)
@@ -58,7 +60,7 @@ namespace Dyze.RimWorld.Pathogenics
             PathogenicsDiseaseProfile profile = GetProfileForPawn(pawn);
             string diseaseLabel = profile?.HediffDef?.label ?? "disease";
             string label = "DP_DiseaseRecoveredLabel".Translate(diseaseLabel.CapitalizeFirst()).ToString();
-            string text = "DP_DiseaseRecoveredDesc".Translate(pawn.Named("PAWN"), diseaseLabel).ToString();
+            string text = "DP_DiseaseRecoveredDesc".Translate(diseaseLabel, pawn.Named("PAWN")).ToString();
 
             LetterDef letterDef = LetterDefOf.PositiveEvent;
             LookTargets lookTargets = new LookTargets(pawn);

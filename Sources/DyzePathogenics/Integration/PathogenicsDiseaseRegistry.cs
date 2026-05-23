@@ -82,6 +82,16 @@ namespace Dyze.RimWorld.Pathogenics.Integration
             return GetProfile(state?.DiseaseDefName) ?? DefaultProfile;
         }
 
+        public static bool IsLegacyPathogenicFlu(string hediffDefName)
+        {
+            return hediffDefName == LegacyPathogenicFluDefName;
+        }
+
+        public static bool IsLegacyPathogenicFlu(PawnDiseaseState state)
+        {
+            return IsLegacyPathogenicFlu(state?.DiseaseDefName);
+        }
+
         public static bool IsIntegratedVanillaDisease(HediffDef hediffDef)
         {
             PathogenicsDiseaseProfile profile = GetProfile(hediffDef);

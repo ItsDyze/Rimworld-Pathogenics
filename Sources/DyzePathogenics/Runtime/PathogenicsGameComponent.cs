@@ -37,7 +37,9 @@ namespace Dyze.RimWorld.Pathogenics
             if (Scribe.mode == LoadSaveMode.Saving)
             {
                 statesToSave = pawnDiseaseStates.Values
-                    .Where(state => state != null && state.PawnId > 0)
+                    .Where(state => state != null &&
+                                    state.PawnId > 0 &&
+                                    !PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(state))
                     .ToList();
                 checkedPawnIdsToSave = checkedOutsiderPawnIds.ToList();
             }
@@ -71,6 +73,25 @@ namespace Dyze.RimWorld.Pathogenics
             {
                 pawnDiseaseStates ??= new Dictionary<int, PawnDiseaseState>();
                 checkedOutsiderPawnIds ??= new HashSet<int>();
+                RemoveDeprecatedPathogenicFluState();
+            }
+        }
+
+        /// <summary>
+        /// DP_PathogenicFlu remains defined for save compatibility, but it is deprecated and
+        /// should not persist as active Pathogenics state after a save loads.
+        /// </summary>
+        private void RemoveDeprecatedPathogenicFluState()
+        {
+            foreach (KeyValuePair<int, PawnDiseaseState> kvp in pawnDiseaseStates.ToList())
+            {
+                if (!PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(kvp.Value))
+                {
+                    continue;
+                }
+
+                RemoveVisiblePathogenicsHediff(PathogenicsPawnLookup.FindAnyPawnById(kvp.Key), kvp.Value);
+                pawnDiseaseStates.Remove(kvp.Key);
             }
         }
 
@@ -88,6 +109,11 @@ namespace Dyze.RimWorld.Pathogenics
         public PawnDiseaseState GetOrCreateDiseaseState(Pawn pawn, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
             if (pawn == null)
+            {
+                return null;
+            }
+
+            if (PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(diseaseDefName))
             {
                 return null;
             }
@@ -166,6 +192,13 @@ namespace Dyze.RimWorld.Pathogenics
             foreach (PawnDiseaseState candidate in legacyStates)
             {
                 if (candidate == null || candidate.PawnId <= 0)
+                {
+                    continue;
+                }
+
+                // Old map-owned saves may still contain the deprecated flu state; do not
+                // re-import it after the game component's load-time migration has cleared it.
+                if (PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(candidate))
                 {
                     continue;
                 }

@@ -599,7 +599,8 @@ namespace Dyze.RimWorld.Pathogenics
                 Pawn trackedPawn = PathogenicsPawnLookup.FindAnyPawnById(kvp.Key);
                 string pawnLabel = trackedPawn?.LabelShort ?? $"ID {kvp.Key}";
                 string location = PathogenicsPawnLookup.DescribePawnLocation(trackedPawn);
-                sb.AppendLine($"- {pawnLabel}: {kvp.Value?.GetStageLabel() ?? "<null>"}, {location}");
+                string disease = kvp.Value?.DiseaseDefName ?? "<null>";
+                sb.AppendLine($"- {pawnLabel}: {disease}, {kvp.Value?.GetStageLabel() ?? "<null>"}, {location}");
                 shown++;
                 if (shown >= 20)
                 {
@@ -671,6 +672,11 @@ namespace Dyze.RimWorld.Pathogenics
 
         private static PawnDiseaseState EnsureSymptomaticDiseaseState(Pawn pawn, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
+            if (PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(diseaseDefName))
+            {
+                return null;
+            }
+
             PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
             if (mapComponent == null)
             {
