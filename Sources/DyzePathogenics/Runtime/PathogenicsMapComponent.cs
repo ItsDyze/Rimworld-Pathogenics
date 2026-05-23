@@ -147,6 +147,11 @@ namespace Dyze.RimWorld.Pathogenics
 
             for (int i = 0; i < idsToRemove.Count; i++)
             {
+                if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true && Registry.TryGetValue(idsToRemove[i], out PawnDiseaseState staleState))
+                {
+                    DyzeLog.Message($"Removing stale Pathogenics state for pawn ID {idsToRemove[i]} ({staleState?.DiseaseDefName ?? "<unknown>"}, stage={staleState?.GetStageLabel() ?? "<null>"}).");
+                }
+
                 Registry.Remove(idsToRemove[i]);
             }
         }
@@ -524,6 +529,11 @@ namespace Dyze.RimWorld.Pathogenics
 
             for (int i = 0; i < pawnIdsToClear.Count; i++)
             {
+                if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true && Registry.TryGetValue(pawnIdsToClear[i], out PawnDiseaseState expiredExposureState))
+                {
+                    DyzeLog.Message($"Clearing expired exposure for pawn ID {pawnIdsToClear[i]} ({expiredExposureState?.DiseaseDefName ?? "<unknown>"}).");
+                }
+
                 Registry.Remove(pawnIdsToClear[i]);
             }
         }
@@ -539,7 +549,7 @@ namespace Dyze.RimWorld.Pathogenics
             state.RecoveringTick = -1;
             state.RecoveredTick = -1;
 
-            DyzeLog.Message($"Pawn (ID: {state.PawnId}) has accumulated enough exposure and is now incubating.");
+            DyzeLog.Message($"Pawn (ID: {state.PawnId}) has accumulated enough {state.DiseaseDefName} exposure and is now incubating.");
         }
 
         public void ProcessStageTransitions()
@@ -600,7 +610,7 @@ namespace Dyze.RimWorld.Pathogenics
                         if (state.InfectiousStartTick > 0 && currentTick >= state.InfectiousStartTick)
                         {
                             state.Stage = SimulatedDiseaseStage.PreSymptomaticInfectious;
-                            DyzeLog.Message($"Pawn {pawn.LabelShort} is now pre-symptomatic infectious.");
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} ({state.DiseaseDefName}) is now pre-symptomatic infectious.");
                         }
                         break;
 
@@ -617,7 +627,7 @@ namespace Dyze.RimWorld.Pathogenics
                                 pawnsToNotify.Add(pawn);
                             }
 
-                            DyzeLog.Message($"Pawn {pawn.LabelShort} has developed visible symptoms!");
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} has developed visible {state.DiseaseDefName} symptoms!");
                         }
                         break;
 
@@ -628,7 +638,7 @@ namespace Dyze.RimWorld.Pathogenics
                             state.RecoveredTick = currentTick + RecoveringDurationTicks;
                             RemoveVisibleHediff(pawn);
                             state.VisibleHediffApplied = false;
-                            DyzeLog.Message($"Pawn {pawn.LabelShort} is now recovering.");
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} ({state.DiseaseDefName}) is now recovering.");
                         }
                         break;
 
@@ -638,7 +648,7 @@ namespace Dyze.RimWorld.Pathogenics
                             state.Stage = SimulatedDiseaseStage.Recovered;
                             RemoveVisibleHediff(pawn);
                             state.VisibleHediffApplied = false;
-                            DyzeLog.Message($"Pawn {pawn.LabelShort} has recovered from the disease.");
+                            DyzeLog.Message($"Pawn {pawn.LabelShort} has recovered from {state.DiseaseDefName}.");
 
                             if (pawn.IsColonist)
                             {
@@ -777,7 +787,19 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            PawnDiseaseState state = GetOrCreateDiseaseState(pawn, diseaseDefName);
+            string requestedDiseaseDefName = diseaseDefName.NullOrEmpty() ? PathogenicsDiseaseRegistry.DefaultDiseaseDefName : diseaseDefName;
+            PawnDiseaseState existingState = GameComponent?.TryGetDiseaseState(pawn);
+            if (existingState != null && existingState.HasDiseaseState() && existingState.DiseaseDefName != requestedDiseaseDefName)
+            {
+                if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
+                {
+                    DyzeLog.Message($"Skipped {requestedDiseaseDefName} exposure for {pawn.LabelShort}; pawn already has active {existingState.DiseaseDefName} state ({existingState.GetStageLabel()}, exposure={existingState.Exposure:F2}).");
+                }
+
+                return;
+            }
+
+            PawnDiseaseState state = GetOrCreateDiseaseState(pawn, requestedDiseaseDefName);
             if (state == null)
             {
                 return;
@@ -787,13 +809,18 @@ namespace Dyze.RimWorld.Pathogenics
             if (state.Stage == SimulatedDiseaseStage.None || state.Stage == SimulatedDiseaseStage.Recovered)
             {
                 state.Stage = SimulatedDiseaseStage.Exposed;
-                state.DiseaseDefName = diseaseDefName.NullOrEmpty() ? PathogenicsDiseaseRegistry.DefaultDiseaseDefName : diseaseDefName;
+                state.DiseaseDefName = requestedDiseaseDefName;
                 state.ExposedTick = currentTick;
                 state.ClearExposure();
                 state.VisibleHediffApplied = false;
             }
 
             bool thresholdCrossed = state.AddExposure(amount);
+            if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
+            {
+                DyzeLog.Message($"Added {amount:F4} exposure to {pawn.LabelShort} for {state.DiseaseDefName}; current={state.Exposure:F2}/1.00, stage={state.GetStageLabel()}.");
+            }
+
             if (thresholdCrossed && state.Stage == SimulatedDiseaseStage.Exposed)
             {
                 StartIncubation(state, currentTick);

@@ -101,11 +101,11 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                     continue;
                 }
 
-                ProcessSourcePawn(sourcePawn, sourceInfectiousness, mapComponent, currentTick);
+                ProcessSourcePawn(sourcePawn, sourceState, sourceInfectiousness, mapComponent, currentTick);
             }
         }
 
-        private static void ProcessSourcePawn(Pawn sourcePawn, float sourceInfectiousness,
+        private static void ProcessSourcePawn(Pawn sourcePawn, PawnDiseaseState sourceState, float sourceInfectiousness,
             PathogenicsMapComponent mapComponent, int currentTick)
         {
             if (sourcePawn == null || mapComponent == null)
@@ -133,7 +133,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 float exposure = CalculateExposure(sourcePawn, targetPawn, distance, sourceInfectiousness);
                 if (exposure > 0f)
                 {
-                    mapComponent.AddExposureToPawn(targetPawn, exposure, PathogenicsGameComponent.Instance?.TryGetDiseaseState(sourcePawn)?.DiseaseDefName);
+                    mapComponent.AddExposureToPawn(targetPawn, exposure, sourceState?.DiseaseDefName);
                 }
 
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true &&
@@ -148,13 +148,13 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                     if (exposure <= 0f)
                     {
                         DyzeLog.Message(sourcePawn.LabelShort + " -> " + targetPawn.LabelShort + ": BLOCKED " +
-                            "(dist=" + distance.ToString("F1") + ", " + roomStatus + ", " + maskStatus + ")");
+                            sourceState?.DiseaseDefName + " exposure (dist=" + distance.ToString("F1") + ", " + roomStatus + ", " + maskStatus + ")");
                     }
                     else
                     {
                         DyzeLog.Message(sourcePawn.LabelShort + " -> " + targetPawn.LabelShort + ": " +
-                            "+" + exposure.ToString("F4") + " exposure (dist=" + distance.ToString("F1") + ", inf=" + sourceInfectiousness.ToString("F2") + ", " + roomStatus + ", " + maskStatus + ") " +
-                            "(target exposure: " + targetState?.Exposure.ToString("F2") + ")");
+                            "+" + exposure.ToString("F4") + " " + sourceState?.DiseaseDefName + " exposure (dist=" + distance.ToString("F1") + ", inf=" + sourceInfectiousness.ToString("F2") + ", " + roomStatus + ", " + maskStatus + ") " +
+                            "(target " + targetState?.DiseaseDefName + " exposure: " + targetState?.Exposure.ToString("F2") + ")");
                     }
                 }
             }

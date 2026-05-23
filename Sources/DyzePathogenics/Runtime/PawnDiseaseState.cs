@@ -155,8 +155,10 @@ namespace Dyze.RimWorld.Pathogenics
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(this);
+            string diseaseLabel = profile?.HediffDef?.label?.CapitalizeFirst() ?? DiseaseDefName;
             sb.AppendLine($"Pawn: {pawn?.LabelShort ?? "Unknown (ID: " + PawnId + ")"}");
-            sb.AppendLine($"Disease: {DiseaseDefName}");
+            sb.AppendLine($"Disease: {diseaseLabel} ({DiseaseDefName})");
             sb.AppendLine($"Stage: {GetStageLabel()}");
             sb.AppendLine($"Exposed tick: {(ExposedTick > 0 ? ExposedTick.ToString() : "N/A")}");
             sb.AppendLine($"Infectious start: {(InfectiousStartTick > 0 ? InfectiousStartTick.ToString() : "N/A")}");

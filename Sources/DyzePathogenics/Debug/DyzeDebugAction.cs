@@ -11,15 +11,32 @@ namespace Dyze.RimWorld.Pathogenics
     public static class DyzeDebugActions
     {
         private const string CoronavirusDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
+        private const string VanillaFluDefName = PathogenicsDiseaseRegistry.IntegratedVanillaFluDefName;
         private const float DefaultCoronavirusSeverity = 0.15f;
 
         [DebugAction(
             "Dyze Pathogenics",
-            "Expose selected pawn (hidden infection)",
+            "Expose selected pawn to Coronavirus (hidden infection)",
             actionType = DebugActionType.ToolMapForPawns,
             allowedGameStates = AllowedGameStates.PlayingOnMap
         )]
         public static void ExposePawnToCoronavirus(Pawn pawn)
+        {
+            ExposePawnToDisease(pawn, CoronavirusDefName);
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Expose selected pawn to Flu (hidden infection)",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ExposePawnToVanillaFlu(Pawn pawn)
+        {
+            ExposePawnToDisease(pawn, VanillaFluDefName);
+        }
+
+        private static void ExposePawnToDisease(Pawn pawn, string diseaseDefName)
         {
             if (pawn == null)
             {
@@ -42,18 +59,32 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
+            if (!IsUsableDiseaseProfile(profile, out string rejectReason))
+            {
+                Messages.Message(rejectReason, MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            if (RejectConflictingActiveDiseaseState(pawn, mapComponent, profile, "exposing to"))
+            {
+                return;
+            }
+
             int currentTick = Find.TickManager.TicksGame;
-            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn, CoronavirusDefName);
+            PawnDiseaseState diseaseState = mapComponent.GetOrCreateDiseaseState(pawn, profile.HediffDefName);
             diseaseState.Stage = SimulatedDiseaseStage.Exposed;
+            diseaseState.DiseaseDefName = profile.HediffDefName;
             diseaseState.ExposedTick = currentTick;
             diseaseState.InfectiousStartTick = -1;
             diseaseState.SymptomOnsetTick = -1;
             diseaseState.RecoveringTick = -1;
             diseaseState.RecoveredTick = -1;
+            diseaseState.VisibleHediffApplied = false;
             diseaseState.ClearExposure();
 
             Messages.Message(
-                $"{pawn.LabelShort} now has a hidden exposed state.",
+                $"{pawn.LabelShort} now has hidden exposed state for {DescribeDisease(profile)}.",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -67,6 +98,22 @@ namespace Dyze.RimWorld.Pathogenics
         )]
         public static void ApplyCoronavirusToPawn(Pawn pawn)
         {
+            ApplyDiseaseToPawn(pawn, CoronavirusDefName, DefaultCoronavirusSeverity);
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Apply Flu to selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void ApplyVanillaFluToPawn(Pawn pawn)
+        {
+            ApplyDiseaseToPawn(pawn, VanillaFluDefName, DefaultCoronavirusSeverity);
+        }
+
+        private static void ApplyDiseaseToPawn(Pawn pawn, string diseaseDefName, float severity)
+        {
             if (pawn == null)
             {
                 Messages.Message(
@@ -77,42 +124,49 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            HediffDef coronavirus = GetCoronavirusDef();
-            if (coronavirus == null)
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
+            if (!IsUsableDiseaseProfile(profile, out string rejectReason))
             {
                 Messages.Message(
-                    $"Could not find HediffDef '{CoronavirusDefName}'.",
+                    rejectReason,
                     MessageTypeDefOf.RejectInput,
                     false
                 );
                 return;
             }
 
-            Hediff existing = pawn.health?.hediffSet?.GetFirstHediffOfDef(coronavirus);
+            PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
+            if (RejectConflictingActiveDiseaseState(pawn, mapComponent, profile, "applying"))
+            {
+                return;
+            }
+
+            HediffDef diseaseDef = profile.HediffDef;
+            Hediff existing = pawn.health?.hediffSet?.GetFirstHediffOfDef(diseaseDef);
             if (existing != null)
             {
-                if (existing.Severity < DefaultCoronavirusSeverity)
+                if (existing.Severity < severity)
                 {
-                    existing.Severity = DefaultCoronavirusSeverity;
+                    existing.Severity = severity;
                 }
 
-                EnsureSymptomaticDiseaseState(pawn, CoronavirusDefName);
+                EnsureSymptomaticDiseaseState(pawn, profile.HediffDefName);
 
                 Messages.Message(
-                    $"{pawn.LabelShort} already has {coronavirus.label}. Severity refreshed and disease state synchronized.",
+                    $"{pawn.LabelShort} already has {DescribeDisease(profile)}. Severity refreshed and hidden disease state synchronized for {profile.HediffDefName}.",
                     MessageTypeDefOf.NeutralEvent,
                     false
                 );
                 return;
             }
-            Hediff hediff = HediffMaker.MakeHediff(coronavirus, pawn);
-            hediff.Severity = DefaultCoronavirusSeverity;
+            Hediff hediff = HediffMaker.MakeHediff(diseaseDef, pawn);
+            hediff.Severity = severity;
             pawn.health.AddHediff(hediff);
 
-            EnsureSymptomaticDiseaseState(pawn, CoronavirusDefName);
+            EnsureSymptomaticDiseaseState(pawn, profile.HediffDefName);
 
             Messages.Message(
-                $"Applied {coronavirus.label} to {pawn.LabelShort} and synchronized hidden disease state.",
+                $"Applied {DescribeDisease(profile)} to {pawn.LabelShort} and synchronized hidden disease state for {profile.HediffDefName}.",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -126,6 +180,22 @@ namespace Dyze.RimWorld.Pathogenics
         )]
         public static void RemoveCoronavirusFromPawn(Pawn pawn)
         {
+            RemoveDiseaseFromPawn(pawn, CoronavirusDefName);
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Remove Flu from selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void RemoveVanillaFluFromPawn(Pawn pawn)
+        {
+            RemoveDiseaseFromPawn(pawn, VanillaFluDefName);
+        }
+
+        private static void RemoveDiseaseFromPawn(Pawn pawn, string diseaseDefName)
+        {
             if (pawn == null)
             {
                 Messages.Message(
@@ -136,11 +206,11 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            HediffDef coronavirus = GetCoronavirusDef();
-            if (coronavirus == null)
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
+            if (profile?.HediffDef == null)
             {
                 Messages.Message(
-                    $"Could not find HediffDef '{CoronavirusDefName}'.",
+                    $"Could not find HediffDef '{diseaseDefName}'.",
                     MessageTypeDefOf.RejectInput,
                     false
                 );
@@ -159,7 +229,7 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             int removedCount = 0;
-            foreach (Hediff hediff in hediffs.Where(hediff => hediff.def == coronavirus).ToList())
+            foreach (Hediff hediff in hediffs.Where(hediff => hediff.def == profile.HediffDef).ToList())
             {
                 pawn.health.RemoveHediff(hediff);
                 removedCount++;
@@ -168,7 +238,7 @@ namespace Dyze.RimWorld.Pathogenics
             if (removedCount <= 0)
             {
                 Messages.Message(
-                    $"{pawn.LabelShort} does not have {coronavirus.label}.",
+                    $"{pawn.LabelShort} does not have {DescribeDisease(profile)}.",
                     MessageTypeDefOf.NeutralEvent,
                     false
                 );
@@ -176,10 +246,16 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             PathogenicsMapComponent mapComponent = GetMapComponentForPawn(pawn);
-            mapComponent?.ClearDiseaseState(pawn);
+            PawnDiseaseState state = mapComponent?.GetDiseaseState(pawn);
+            bool clearedHiddenState = state != null && state.DiseaseDefName == profile.HediffDefName;
+            if (clearedHiddenState)
+            {
+                mapComponent.ClearDiseaseState(pawn);
+            }
 
             Messages.Message(
-                $"Removed {coronavirus.label} from {pawn.LabelShort} and cleared hidden disease state.",
+                $"Removed {DescribeDisease(profile)} from {pawn.LabelShort}" +
+                (clearedHiddenState ? $" and cleared matching hidden disease state ({profile.HediffDefName})." : "; hidden state was for another disease and was left intact."),
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -192,6 +268,22 @@ namespace Dyze.RimWorld.Pathogenics
             allowedGameStates = AllowedGameStates.PlayingOnMap
         )]
         public static void AddExposureToPawn(Pawn pawn)
+        {
+            AddExposureToPawn(pawn, CoronavirusDefName);
+        }
+
+        [DebugAction(
+            "Dyze Pathogenics",
+            "Add Flu exposure (0.25) to selected pawn",
+            actionType = DebugActionType.ToolMapForPawns,
+            allowedGameStates = AllowedGameStates.PlayingOnMap
+        )]
+        public static void AddVanillaFluExposureToPawn(Pawn pawn)
+        {
+            AddExposureToPawn(pawn, VanillaFluDefName);
+        }
+
+        private static void AddExposureToPawn(Pawn pawn, string diseaseDefName)
         {
             if (pawn == null)
             {
@@ -214,13 +306,31 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            mapComponent.AddExposureToPawn(pawn, 0.25f);
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(diseaseDefName);
+            if (!IsUsableDiseaseProfile(profile, out string rejectReason))
+            {
+                Messages.Message(rejectReason, MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            PawnDiseaseState existingState = mapComponent.GetDiseaseState(pawn);
+            if (existingState != null && existingState.HasDiseaseState() && existingState.DiseaseDefName != profile.HediffDefName)
+            {
+                Messages.Message(
+                    $"{pawn.LabelShort} already has active {DescribeDisease(existingState)}; not adding {DescribeDisease(profile)} exposure because only one active Pathogenics disease state is tracked per pawn.",
+                    MessageTypeDefOf.RejectInput,
+                    false
+                );
+                return;
+            }
+
+            mapComponent.AddExposureToPawn(pawn, 0.25f, profile.HediffDefName);
 
             PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
             float currentExposure = state?.Exposure ?? 0f;
 
             Messages.Message(
-                $"{pawn.LabelShort} gained exposure. Current: {currentExposure:F2} / 1.00",
+                $"{pawn.LabelShort} gained {DescribeDisease(profile)} exposure. Current {state?.DiseaseDefName ?? profile.HediffDefName}: {currentExposure:F2} / 1.00",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -266,6 +376,7 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
+            string diseaseDescription = DescribeDisease(state);
             state.ClearExposure();
             if (state.Stage == SimulatedDiseaseStage.Exposed)
             {
@@ -273,7 +384,7 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             Messages.Message(
-                $"Cleared exposure for {pawn.LabelShort}.",
+                $"Cleared exposure for {pawn.LabelShort} ({diseaseDescription}).",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -308,10 +419,12 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
+            PawnDiseaseState state = mapComponent.GetDiseaseState(pawn);
+            string diseaseDescription = state != null ? DescribeDisease(state) : "no tracked disease";
             mapComponent.ClearDiseaseState(pawn);
 
             Messages.Message(
-                $"Cleared hidden disease state for {pawn.LabelShort}.",
+                $"Cleared hidden disease state for {pawn.LabelShort} ({diseaseDescription}).",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -404,8 +517,9 @@ namespace Dyze.RimWorld.Pathogenics
             float infectiousness = InfectiousnessUtility.GetInfectiousness(pawn);
             if (infectiousness <= 0f)
             {
+                PawnDiseaseState nonInfectiousState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
                 Messages.Message(
-                    $"{pawn.LabelShort} is not infectious (no disease state or not contagious yet).",
+                    $"{pawn.LabelShort} is not infectious for {DescribeDisease(nonInfectiousState)} (no disease state or not contagious yet).",
                     MessageTypeDefOf.RejectInput,
                     false
                 );
@@ -415,6 +529,8 @@ namespace Dyze.RimWorld.Pathogenics
             const float PulseExposureAmount = 0.5f;
             int targetsHit = 0;
 
+            PawnDiseaseState sourceState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
+            string sourceDiseaseDefName = sourceState?.DiseaseDefName;
             var allPawns = pawn.Map.mapPawns.AllPawnsSpawned;
             for (int i = 0; i < allPawns.Count; i++)
             {
@@ -441,13 +557,12 @@ namespace Dyze.RimWorld.Pathogenics
                     continue;
                 }
 
-                string sourceDiseaseDefName = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn)?.DiseaseDefName;
                 mapComponent.AddExposureToPawn(target, PulseExposureAmount, sourceDiseaseDefName);
                 targetsHit++;
             }
 
             Messages.Message(
-                $"Transmission pulse from {pawn.LabelShort}: hit {targetsHit} targets (+{PulseExposureAmount:F2} exposure each)",
+                $"Transmission pulse from {pawn.LabelShort} ({DescribeDisease(sourceState)}): hit {targetsHit} targets (+{PulseExposureAmount:F2} exposure each)",
                 MessageTypeDefOf.PositiveEvent,
                 false
             );
@@ -657,7 +772,75 @@ namespace Dyze.RimWorld.Pathogenics
                 return;
             }
 
-            DyzeLog.DevAction($"Pawn {pawn.LabelShort}: location={mapInfo}, stateMapId={diseaseState.MapId}, stage={diseaseState.GetStageLabel()}, visibleHediff={visible}, preserveAcrossMaps={diseaseState.PreserveAcrossMaps}");
+            DyzeLog.DevAction($"Pawn {pawn.LabelShort}: location={mapInfo}, disease={DescribeDisease(diseaseState)}, stateMapId={diseaseState.MapId}, stage={diseaseState.GetStageLabel()}, exposure={diseaseState.Exposure:F2}, visibleHediff={visible}, preserveAcrossMaps={diseaseState.PreserveAcrossMaps}");
+        }
+
+        private static bool IsUsableDiseaseProfile(PathogenicsDiseaseProfile profile, out string rejectReason)
+        {
+            if (profile == null)
+            {
+                rejectReason = "Unknown Pathogenics disease profile.";
+                return false;
+            }
+
+            if (PathogenicsDiseaseRegistry.IsLegacyPathogenicFlu(profile.HediffDefName))
+            {
+                rejectReason = $"'{profile.HediffDefName}' is a deprecated compatibility disease and cannot be used by debug actions.";
+                return false;
+            }
+
+            if (!profile.SupportsHiddenSimulation)
+            {
+                rejectReason = $"'{profile.HediffDefName}' does not support hidden Pathogenics simulation.";
+                return false;
+            }
+
+            if (profile.HediffDef == null)
+            {
+                rejectReason = $"Could not find HediffDef '{profile.HediffDefName}'.";
+                return false;
+            }
+
+            rejectReason = null;
+            return true;
+        }
+
+        private static bool RejectConflictingActiveDiseaseState(
+            Pawn pawn,
+            PathogenicsMapComponent mapComponent,
+            PathogenicsDiseaseProfile profile,
+            string actionDescription
+        )
+        {
+            PawnDiseaseState existingState = mapComponent?.GetDiseaseState(pawn);
+            if (existingState == null || !existingState.HasDiseaseState() || existingState.DiseaseDefName == profile.HediffDefName)
+            {
+                return false;
+            }
+
+            Messages.Message(
+                $"{pawn.LabelShort} already has active {DescribeDisease(existingState)}; not {actionDescription} {DescribeDisease(profile)} because only one active Pathogenics disease state is tracked per pawn.",
+                MessageTypeDefOf.RejectInput,
+                false
+            );
+            return true;
+        }
+
+        private static string DescribeDisease(PawnDiseaseState state)
+        {
+            if (state == null)
+            {
+                return "no tracked disease";
+            }
+
+            return DescribeDisease(PathogenicsDiseaseRegistry.GetProfile(state), state.DiseaseDefName);
+        }
+
+        private static string DescribeDisease(PathogenicsDiseaseProfile profile, string fallbackDefName = null)
+        {
+            string defName = profile?.HediffDefName ?? fallbackDefName ?? "<unknown>";
+            string label = profile?.HediffDef?.label?.CapitalizeFirst();
+            return label.NullOrEmpty() ? defName : $"{label} ({defName})";
         }
 
         private static PathogenicsMapComponent GetMapComponentForPawn(Pawn pawn)
@@ -725,11 +908,6 @@ namespace Dyze.RimWorld.Pathogenics
             }
 
             return null;
-        }
-
-        private static HediffDef GetCoronavirusDef()
-        {
-            return DefDatabase<HediffDef>.GetNamedSilentFail(CoronavirusDefName);
         }
     }
 }

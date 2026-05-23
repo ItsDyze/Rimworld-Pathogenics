@@ -147,7 +147,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
             {
                 if (DyzePathogenicsMod.Settings?.EnableDebugLogging == true)
                 {
-                    DyzeLog.Message($"Outsider {pawn.LabelShort} arrived but did not import the disease.");
+                    DyzeLog.Message($"Outsider {pawn.LabelShort} arrived but did not import a Pathogenics disease (eligible: {string.Join(", ", PathogenicsDiseaseRegistry.ImportableProfiles().Select(profile => profile.HediffDefName).ToArray())}).");
                 }
 
                 return;
