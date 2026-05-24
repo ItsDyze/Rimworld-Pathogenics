@@ -2,7 +2,7 @@
 
 ## Status
 
-Done, hardened for release in v0.3.2-dev
+Done, hardened for v1 release
 
 ## Goal
 
@@ -84,10 +84,12 @@ The release-hardening pass changes ownership:
 
 ## Implementation detail: Visible and hidden state are separate, but no longer independent
 
-The visible disease (`DP_PathogenicFlu` HediffDef) and the hidden disease state (`PawnDiseaseState`) are still separate systems conceptually:
+The visible disease hediff and the hidden disease state (`PawnDiseaseState`) are still separate systems conceptually:
 
-- **Visible:** standard RimWorld `HediffDef` shown in the health tab
-- **Hidden:** tracks progression before and after visible symptoms
+- **Visible:** standard RimWorld `HediffDef` shown in the health tab, such as the v1 default `DP_Coronavirus` or integrated vanilla `Flu`
+- **Hidden:** tracks progression before and after visible symptoms for the active Pathogenics disease profile
+
+The old `DP_PathogenicFlu` hediff remains loadable only as deprecated save compatibility, not as the v1 default disease.
 
 But release hardening changed ownership of transitions:
 

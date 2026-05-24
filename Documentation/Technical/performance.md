@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Implemented guidance for v1
 
 ## Goal
 
@@ -16,7 +16,7 @@ Do not run the full simulation every tick.
 
 ## Recommended interval
 
-Run respiratory exposure every fixed interval, for example:
+Respiratory exposure should run on a fixed interval rather than every tick, for example:
 
 ```text
 250 ticks
@@ -41,7 +41,7 @@ Recommended order:
 
 ## Radius
 
-Start with a modest radius:
+Use a modest radius:
 
 ```text
 5 to 6 tiles

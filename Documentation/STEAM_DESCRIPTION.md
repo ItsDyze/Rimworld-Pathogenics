@@ -30,11 +30,11 @@ That changes the shape of the problem. Layout, crowding, isolation, and protecti
 
 [h2]Current state[/h2]
 
-[b]Version:[/b] v1.0-rc
+[b]Version:[/b] v1.0
 
-[b]Status:[/b] Release candidate. This is the version intended to go live once the final illustration from the artist is in.
+[b]Status:[/b] Initial public release. The first complete respiratory outbreak loop is live.
 
-[b]Not in yet:[/b] quarantine management tools, richer progression variants, world map spread, broad cross-mod disease support.
+[b]Not included in v1:[/b] quarantine management tools, richer progression variants, world map spread, broad cross-mod disease support.
 
 [b]Having issues with this version?[/b] Use the debug action [i]Reset all Pathogenics state worldwide[/i] to cleanly reset existing Pathogenics disease state across the whole save.
 

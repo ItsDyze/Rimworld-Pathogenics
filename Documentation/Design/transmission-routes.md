@@ -6,7 +6,7 @@ Design reference
 
 ## Summary
 
-Diseases should eventually define their own transmission routes instead of sharing one generic residue mechanic.
+Diseases should define their own transmission routes instead of sharing one generic residue mechanic. In v1, Pathogenics only implements the shared-air respiratory route.
 
 ## Possible routes
 
@@ -22,17 +22,17 @@ AnimalContact
 CorpseContact
 ```
 
-## v0.2 route
+## v1 route
 
-Version 0.2 should implement only:
+Version 1.0 implements only:
 
 ```text
 Airborne / droplet-style proximity exposure
 ```
 
-This is enough for a standalone flu-like respiratory disease.
+This is enough for the custom coronavirus disease and conservative vanilla flu integration.
 
-## Excluded routes for v0.2
+## Excluded routes for v1
 
 Surface contamination:
 
@@ -63,7 +63,7 @@ Vector acquires pathogen
 Vector infects another pawn later
 ```
 
-This would be needed for malaria-style diseases, but it is out of scope for v0.2.
+This would be needed for malaria-style diseases, but it is out of scope for v1.
 
 ## Future design goal
 
