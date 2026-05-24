@@ -10,7 +10,7 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 
 ## Current Status
 
-**v1.0-rc** — Release candidate. The mod is functionally ready for release; the only missing public-release piece is the final illustration from the artist before it goes live.
+**v1.0** — Initial public release. The mod's first complete outbreak loop is live: outsider importation, hidden incubation, proximity-based respiratory spread, mask protection, save-safe state tracking, and conservative vanilla flu integration.
 
 ### Implemented Features
 
@@ -25,12 +25,12 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 | Debug readout overlay | v0.3 |
 | Configurable balancing (import chance, exposure multiplier) | v0.3 |
 | Mask protection (face-covering apparel blocks transmission) | v0.3.1 |
-| Global disease registry for cross-map/caravan state continuity | v1.0-rc |
-| Persistent outsider import cache across save/load | v1.0-rc |
-| Pause-safe master toggle and reset tooling | v1.0-rc |
-| Coronavirus as the default custom Pathogenics disease | v1.0-rc |
-| Deprecated `DP_PathogenicFlu` compatibility def retained for old saves | v1.0-rc |
-| Vanilla flu integration with optional vanilla disease incident suppression | v1.0-rc |
+| Global disease registry for cross-map/caravan state continuity | v1.0 |
+| Persistent outsider import cache across save/load | v1.0 |
+| Pause-safe master toggle and reset tooling | v1.0 |
+| Coronavirus as the default custom Pathogenics disease | v1.0 |
+| Deprecated `DP_PathogenicFlu` compatibility def retained for old saves | v1.0 |
+| Vanilla flu integration with optional vanilla disease incident suppression | v1.0 |
 
 ### Integrated Vanilla Diseases
 
@@ -47,10 +47,10 @@ The settings window includes disease event controls:
 
 Malaria and other vector/environment-bound illnesses are intentionally not integrated until Pathogenics has matching transmission routes.
 
-### Not Yet Implemented
+### Not Included in v1
 
 - Quarantine management tools
-- Additional disease types
+- Broad cross-mod disease support
 - Richer disease progression variants
 - World map spread
 
@@ -76,7 +76,7 @@ Isolation and distance reduce spread
 
 ## Release Reliability Notes
 
-This release candidate hardens the simulation for public release:
+The v1 release hardens the simulation for public use:
 
 - **Cross-map continuity:** disease state is now owned by a `GameComponent` registry instead of only a map component, so lookups continue to work when pawns move between maps or travel off-map.
 - **Save/load stability:** outsider import checks are persisted, removing reload-dependent re-rolls for already-seen outsiders.

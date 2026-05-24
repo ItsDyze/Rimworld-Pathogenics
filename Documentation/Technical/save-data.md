@@ -2,62 +2,75 @@
 
 ## Status
 
-Planned
+Implemented for v1
 
 ## Goal
 
-Persist hidden disease simulation state safely across saves.
+Persist hidden disease simulation state safely across saves, maps, and caravans.
 
-## Data to save
+## Data saved
 
-For each tracked pawn:
+Pathogenics v1 stores authoritative disease state in `PathogenicsGameComponent`, with legacy map-owned state imported on load. For each tracked pawn:
 
 ```text
 pawn reference
 stage
 exposure amount
-infection tick
+exposed tick
 infectious start tick
 symptom onset tick
-infectious end tick
-recovery tick
-source information, optional
+recovering tick
+recovered tick
+map id
+preserve-across-maps flag
+visible hediff applied flag
 ```
 
-## First version simplification
+The game component also persists the outsider import cache so already-seen outsiders are not rerolled differently after save/load.
 
-Because v0.2 focuses on one disease, the save data can track only the standalone respiratory disease.
+## v1 disease scope
 
-Initial structure:
+Because v1 focuses on a conservative respiratory model, saved hidden state tracks diseases registered with the Pathogenics disease registry.
+
+Current custom/default disease:
 
 ```text
-Pawn -> PathogenicFluState
+DP_Coronavirus
 ```
 
-Future structure:
+Integrated vanilla disease:
 
 ```text
-Pawn -> DiseaseDef -> DiseaseState
+Flu
 ```
 
-## Cleanup rules
+Deprecated compatibility disease:
+
+```text
+DP_PathogenicFlu
+```
+
+`DP_PathogenicFlu` remains loadable for old saves, but it is not scenario-addable, importable, transmissible, or used by new gameplay/debug paths.
+
+Malaria, vector-borne diseases, environment-bound diseases, and broad cross-mod disease support are intentionally excluded until matching transmission routes exist.
+
+## Cleanup and migration rules
 
 During load or tick processing:
 
+- import legacy `PathogenicsMapComponent` entries into the global registry
 - remove entries for destroyed pawns
 - remove entries for dead pawns if not needed
-- remove recovered states after immunity expires
+- remove recovered states after cleanup windows expire
 - remove invalid references
-- avoid keeping references to world pawns unnecessarily
+- resynchronize visible hediff state with hidden state where possible
 
 ## Safe removal
 
-The old residue cleanup button is less important for v0.2 if no custom residue things are spawned.
-
-However, a debug/admin cleanup action is still useful:
+The old residue cleanup path is not part of the v1 respiratory loop. A debug/admin cleanup action remains useful for old prototype saves:
 
 ```text
-Clear all simulated disease state
+Reset all Pathogenics state worldwide
 ```
 
-This should remove hidden exposure/incubation data from loaded maps.
+This removes hidden exposure/incubation data, visible Pathogenics hediffs, and outsider import cache state across the whole save.

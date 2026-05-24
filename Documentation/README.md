@@ -2,16 +2,18 @@
 
 This folder contains design notes, roadmap items, and technical documentation for the mod.
 
-The project is pivoting away from the original generic floor-residue implementation toward a more realistic disease simulation model.
+The v1 release has completed the pivot away from the original generic floor-residue prototype toward a respiratory disease simulation model.
 
 ## Current direction
 
-Version 0.2 focuses on one standalone respiratory disease rather than trying to cover every vanilla infection with the same residue mechanic.
+Version 1.0 focuses on one complete respiratory outbreak loop rather than trying to cover every vanilla infection or cross-mod disease with unsupported transmission assumptions.
 
 The goal is to build one complete disease loop first:
 
 ```text
 Outsider arrives infected or incubating
+        ↓
+Global registry tracks hidden disease state across maps/caravans
         ↓
 Pawn may become infectious before symptoms
         ↓
@@ -23,6 +25,8 @@ Symptoms appear later as a visible disease
         ↓
 Isolation and distance reduce spread
 ```
+
+Current disease scope is intentionally conservative: coronavirus is the default custom Pathogenics disease, vanilla flu is integrated because it fits the shared-air model, and `DP_PathogenicFlu` remains only as a deprecated compatibility def for old saves. Malaria, vector-borne diseases, environment-bound diseases, and broad cross-mod disease support are excluded until matching transmission routes exist.
 
 ## Folder structure
 

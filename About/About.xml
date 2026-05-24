@@ -7,20 +7,21 @@
 
 Disease enters your colony through visitors, traders, raiders, and refugees — then spreads through proximity exposure. The catch: symptoms don't appear immediately. Infected colonists can spread illness before you even know they're sick.
 
-Features:
+v1 features:
 - Proximity-based respiratory transmission
 - Hidden incubation period before symptoms appear
 - Outsider importation (visitors, traders, raiders, refugees, prisoners, quest pawns)
 - Mask protection from face-covering apparel
 - Symptom notifications and debug overlay
 - Configurable balancing settings
-- Cross-map registry and release-hardening improvements
+- Cross-map disease registry and save/load reliability improvements
+- Coronavirus as the default custom disease, with vanilla flu integration
 
-If this version ever gets into a broken prototype-like state, use the debug action "Reset all Pathogenics state worldwide".
+If an old prototype save gets into a broken state, use the debug action "Reset all Pathogenics state worldwide".
 
 That's mostly vibe coded.
 
-v1.0-rc — Release candidate. Requires RimWorld 1.6 and Harmony.</description>
+v1.0 release. Requires RimWorld 1.6 and Harmony.</description>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

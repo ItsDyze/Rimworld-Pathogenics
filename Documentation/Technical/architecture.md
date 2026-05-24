@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented for v0.3.2-dev release hardening
+Implemented for the v1 release
 
 ## Goal
 

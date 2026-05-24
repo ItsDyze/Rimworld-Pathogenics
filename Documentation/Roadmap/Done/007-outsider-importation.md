@@ -2,7 +2,7 @@
 
 ## Status
 
-Done (v0.3.0), hardened for release in v0.3.2-dev
+Done (v0.3.0), hardened for v1 release
 
 ## Goal
 
@@ -63,12 +63,12 @@ Included:
 - persist outsider check state through save/load
 - debug logging
 
-Excluded:
+Excluded from this outsider-importation feature:
 
 - faction-level epidemic simulation
 - world map spread
 - storyteller incident replacement
-- vanilla disease incident suppression
+- vanilla disease incident suppression (handled separately by the v1 disease incident settings)
 
 ## Release-hardening notes
 

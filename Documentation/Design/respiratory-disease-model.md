@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned model for v0.2
+Implemented v1 model
 
 ## Goal
 
@@ -50,7 +50,7 @@ A pawn may become infectious during incubation if the disease profile allows it.
 
 For the standalone respiratory disease, pre-symptomatic transmission should be enabled.
 
-## Transmission routes for v0.2
+## Transmission routes for v1
 
 Primary route:
 
@@ -58,7 +58,7 @@ Primary route:
 shared air / proximity exposure
 ```
 
-Secondary routes are excluded from the initial implementation:
+Secondary routes are excluded from v1:
 
 ```text
 surface contamination
@@ -104,4 +104,4 @@ The player should be able to reduce spread by using existing RimWorld behavior:
 
 ## Future expansion
 
-Once the standalone disease works, the model can be generalized into disease profiles with different routes.
+The standalone respiratory loop now works. Future expansion can add disease profiles with different routes only when those routes are actually modeled.
