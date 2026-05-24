@@ -73,6 +73,24 @@ namespace Dyze.RimWorld.Pathogenics
             Settings.OutsiderImportChance = listing.Slider(Settings.OutsiderImportChance, 0.01f, 0.5f);
 
             listing.GapLine();
+
+            // ===== v0.4: Vanilla Disease Event Handling =====
+
+            listing.Label("Dyze_Pathogenics_Section_DiseaseEvents".Translate());
+
+            listing.CheckboxLabeled(
+                "Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Label".Translate(),
+                ref Settings.DisableAllVanillaDiseaseIncidents,
+                "Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Desc".Translate()
+            );
+
+            listing.CheckboxLabeled(
+                "Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Label".Translate(),
+                ref Settings.DisableIntegratedVanillaDiseaseIncidents,
+                "Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Desc".Translate()
+            );
+
+            listing.GapLine();
             
             // ===== v0.3: Respiratory Spread Settings =====
             

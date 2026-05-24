@@ -1,6 +1,7 @@
 using System;
 using RimWorld;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -14,11 +15,18 @@ namespace Dyze.RimWorld.Pathogenics
         /// </summary>
         public static void SendSymptomOnsetLetter(Pawn pawn)
         {
+            SendSymptomOnsetLetter(pawn, PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn));
+        }
+
+        public static void SendSymptomOnsetLetter(Pawn pawn, PawnDiseaseState state)
+        {
             if (pawn == null)
                 return;
 
-            string label = "DP_PathogenicFluDetectedLabel".Translate();
-            string text = GetSymptomOnsetText(pawn);
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(state);
+            string diseaseLabel = profile?.HediffDef?.label ?? "disease";
+            string label = "DP_DiseaseDetectedLabel".Translate(diseaseLabel.CapitalizeFirst()).ToString();
+            string text = GetSymptomOnsetText(pawn, diseaseLabel);
 
             LetterDef letterDef = LetterDefOf.ThreatSmall;
             LookTargets lookTargets = new LookTargets(pawn);
@@ -29,10 +37,12 @@ namespace Dyze.RimWorld.Pathogenics
         /// <summary>
         /// Get the text for symptom onset notification.
         /// </summary>
-        private static string GetSymptomOnsetText(Pawn pawn)
+        private static string GetSymptomOnsetText(Pawn pawn, string diseaseLabel)
         {
             // Base text
-            string baseText = "DP_PathogenicFluDetectedDesc".Translate(pawn.Named("PAWN")).ToString();
+            // Positional disease label must be supplied before the named pawn argument;
+            // otherwise {0} resolves to the pawn and produces "symptoms of PawnName".
+            string baseText = "DP_DiseaseDetectedDesc".Translate(diseaseLabel, pawn.Named("PAWN")).ToString();
 
             // Add transmission warning if settings allow
             if (DyzePathogenicsMod.Settings?.ShowTransmissionWarning == true)
@@ -49,17 +59,25 @@ namespace Dyze.RimWorld.Pathogenics
         /// </summary>
         public static void SendRecoveryLetter(Pawn pawn)
         {
+            SendRecoveryLetter(pawn, PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn));
+        }
+
+        public static void SendRecoveryLetter(Pawn pawn, PawnDiseaseState state)
+        {
             if (pawn == null)
                 return;
 
-            string label = "DP_PathogenicFluRecoveredLabel".Translate();
-            string text = "DP_PathogenicFluRecoveredDesc".Translate(pawn.Named("PAWN")).ToString();
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(state);
+            string diseaseLabel = profile?.HediffDef?.label ?? "disease";
+            string label = "DP_DiseaseRecoveredLabel".Translate(diseaseLabel.CapitalizeFirst()).ToString();
+            string text = "DP_DiseaseRecoveredDesc".Translate(diseaseLabel, pawn.Named("PAWN")).ToString();
 
             LetterDef letterDef = LetterDefOf.PositiveEvent;
             LookTargets lookTargets = new LookTargets(pawn);
 
             Find.LetterStack.ReceiveLetter(label, text, letterDef, lookTargets);
         }
+
 
         /// <summary>
         /// Send a message (non-letter notification) for less critical events.

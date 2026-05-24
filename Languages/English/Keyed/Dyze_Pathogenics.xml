@@ -2,15 +2,19 @@
 <LanguageData>
 
   <!-- Disease Detection -->
-  <PathogenicFluDetected>Pathogenic Flu Detected</PathogenicFluDetected>
-  <PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the pathogenic flu!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</PathogenicFluDetectedDesc>
+  <PathogenicFluDetected>Coronavirus Detected</PathogenicFluDetected>
+  <PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the coronavirus!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</PathogenicFluDetectedDesc>
 
-  <DP_PathogenicFluDetectedLabel>Pathogenic Flu Detected</DP_PathogenicFluDetectedLabel>
-  <DP_PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the pathogenic flu!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</DP_PathogenicFluDetectedDesc>
+  <DP_PathogenicFluDetectedLabel>Coronavirus Detected</DP_PathogenicFluDetectedLabel>
+  <DP_PathogenicFluDetectedDesc>{PAWN_nameDef} has developed symptoms of the coronavirus!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</DP_PathogenicFluDetectedDesc>
+  <DP_DiseaseDetectedLabel>{0} Detected</DP_DiseaseDetectedLabel>
+  <DP_DiseaseDetectedDesc>{PAWN_nameDef} has developed symptoms of {0}!\n\nThe disease has progressed from its incubation phase. Ensure the colonist receives medical attention.</DP_DiseaseDetectedDesc>
   <DP_TransmissionWarning>Warning: The disease is contagious! Anyone in close proximity may be exposed.</DP_TransmissionWarning>
 
-  <DP_PathogenicFluRecoveredLabel>Pathogenic Flu Recovered</DP_PathogenicFluRecoveredLabel>
-  <DP_PathogenicFluRecoveredDesc>{PAWN_nameDef} has recovered from the pathogenic flu.</DP_PathogenicFluRecoveredDesc>
+  <DP_PathogenicFluRecoveredLabel>Coronavirus Recovered</DP_PathogenicFluRecoveredLabel>
+  <DP_PathogenicFluRecoveredDesc>{PAWN_nameDef} has recovered from the coronavirus.</DP_PathogenicFluRecoveredDesc>
+  <DP_DiseaseRecoveredLabel>{0} Recovered</DP_DiseaseRecoveredLabel>
+  <DP_DiseaseRecoveredDesc>{PAWN_nameDef} has recovered from {0}.</DP_DiseaseRecoveredDesc>
 
   <!-- Settings Category -->
   <Dyze_Pathogenics_SettingsCategory>Dyze's Pathogenics</Dyze_Pathogenics_SettingsCategory>
@@ -20,6 +24,7 @@
   <Dyze_Pathogenics_Section_OutsiderImportation>Outsider Importation</Dyze_Pathogenics_Section_OutsiderImportation>
   <Dyze_Pathogenics_Section_RespiratorySpread>Respiratory Spread</Dyze_Pathogenics_Section_RespiratorySpread>
   <Dyze_Pathogenics_Section_PlayerFeedback>Player Feedback</Dyze_Pathogenics_Section_PlayerFeedback>
+  <Dyze_Pathogenics_Section_DiseaseEvents>Disease Event Handling</Dyze_Pathogenics_Section_DiseaseEvents>
   <Dyze_Pathogenics_Section_Debug>Debug</Dyze_Pathogenics_Section_Debug>
 
   <!-- Core Settings -->
@@ -34,6 +39,13 @@
   <Dyze_Pathogenics_EnableOutsiderImportation_Desc>When enabled, outsiders (visitors, traders, raiders, refugees, prisoners, quest pawns) can bring the disease into the colony.</Dyze_Pathogenics_EnableOutsiderImportation_Desc>
 
   <Dyze_Pathogenics_OutsiderImportChance_Label>Outsider import chance</Dyze_Pathogenics_OutsiderImportChance_Label>
+
+  <!-- Disease Event Settings -->
+  <Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Label>Disable all vanilla disease incidents</Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Label>
+  <Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Desc>Prevents vanilla random disease incidents from firing. Pathogenics importation and transmission can still create disease outbreaks.</Dyze_Pathogenics_DisableAllVanillaDiseaseIncidents_Desc>
+
+  <Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Label>Disable integrated vanilla disease incidents</Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Label>
+  <Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Desc>Prevents vanilla incidents only for diseases that Pathogenics explicitly integrates, currently vanilla flu. Non-integrated diseases such as malaria remain untouched.</Dyze_Pathogenics_DisableIntegratedVanillaDiseaseIncidents_Desc>
 
   <!-- Respiratory Spread Settings -->
   <Dyze_Pathogenics_EnableRespiratorySpread_Label>Enable respiratory spread</Dyze_Pathogenics_EnableRespiratorySpread_Label>

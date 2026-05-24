@@ -14,6 +14,11 @@ Create a clean simulation layer for one standalone respiratory disease without e
 
 ```text
 Sources/DyzePathogenics/
+├─ Integration/
+│   ├─ PathogenicsDiseaseProfile.cs
+│   └─ PathogenicsDiseaseRegistry.cs
+├─ Patches/
+│   └─ IncidentWorkerDiseasePatch.cs
 ├─ Runtime/
 │   ├─ PathogenicsGameComponent.cs
 │   ├─ PathogenicsMapComponent.cs
@@ -31,6 +36,23 @@ Sources/DyzePathogenics/
 ```
 
 ## Implemented components
+
+### Disease integration registry
+
+Files:
+
+- `Sources/DyzePathogenics/Integration/PathogenicsDiseaseProfile.cs`
+- `Sources/DyzePathogenics/Integration/PathogenicsDiseaseRegistry.cs`
+- `Sources/DyzePathogenics/Patches/IncidentWorkerDiseasePatch.cs`
+
+Responsibilities:
+
+- explicitly define which diseases Pathogenics can simulate
+- map hidden state to the visible `HediffDef` that should appear at symptom onset
+- choose importable diseases for outsider importation
+- suppress vanilla disease incidents according to player settings
+
+Current profiles are the custom coronavirus disease (`DP_Coronavirus`), vanilla `Flu`, and a deprecated `DP_PathogenicFlu` compatibility profile. `DP_PathogenicFlu` is retained for old saves only: it is not scenario-addable, not importable, not transmissible, and new debug/gameplay paths use `DP_Coronavirus`. The vanilla flu profile is intentionally conservative: it uses the current respiratory model and can have its vanilla incident suppressed. Malaria is intentionally excluded because the mod does not model insect/vector transmission.
 
 ### Global registry
 
@@ -53,7 +75,7 @@ Responsibilities:
 
 - tick map-local simulation work
 - bridge map-local pawn iteration to the global registry
-- resynchronize visible `DP_PathogenicFlu` with hidden state
+- resynchronize the profile-selected visible disease hediff with hidden state
 - import legacy map-owned state during load
 - provide local debug/reset helpers
 
@@ -118,7 +140,7 @@ That removes the previous risk where the visible disease could self-remove while
 
 ## Key design: Separate visible and hidden state, with one owner
 
-The visible disease (`DP_PathogenicFlu` HediffDef) and the hidden disease state (`PawnDiseaseState`) are still separate concepts, but they no longer progress independently.
+The visible disease selected by the active disease profile and the hidden disease state (`PawnDiseaseState`) are still separate concepts, but they no longer progress independently.
 
 - **Visible:** what the player sees in the health tab
 - **Hidden:** progression, infectiousness, and stage scheduling
@@ -157,8 +179,8 @@ File: `Sources/DyzePathogenics/Debug/DyzeDebugAction.cs`
 Useful release-validation actions:
 
 - `Expose selected pawn (hidden infection)`
-- `Apply pathogenic flu to selected pawn`
-- `Remove pathogenic flu from selected pawn`
+- `Apply coronavirus to selected pawn`
+- `Remove coronavirus from selected pawn`
 - `Force transmission pulse`
 - `Print simulation state`
 - `Log registry health`

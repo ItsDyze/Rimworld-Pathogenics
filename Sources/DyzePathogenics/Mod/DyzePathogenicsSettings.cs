@@ -41,6 +41,18 @@ namespace Dyze.RimWorld.Pathogenics
         /// </summary>
         public float OutsiderImportChance = 0.15f;
 
+        // ===== v0.4: Vanilla Disease Event Handling =====
+
+        /// <summary>
+        /// Disable every vanilla random disease incident, regardless of whether Pathogenics integrates that disease.
+        /// </summary>
+        public bool DisableAllVanillaDiseaseIncidents = false;
+
+        /// <summary>
+        /// Disable only vanilla random disease incidents for diseases explicitly integrated with Pathogenics.
+        /// </summary>
+        public bool DisableIntegratedVanillaDiseaseIncidents = true;
+
         // ===== v0.3: Feature 6 - Respiratory Spread =====
 
         /// <summary>
@@ -79,6 +91,8 @@ namespace Dyze.RimWorld.Pathogenics
         private const bool DefaultAffectColonistsOnly = false;
         private const bool DefaultEnableOutsiderImportation = true;
         private const float DefaultOutsiderImportChance = 0.15f;
+        private const bool DefaultDisableAllVanillaDiseaseIncidents = false;
+        private const bool DefaultDisableIntegratedVanillaDiseaseIncidents = true;
         private const bool DefaultEnableRespiratorySpread = true;
         private const float DefaultExposureGainMultiplier = 3.0f;
         private const bool DefaultShowTransmissionWarning = true;
@@ -96,6 +110,10 @@ namespace Dyze.RimWorld.Pathogenics
             // v0.3: Outsider importation
             Scribe_Values.Look(ref EnableOutsiderImportation, "EnableOutsiderImportation", DefaultEnableOutsiderImportation);
             Scribe_Values.Look(ref OutsiderImportChance, "OutsiderImportChance", DefaultOutsiderImportChance);
+
+            // v0.4: Vanilla disease event handling
+            Scribe_Values.Look(ref DisableAllVanillaDiseaseIncidents, "DisableAllVanillaDiseaseIncidents", DefaultDisableAllVanillaDiseaseIncidents);
+            Scribe_Values.Look(ref DisableIntegratedVanillaDiseaseIncidents, "DisableIntegratedVanillaDiseaseIncidents", DefaultDisableIntegratedVanillaDiseaseIncidents);
             
             // v0.3: Respiratory spread
             Scribe_Values.Look(ref EnableRespiratorySpread, "EnableRespiratorySpread", DefaultEnableRespiratorySpread);
@@ -129,6 +147,8 @@ namespace Dyze.RimWorld.Pathogenics
             AffectColonistsOnly = DefaultAffectColonistsOnly;
             EnableOutsiderImportation = DefaultEnableOutsiderImportation;
             OutsiderImportChance = DefaultOutsiderImportChance;
+            DisableAllVanillaDiseaseIncidents = DefaultDisableAllVanillaDiseaseIncidents;
+            DisableIntegratedVanillaDiseaseIncidents = DefaultDisableIntegratedVanillaDiseaseIncidents;
             EnableRespiratorySpread = DefaultEnableRespiratorySpread;
             ExposureGainMultiplier = DefaultExposureGainMultiplier;
             ShowTransmissionWarning = DefaultShowTransmissionWarning;

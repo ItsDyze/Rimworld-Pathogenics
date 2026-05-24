@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <DP_Coronavirus.label>coronavirus</DP_Coronavirus.label>
+  <DP_Coronavirus.description>A Pathogenics respiratory illness that uses hidden incubation, pre-symptomatic infectiousness, and proximity exposure before visible symptoms appear.</DP_Coronavirus.description>
+  <DP_Coronavirus.stages.0.label>early symptomatic</DP_Coronavirus.stages.0.label>
+  <DP_Coronavirus.stages.1.label>late symptomatic</DP_Coronavirus.stages.1.label>
+</LanguageData>

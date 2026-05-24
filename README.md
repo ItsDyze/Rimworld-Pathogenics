@@ -28,6 +28,24 @@ Unlike vanilla's random one-off illness events, this mod models disease as a pro
 | Global disease registry for cross-map/caravan state continuity | v1.0-rc |
 | Persistent outsider import cache across save/load | v1.0-rc |
 | Pause-safe master toggle and reset tooling | v1.0-rc |
+| Coronavirus as the default custom Pathogenics disease | v1.0-rc |
+| Deprecated `DP_PathogenicFlu` compatibility def retained for old saves | v1.0-rc |
+| Vanilla flu integration with optional vanilla disease incident suppression | v1.0-rc |
+
+### Integrated Vanilla Diseases
+
+Pathogenics now has a small disease integration registry. The default custom Pathogenics disease is **coronavirus** (`DP_Coronavirus`). The old `DP_PathogenicFlu` def is deprecated, non-scenario-addable, and retained only so existing saves can load safely.
+
+The first integrated vanilla disease is **flu** (`Flu`), because it fits the current shared-air respiratory model.
+
+Integrated flu can enter through the existing outsider importation flow, spread through the same hidden exposure/incubation system, and appear as the vanilla flu hediff when symptoms start.
+
+The settings window includes disease event controls:
+
+- **Disable all vanilla disease incidents**: blocks vanilla random disease incidents entirely.
+- **Disable integrated vanilla disease incidents**: blocks only vanilla incidents for Pathogenics-integrated diseases, currently flu. Non-integrated diseases such as malaria remain untouched.
+
+Malaria and other vector/environment-bound illnesses are intentionally not integrated until Pathogenics has matching transmission routes.
 
 ### Not Yet Implemented
 
@@ -62,7 +80,7 @@ This release candidate hardens the simulation for public release:
 
 - **Cross-map continuity:** disease state is now owned by a `GameComponent` registry instead of only a map component, so lookups continue to work when pawns move between maps or travel off-map.
 - **Save/load stability:** outsider import checks are persisted, removing reload-dependent re-rolls for already-seen outsiders.
-- **No hidden/visible drift:** the hidden disease state now owns visible `DP_PathogenicFlu` application and removal, so symptom timing and hediff lifetime stay aligned.
+- **No hidden/visible drift:** the hidden disease state now owns visible disease application and removal, so symptom timing and hediff lifetime stay aligned.
 - **Pause-safe master toggle:** disabling the mod now pauses both hidden progression and visible Pathogenics severity progression. Re-enabling resumes from the preserved state.
 - **Recovery/reset path:** debug actions now include registry health logging, cross-map state logging, and a worldwide Pathogenics reset to recover seamlessly from broken prototype-era states if needed.
 

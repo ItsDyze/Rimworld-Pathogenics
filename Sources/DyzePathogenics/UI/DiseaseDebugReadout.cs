@@ -5,6 +5,7 @@ using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -16,7 +17,7 @@ namespace Dyze.RimWorld.Pathogenics
     {
         private const float LineHeight = 20f;
         private const float Padding = 10f;
-        private const float ColumnWidth = 180f;
+        private const float ColumnWidth = 160f;
 
         /// <summary>
         /// Render the debug readout if enabled.
@@ -47,7 +48,7 @@ namespace Dyze.RimWorld.Pathogenics
             // Calculate required height
             int pawnCount = Math.Min(activeStates.Count, 15); // Limit to 15 to avoid overflow
             float height = Padding + (pawnCount + 3) * LineHeight + Padding;
-            float width = ColumnWidth * 3 + Padding * 2; // v0.3.1: Added column for mask status
+            float width = ColumnWidth * 4 + Padding * 2;
 
             // Position in top-right corner
             Rect rect = new Rect(UI.screenWidth - width - 10f, 10f, width, height);
@@ -72,9 +73,11 @@ namespace Dyze.RimWorld.Pathogenics
             float y = titleRect.y + LineHeight;
             Rect pawnHeaderRect = new Rect(rect.x + Padding, y, ColumnWidth, LineHeight);
             Rect stateHeaderRect = new Rect(rect.x + Padding + ColumnWidth, y, ColumnWidth, LineHeight);
-            Rect maskHeaderRect = new Rect(rect.x + Padding + ColumnWidth * 2, y, ColumnWidth, LineHeight);
+            Rect diseaseHeaderRect = new Rect(rect.x + Padding + ColumnWidth * 2, y, ColumnWidth, LineHeight);
+            Rect maskHeaderRect = new Rect(rect.x + Padding + ColumnWidth * 3, y, ColumnWidth, LineHeight);
             Widgets.Label(pawnHeaderRect, "Pawn");
             Widgets.Label(stateHeaderRect, "State (Exposure)");
+            Widgets.Label(diseaseHeaderRect, "Disease");
             Widgets.Label(maskHeaderRect, "Mask"); // v0.3.1: New mask column
 
             // Draw pawn states
@@ -91,6 +94,7 @@ namespace Dyze.RimWorld.Pathogenics
 
                 string pawnName = pawn.LabelShort;
                 string stateInfo = state.GetStageLabel();
+                string diseaseInfo = GetDiseaseLabel(state);
 
                 // Add exposure info if relevant
                 if (state.Stage == SimulatedDiseaseStage.Exposed)
@@ -104,7 +108,8 @@ namespace Dyze.RimWorld.Pathogenics
 
                 Rect pawnRect = new Rect(rect.x + Padding, y, ColumnWidth, LineHeight);
                 Rect stateRect = new Rect(rect.x + Padding + ColumnWidth, y, ColumnWidth, LineHeight);
-                Rect maskRect = new Rect(rect.x + Padding + ColumnWidth * 2, y, ColumnWidth, LineHeight);
+                Rect diseaseRect = new Rect(rect.x + Padding + ColumnWidth * 2, y, ColumnWidth, LineHeight);
+                Rect maskRect = new Rect(rect.x + Padding + ColumnWidth * 3, y, ColumnWidth, LineHeight);
 
                 // Color code based on stage
                 if (state.IsInfectious())
@@ -119,6 +124,7 @@ namespace Dyze.RimWorld.Pathogenics
 
                 Widgets.Label(pawnRect, pawnName);
                 Widgets.Label(stateRect, stateInfo);
+                Widgets.Label(diseaseRect, diseaseInfo);
                 
                 // v0.3.1: Show mask status in separate color
                 GUI.color = isMasked ? new Color(0.3f, 1f, 0.3f) : new Color(0.5f, 0.5f, 0.5f);
@@ -137,6 +143,17 @@ namespace Dyze.RimWorld.Pathogenics
             // Restore text settings
             Text.Font = oldFont;
             GUI.color = oldColor;
+        }
+
+        private static string GetDiseaseLabel(PawnDiseaseState state)
+        {
+            if (state == null)
+            {
+                return "<null>";
+            }
+
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(state);
+            return profile?.HediffDef?.label?.CapitalizeFirst() ?? state.DiseaseDefName ?? "Unknown";
         }
 
     }

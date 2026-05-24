@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 using Dyze.RimWorld.Pathogenics;
@@ -7,7 +9,7 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
     /// <summary>
     /// Utility for calculating disease infectiousness based on infection stage.
     ///
-    /// Infectiousness follows the disease progression:
+    /// Infectiousness follows each disease progression independently:
     /// - Exposed/Incubating: 0.00 (not yet infectious)
     /// - PreSymptomaticInfectious: 0.50 (contagious before symptoms appear)
     /// - Symptomatic: 1.00 (fully contagious with visible symptoms)
@@ -18,18 +20,24 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
     {
         public static float GetInfectiousness(Pawn pawn)
         {
-            if (pawn == null)
-            {
-                return 0f;
-            }
+            return GetInfectiousnessForPawn(pawn);
+        }
 
-            PawnDiseaseState diseaseState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
-            if (diseaseState == null)
+        public static float GetInfectiousness(Pawn pawn, PawnDiseaseState diseaseState)
+        {
+            if (pawn == null || diseaseState == null)
             {
                 return 0f;
             }
 
             return GetInfectiousnessForStage(diseaseState.Stage);
+        }
+
+        public static List<PawnDiseaseState> GetInfectiousDiseaseStates(Pawn pawn)
+        {
+            return PathogenicsGameComponent.Instance?.GetDiseaseStates(pawn)
+                .Where(state => state != null && GetInfectiousnessForStage(state.Stage) > 0f)
+                .ToList() ?? new List<PawnDiseaseState>();
         }
 
         public static float GetInfectiousnessForStage(SimulatedDiseaseStage stage)
@@ -49,12 +57,20 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
 
         public static bool IsInfectious(Pawn pawn)
         {
-            return GetInfectiousness(pawn) > 0f;
+            return GetInfectiousDiseaseStates(pawn).Count > 0;
         }
 
         public static float GetInfectiousnessForPawn(Pawn pawn)
         {
-            return GetInfectiousness(pawn);
+            if (pawn == null)
+            {
+                return 0f;
+            }
+
+            return PathogenicsGameComponent.Instance?.GetDiseaseStates(pawn)
+                .Select(state => GetInfectiousnessForStage(state.Stage))
+                .DefaultIfEmpty(0f)
+                .Max() ?? 0f;
         }
 
         public static string GetInfectiousnessLabel(float infectiousness)
@@ -77,15 +93,18 @@ namespace Dyze.RimWorld.Pathogenics.Simulation
                 return "Pawn is null";
             }
 
-            PawnDiseaseState diseaseState = PathogenicsGameComponent.Instance?.TryGetDiseaseState(pawn);
-            if (diseaseState == null)
+            List<PawnDiseaseState> states = PathogenicsGameComponent.Instance?.GetDiseaseStates(pawn) ?? new List<PawnDiseaseState>();
+            if (states.Count == 0)
             {
                 return $"Pawn {pawn.LabelShort}: No disease state";
             }
 
-            float infectiousness = GetInfectiousnessForStage(diseaseState.Stage);
-            string label = GetInfectiousnessLabel(infectiousness);
-            return $"Pawn {pawn.LabelShort}: Stage={diseaseState.GetStageLabel()}, Infectiousness={infectiousness:F2} ({label})";
+            return $"Pawn {pawn.LabelShort}: " + string.Join("; ", states.Select(state =>
+            {
+                float infectiousness = GetInfectiousnessForStage(state.Stage);
+                string label = GetInfectiousnessLabel(infectiousness);
+                return $"{state.DiseaseDefName} Stage={state.GetStageLabel()}, Infectiousness={infectiousness:F2} ({label})";
+            }).ToArray());
         }
     }
 }

@@ -1,5 +1,6 @@
 using RimWorld;
 using Verse;
+using Dyze.RimWorld.Pathogenics.Integration;
 
 namespace Dyze.RimWorld.Pathogenics
 {
@@ -19,13 +20,15 @@ namespace Dyze.RimWorld.Pathogenics
     }
 
     /// <summary>
-    /// Tracks hidden disease state for a single pawn.
-    /// This state controls when the visible HediffDef should be applied.
-    /// For v0.2, this is specific to DP_PathogenicFlu.
+    /// Tracks hidden simulation state for one pawn/disease pair.
+    /// A pawn can have several PawnDiseaseState entries in the game component registry,
+    /// one per Pathogenics-controlled disease defName.
+    /// This state controls when the registered visible HediffDef should be applied.
     /// </summary>
     public class PawnDiseaseState : IExposable
     {
         public int PawnId;
+        public string DiseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
         public SimulatedDiseaseStage Stage = SimulatedDiseaseStage.None;
         public int ExposedTick = -1;
         public int InfectiousStartTick = -1;
@@ -51,15 +54,21 @@ namespace Dyze.RimWorld.Pathogenics
         {
         }
 
-        public PawnDiseaseState(int pawnId, int mapId)
+        public PawnDiseaseState(int pawnId, int mapId, string diseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName)
         {
             PawnId = pawnId;
             MapId = mapId;
+            DiseaseDefName = diseaseDefName.NullOrEmpty() ? PathogenicsDiseaseRegistry.DefaultDiseaseDefName : diseaseDefName;
         }
 
         public void ExposeData()
         {
             Scribe_Values.Look(ref PawnId, "pawnId");
+            Scribe_Values.Look(ref DiseaseDefName, "diseaseDefName", PathogenicsDiseaseRegistry.DefaultDiseaseDefName);
+            if (DiseaseDefName.NullOrEmpty())
+            {
+                DiseaseDefName = PathogenicsDiseaseRegistry.DefaultDiseaseDefName;
+            }
             Scribe_Values.Look(ref Stage, "stage", SimulatedDiseaseStage.None);
             Scribe_Values.Look(ref ExposedTick, "exposedTick", -1);
             Scribe_Values.Look(ref InfectiousStartTick, "infectiousStartTick", -1);
@@ -147,7 +156,10 @@ namespace Dyze.RimWorld.Pathogenics
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
+            PathogenicsDiseaseProfile profile = PathogenicsDiseaseRegistry.GetProfile(this);
+            string diseaseLabel = profile?.HediffDef?.label?.CapitalizeFirst() ?? DiseaseDefName;
             sb.AppendLine($"Pawn: {pawn?.LabelShort ?? "Unknown (ID: " + PawnId + ")"}");
+            sb.AppendLine($"Disease: {diseaseLabel} ({DiseaseDefName})");
             sb.AppendLine($"Stage: {GetStageLabel()}");
             sb.AppendLine($"Exposed tick: {(ExposedTick > 0 ? ExposedTick.ToString() : "N/A")}");
             sb.AppendLine($"Infectious start: {(InfectiousStartTick > 0 ? InfectiousStartTick.ToString() : "N/A")}");
